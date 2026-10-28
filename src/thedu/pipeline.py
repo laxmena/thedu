@@ -18,8 +18,9 @@ from thedu.judge import question_scores
 from thedu.llm import Gateway, Usage
 from thedu.paths import CONFIGS_DIR, ROOT, SPIKE_DIR, runs_dir
 from thedu.planner import BlindPlanner, GroundedPlanner
-from thedu.pricing import load_pricing
+from thedu.pricing import load_pricing, load_rerank_pricing
 from thedu.ranker import RrfRanker, drop_zero_scores
+from thedu.ranker.rerank import CrossEncoderReranker
 from thedu.registry import RunDir
 from thedu.report import summarize
 from thedu.retrievers import Bm25Retriever, DenseRetriever
@@ -27,9 +28,11 @@ from thedu.tokens import estimate_tokens
 
 log = logging.getLogger(__name__)
 
-ORDER = ["A0", "A4", "A2", "A3", "H0", "A5"]
+ORDER = ["A0", "A4", "A2", "A3", "H0", "A5", "A0R", "A3R", "A4R"]
 # What each setup is built from. H0 and A5 fuse two components with the ranker.
-DEPS = {"A0": ("A0",), "A4": ("A4",), "A2": ("A2",), "A3": ("A3",), "H0": ("A0", "A4"), "A5": ("A3", "A4")}
+DEPS = {"A0": ("A0",), "A4": ("A4",), "A2": ("A2",), "A3": ("A3",), "H0": ("A0", "A4"), "A5": ("A3", "A4"),
+        "A0R": ("A0",), "A3R": ("A3",), "A4R": ("A4",)}
+RERANKED = {"A0R", "A3R", "A4R"}  # one component, its top reordered by the cross-encoder
 BM25_BASED = {"A0", "A2", "A3"}  # lists whose zero-score filler is dropped before fusion
 PROBE_QUESTIONS = 30
 PROBE_ATTEMPT = 9  # a salt that skips both caches, so the probe measures real calls
@@ -69,7 +72,10 @@ def make_gateway(cfg: RunConfig, offline: bool = False) -> tuple[Gateway, dict[s
         offline=offline, budget_usd=budget,
         estimator=estimate_tokens if cfg.planner.use_spike_cache else None,  # spike-cache calls have no token split
     )
-    return gw, {"input": rate.input_per_mtok_usd, "output": rate.output_per_mtok_usd}
+    rates = {"input": rate.input_per_mtok_usd, "output": rate.output_per_mtok_usd}
+    if cfg.uses_rerank():
+        rates["rerank"] = load_rerank_pricing().price_per_mtok_usd
+    return gw, rates
 
 
 def run_dev(cfg: RunConfig, offline: bool = False, restart: bool = False, root: Path | None = None,
@@ -111,8 +117,10 @@ def execute(cfg: RunConfig, docs: dict[str, str], queries: dict[str, str], qrels
         per_q_ms = (time.perf_counter() - t0) * 1000 / len(need_dense)
         dense_hits = {q: (h, per_q_ms) for q, h in zip(need_dense, found)}
     blind = BlindPlanner(gateway, cfg.planner) if "A2" in setups else None
-    grounded = GroundedPlanner(gateway, cfg.planner, docs, cfg.dataset) if {"A3", "A5"} & set(setups) else None
+    grounded = GroundedPlanner(gateway, cfg.planner, docs, cfg.dataset) if {"A3", "A5", "A3R"} & set(setups) else None
     ranker = RrfRanker(cfg.ranker.rrf_k, cfg.ranker.depth)
+    reranker = CrossEncoderReranker(docs, cfg.rerank.model, cfg.rerank.depth, cfg.rerank.max_length) \
+        if cfg.uses_rerank() else None
 
     def timed_search(text: str):
         t0 = time.perf_counter()
@@ -150,8 +158,12 @@ def execute(cfg: RunConfig, docs: dict[str, str], queries: dict[str, str], qrels
 
         for s in todo[qid]:
             parts = [comp(d) for d in DEPS[s]]
-            rank_ms = 0.0
-            if len(parts) == 1:
+            rank_ms, rerank_tokens = 0.0, 0
+            if s in RERANKED:
+                t0 = time.perf_counter()
+                hits, rerank_tokens = reranker.rerank(parts[0].hits, queries[qid])
+                rank_ms = (time.perf_counter() - t0) * 1000
+            elif len(parts) == 1:
                 hits = parts[0].hits
             else:
                 t0 = time.perf_counter()
@@ -167,6 +179,8 @@ def execute(cfg: RunConfig, docs: dict[str, str], queries: dict[str, str], qrels
                 "parts": {d: {"retrieval_ms": c.retrieval_ms, "llm_ms": c.usage.llm_ms, "untimed": c.usage.untimed_calls}
                           for d, c in zip(DEPS[s], parts)},
                 "rank_ms": rank_ms,
+                "rerank_tokens": rerank_tokens,
+                "rerank_cost_usd": rerank_tokens * rates.get("rerank", 0.0) / 1e6,
                 "fallback": any(c.fallback for c in parts),
                 "queries": next((c.queries for d, c in zip(DEPS[s], parts) if d in ("A2", "A3")), [queries[qid]]),
             })

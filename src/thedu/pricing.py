@@ -33,3 +33,15 @@ def load_pricing(path: str | Path) -> Pricing:
     p = Path(path)
     p = p if p.is_absolute() else ROOT / p
     return Pricing.model_validate(yaml.safe_load(p.read_text()))
+
+
+class RerankRate(BaseModel):
+    fetched: str
+    source: str
+    price_per_mtok_usd: float
+
+
+def load_rerank_pricing(path: str | Path = "configs/pricing_rerank.yaml") -> RerankRate:
+    p = Path(path)
+    p = p if p.is_absolute() else ROOT / p
+    return RerankRate.model_validate(yaml.safe_load(p.read_text()))

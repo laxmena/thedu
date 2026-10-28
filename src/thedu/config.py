@@ -12,7 +12,8 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from thedu.prompts import load_prompt
 
-Setup = Literal["A0", "A2", "A3", "A4", "H0", "A5"]  # H0 = RRF(A0, A4); A5 = RRF(A3, A4)
+Setup = Literal["A0", "A2", "A3", "A4", "H0", "A5", "A0R", "A3R", "A4R"]
+# H0 = RRF(A0, A4); A5 = RRF(A3, A4); xR = the top of x reordered by a cross-encoder
 
 
 # The instruction MTEB gives Qwen3-Embedding for each dataset's queries. SciFact and NFCorpus: sources in
@@ -89,6 +90,12 @@ class RankerConfig(_Frozen):
     depth: int = Field(100, ge=1)  # top results of each list that are fused, and kept
 
 
+class RerankConfig(_Frozen):
+    model: str = "BAAI/bge-reranker-v2-m3"  # zero-shot, not tuned
+    depth: int = Field(50, ge=1)  # candidates reordered; ranks below stay in their original order
+    max_length: int = Field(512, ge=1)  # query + document tokens per pair
+
+
 class RunConfig(_Frozen):
     dataset: Literal["scifact", "nfcorpus", "fiqa"]
     split: Literal["dev", "test"] = "dev"  # `thedu dev` refuses "test"; only `thedu parity` runs it
@@ -101,19 +108,26 @@ class RunConfig(_Frozen):
     llm: LLMConfig = LLMConfig()
     planner: PlannerConfig = PlannerConfig()
     ranker: RankerConfig = RankerConfig()
+    rerank: RerankConfig = RerankConfig()  # used only by the xR setups; left out of the hash otherwise
     pricing: str = "configs/pricing.yaml"
 
     def prompt_texts(self) -> dict[str, str]:
         names = []
         if "A2" in self.setups:
             names.append(self.planner.blind_prompt)
-        if "A3" in self.setups:
+        if {"A3", "A3R"} & set(self.setups):
             names.append(self.planner.grounded_prompt)
         return {n: load_prompt(n) for n in names}
 
+    def uses_rerank(self) -> bool:
+        return any(s.endswith("R") for s in self.setups)
+
     def hash(self, rates: dict[str, float] | None = None) -> str:
+        exclude: dict = {"llm": {"workers", "cache_file"}, "pricing": True}
+        if not self.uses_rerank():
+            exclude["rerank"] = True  # keeps the hashes of runs made before reranking existed
         payload = {
-            "config": self.model_dump(exclude={"llm": {"workers", "cache_file"}, "pricing": True}),
+            "config": self.model_dump(exclude=exclude),
             "prompts": self.prompt_texts(),
             "rates": rates or {},
         }

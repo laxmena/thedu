@@ -7,8 +7,10 @@ import numpy as np
 from thedu.judge import bootstrap_interval, cost_per_search, paired_difference, relative_latency
 
 # (base, other): "other vs base" is other minus base, question by question.
-PAIRS = [("H0", "A5"), ("A4", "A5"), ("A4", "H0"), ("A3", "A5")]
-USES_EMBEDDINGS = {"A4", "H0", "A5"}  # embedding search has no reference price yet
+PAIRS = [("H0", "A5"), ("A4", "A5"), ("A4", "H0"), ("A3", "A5"),
+         ("A4", "A3R"), ("A4", "A0R"), ("A3", "A3R"), ("A0R", "A3R"), ("A4", "A4R")]
+PRIMARY = {"A3R vs A4"}  # pre-registered (JOURNAL.md, 2026-10-28); every other comparison involving a reranker is secondary
+USES_EMBEDDINGS = {"A4", "H0", "A5", "A4R"}  # embedding search has no reference price yet
 UNFUSED_BM25 = {"A0", "A2", "A3"}  # their top 100 can hold zero-score filler; fused lists have it removed
 
 
@@ -49,6 +51,7 @@ def summarize(rows: dict[tuple[str, str], dict], setups: list[str], qids: list[s
         uncosted = sum(r["uncosted_calls"] for r in rs)
         estimated = sum(r["estimated_calls"] for r in rs)
         llm_cost = None if uncosted else cost_per_search(sum(r["cost_usd"] for r in rs), len(qids))
+        rerank_cost = cost_per_search(sum(r.get("rerank_cost_usd", 0.0) for r in rs), len(qids))
         par_ms[s], seq_ms[s] = _latencies(rs, probe_ms)
         out["setups"][s] = {
             "ndcg10": {"mean": nd.mean, "lo": nd.lo, "hi": nd.hi},
@@ -60,7 +63,8 @@ def summarize(rows: dict[tuple[str, str], dict], setups: list[str], qids: list[s
             "llm_cost_per_search_usd": llm_cost,  # rewrite calls only
             "llm_cost_is_estimate": estimated > 0,  # tokens counted offline; hidden thinking tokens are not included
             # The full cost per search needs a reference price for embedding search, which is not chosen yet.
-            "cost_per_search_usd": None if s in USES_EMBEDDINGS else llm_cost,
+            "rerank_cost_per_search_usd": rerank_cost if s.endswith("R") else None,  # at the reference rate
+            "cost_per_search_usd": None if s in USES_EMBEDDINGS or llm_cost is None else llm_cost + rerank_cost,
             "uncosted_calls": uncosted,
             "estimated_calls": estimated,
             "fallbacks": sum(r["fallback"] for r in rs),
@@ -72,7 +76,10 @@ def summarize(rows: dict[tuple[str, str], dict], setups: list[str], qids: list[s
 
     def compare(base: str, other: str) -> None:
         p = paired_difference(col(base, "ndcg10"), col(other, "ndcg10"))
-        out["paired"][f"{other} vs {base}"] = {"ndcg10_diff": p.mean, "lo": p.lo, "hi": p.hi, "wins": p.wins, "losses": p.losses}
+        name = f"{other} vs {base}"
+        out["paired"][name] = {"ndcg10_diff": p.mean, "lo": p.lo, "hi": p.hi, "wins": p.wins, "losses": p.losses}
+        if other.endswith("R") or base.endswith("R"):
+            out["paired"][name]["role"] = "primary" if name in PRIMARY else "secondary"
 
     if "A0" in setups:
         for s in setups:

@@ -1,0 +1,16 @@
+# Cross-encoder reranking of keyword candidates, nfcorpus dev (pre-registered in JOURNAL.md, 2026-10-28).
+# Primary test: A3R vs A4. Rewrites come from the pinned-provider cache; A0, A3, A4 repeat the M3 runs' setups.
+dataset: nfcorpus
+split: dev
+setups: [A0, A3, A4, A0R, A3R]
+bm25: {k1: 0.9, b: 0.4}
+dense: {model: Qwen/Qwen3-Embedding-0.6B, max_seq_length: 512}
+llm:
+  model: qwen/qwen3-14b
+  temperature: 0.0
+  seed: 7
+  max_tokens: 300
+  provider: {order: [DeepInfra], allow_fallbacks: false}
+planner: {grounded_prompt: grounded_v1, query_repeat: 3, feedback_k: 5, use_spike_cache: false}
+ranker: {rrf_k: 60, depth: 100}
+rerank: {model: BAAI/bge-reranker-v2-m3, depth: 50, max_length: 512}

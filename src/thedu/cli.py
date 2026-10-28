@@ -60,7 +60,7 @@ def dev(
         typer.echo(f"\n{e}", err=True)
         raise typer.Exit(1)
     typer.echo(f"\n{cfg.dataset}: {m['n_questions']} dev questions   run {run.path.name}")
-    typer.echo(f"{'setup':<6}{'nDCG@10':>9}  {'95% range':<18}{'Recall@100':>11}{'LLM $/search':>14}{'latency par/seq':>17}")
+    typer.echo(f"{'setup':<6}{'nDCG@10':>9}  {'95% range':<18}{'Recall@100':>11}{'LLM $/search':>14}{'rerank $/search':>17}{'latency par/seq':>17}")
     soft = False
     for s, v in m["setups"].items():
         nd, rc = v["ndcg10"], v["recall100"]
@@ -70,14 +70,17 @@ def dev(
         lat = "n/a" if lat is None else f"{lat['parallel']:.0f}x / {lat['sequential']:.0f}x"
         flag = "*" if v["recall100_is_soft"] else " "
         soft = soft or v["recall100_is_soft"]
-        typer.echo(f"{s:<6}{nd['mean']:>9.4f}  [{nd['lo']:.4f}, {nd['hi']:.4f}]{rc['mean']:>10.4f}{flag}{cost:>14}{lat:>17}")
+        rr = v.get("rerank_cost_per_search_usd")
+        rr = "" if rr is None else f"{rr:.5f}"
+        typer.echo(f"{s:<6}{nd['mean']:>9.4f}  [{nd['lo']:.4f}, {nd['hi']:.4f}]{rc['mean']:>10.4f}{flag}{cost:>14}{rr:>17}{lat:>17}")
     if soft:
         typer.echo("* soft: many questions match fewer than 100 documents, so the rest of this BM25 top 100 is arbitrary filler.")
     if any(v["llm_cost_is_estimate"] for v in m["setups"].values()):
         typer.echo("~ estimated offline from cached rewrites (hidden thinking tokens not counted).")
     typer.echo("\nPaired nDCG@10 difference (second minus first, same questions, 95% range):")
     for name, p in m["paired"].items():
-        typer.echo(f"  {name}: {p['ndcg10_diff']:+.4f}  [{p['lo']:+.4f}, {p['hi']:+.4f}]  wins {p['wins']}, losses {p['losses']}")
+        role = f"  [{p['role']}]" if "role" in p else ""
+        typer.echo(f"  {name}: {p['ndcg10_diff']:+.4f}  [{p['lo']:+.4f}, {p['hi']:+.4f}]  wins {p['wins']}, losses {p['losses']}{role}")
     for name, e in m["extras"].items():
         if isinstance(e, dict):
             typer.echo(f"  {name}: {e['rescued']} of {e['a4_misses']} A4 misses rescued; "
