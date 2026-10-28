@@ -1,0 +1,14 @@
+{
+  "hash": "d8fe5f9aff",
+  "kind": "dev",
+  "status": "complete",
+  "started": "2026-10-28T09:01:16",
+  "rates_usd_per_mtok": {
+    "input": 0.12,
+    "output": 0.24,
+    "rerank": 0.05
+  },
+  "git_commit": "c6cf2cb6e3eca383bb9707a9e33624cd18ef067f",
+  "code_hash": "83aa70cd8036",
+  "finished": "2026-10-28T11:38:00"
+}

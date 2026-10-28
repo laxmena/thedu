@@ -1,0 +1,209 @@
+{
+  "n_questions": 809,
+  "dataset": "scifact",
+  "llm_latency_probe_ms": null,
+  "setups": {
+    "A0": {
+      "ndcg10": {
+        "mean": 0.6944532803187498,
+        "lo": 0.6674676242963904,
+        "hi": 0.7220124940432254
+      },
+      "recall100": {
+        "mean": 0.9264112072517512,
+        "lo": 0.9088334363411619,
+        "hi": 0.9438411619283066
+      },
+      "recall100_is_soft": false,
+      "llm_calls": 0,
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "llm_cost_per_search_usd": 0.0,
+      "llm_cost_is_estimate": false,
+      "rerank_cost_per_search_usd": null,
+      "cost_per_search_usd": 0.0,
+      "uncosted_calls": 0,
+      "estimated_calls": 0,
+      "fallbacks": 0,
+      "latency_relative_to_A0": {
+        "parallel": 1.0,
+        "sequential": 1.0
+      }
+    },
+    "A4": {
+      "ndcg10": {
+        "mean": 0.7368405891377557,
+        "lo": 0.7107954054894028,
+        "hi": 0.7619916905241797
+      },
+      "recall100": {
+        "mean": 0.9538524927894521,
+        "lo": 0.9394313967861557,
+        "hi": 0.9672435105067985
+      },
+      "recall100_is_soft": false,
+      "llm_calls": 0,
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "llm_cost_per_search_usd": 0.0,
+      "llm_cost_is_estimate": false,
+      "rerank_cost_per_search_usd": null,
+      "cost_per_search_usd": null,
+      "uncosted_calls": 0,
+      "estimated_calls": 0,
+      "fallbacks": 0,
+      "latency_relative_to_A0": {
+        "parallel": 39.771119738837356,
+        "sequential": 39.771119738837356
+      }
+    },
+    "A3": {
+      "ndcg10": {
+        "mean": 0.6941256442752731,
+        "lo": 0.6669860674948735,
+        "hi": 0.7211775371806849
+      },
+      "recall100": {
+        "mean": 0.9410383189122373,
+        "lo": 0.9243510506798516,
+        "hi": 0.9571075401730531
+      },
+      "recall100_is_soft": false,
+      "llm_calls": 809,
+      "tokens_in": 502906,
+      "tokens_out": 56919,
+      "llm_cost_per_search_usd": 9.148242274412855e-05,
+      "llm_cost_is_estimate": false,
+      "rerank_cost_per_search_usd": null,
+      "cost_per_search_usd": 9.148242274412855e-05,
+      "uncosted_calls": 0,
+      "estimated_calls": 0,
+      "fallbacks": 0,
+      "latency_relative_to_A0": {
+        "parallel": 4802.458180838806,
+        "sequential": 4802.458180838806
+      }
+    },
+    "A0R": {
+      "ndcg10": {
+        "mean": 0.7387572942627733,
+        "lo": 0.7131499921032232,
+        "hi": 0.7643937862571185
+      },
+      "recall100": {
+        "mean": 0.9264112072517512,
+        "lo": 0.9088334363411619,
+        "hi": 0.9438411619283066
+      },
+      "recall100_is_soft": false,
+      "llm_calls": 0,
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "llm_cost_per_search_usd": 0.0,
+      "llm_cost_is_estimate": false,
+      "rerank_cost_per_search_usd": 0.0010199605067985167,
+      "cost_per_search_usd": 0.0010199605067985167,
+      "uncosted_calls": 0,
+      "estimated_calls": 0,
+      "fallbacks": 0,
+      "latency_relative_to_A0": {
+        "parallel": 181050.48014372302,
+        "sequential": 181050.48014372302
+      }
+    },
+    "A3R": {
+      "ndcg10": {
+        "mean": 0.7387100103502519,
+        "lo": 0.7132649895638039,
+        "hi": 0.7638527675803741
+      },
+      "recall100": {
+        "mean": 0.9410383189122373,
+        "lo": 0.9243510506798516,
+        "hi": 0.9571075401730531
+      },
+      "recall100_is_soft": false,
+      "llm_calls": 809,
+      "tokens_in": 502906,
+      "tokens_out": 56919,
+      "llm_cost_per_search_usd": 9.148242274412855e-05,
+      "llm_cost_is_estimate": false,
+      "rerank_cost_per_search_usd": 0.0010188566749072929,
+      "cost_per_search_usd": 0.0011103390976514214,
+      "uncosted_calls": 0,
+      "estimated_calls": 0,
+      "fallbacks": 0,
+      "latency_relative_to_A0": {
+        "parallel": 186478.04506235308,
+        "sequential": 186478.04506235308
+      }
+    }
+  },
+  "paired": {
+    "A4 vs A0": {
+      "ndcg10_diff": 0.042387308819005834,
+      "lo": 0.020815029680580084,
+      "hi": 0.06439810352671936,
+      "wins": 191,
+      "losses": 132
+    },
+    "A3 vs A0": {
+      "ndcg10_diff": -0.0003276360434767579,
+      "lo": -0.011381322691970277,
+      "hi": 0.010509509259101813,
+      "wins": 121,
+      "losses": 118
+    },
+    "A0R vs A0": {
+      "ndcg10_diff": 0.04430401394402361,
+      "lo": 0.028524223279581998,
+      "hi": 0.06063947708425109,
+      "wins": 166,
+      "losses": 95,
+      "role": "secondary"
+    },
+    "A3R vs A0": {
+      "ndcg10_diff": 0.04425673003150202,
+      "lo": 0.028723432050926347,
+      "hi": 0.059876363562589595,
+      "wins": 168,
+      "losses": 93,
+      "role": "secondary"
+    },
+    "A3R vs A4": {
+      "ndcg10_diff": 0.001869421212496181,
+      "lo": -0.01752887991695591,
+      "hi": 0.021257636115452623,
+      "wins": 136,
+      "losses": 152,
+      "role": "primary"
+    },
+    "A0R vs A4": {
+      "ndcg10_diff": 0.0019167051250177762,
+      "lo": -0.01733894863077364,
+      "hi": 0.02165357218373923,
+      "wins": 136,
+      "losses": 148,
+      "role": "secondary"
+    },
+    "A3R vs A3": {
+      "ndcg10_diff": 0.04458436607497877,
+      "lo": 0.026863029678475092,
+      "hi": 0.06111644074044498,
+      "wins": 175,
+      "losses": 106,
+      "role": "secondary"
+    },
+    "A3R vs A0R": {
+      "ndcg10_diff": -4.7283912521594624e-05,
+      "lo": -0.006768642730811668,
+      "hi": 0.006271447981162133,
+      "wins": 28,
+      "losses": 27,
+      "role": "secondary"
+    }
+  },
+  "extras": {
+    "ceiling_best_of_A3_A4": 0.803928087522697
+  }
+}
