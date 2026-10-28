@@ -1,0 +1,210 @@
+{
+  "n_questions": 324,
+  "dataset": "nfcorpus",
+  "llm_latency_probe_ms": null,
+  "setups": {
+    "A0": {
+      "ndcg10": {
+        "mean": 0.2842229880498305,
+        "lo": 0.25204726636433683,
+        "hi": 0.3131459726631157
+      },
+      "recall100": {
+        "mean": 0.22694515105314478,
+        "lo": 0.19817644232269307,
+        "hi": 0.2555800082330875
+      },
+      "recall100_is_soft": true,
+      "llm_calls": 0,
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "llm_cost_per_search_usd": 0.0,
+      "llm_cost_is_estimate": false,
+      "cost_per_search_usd": 0.0,
+      "uncosted_calls": 0,
+      "estimated_calls": 0,
+      "fallbacks": 0,
+      "latency_relative_to_A0": {
+        "parallel": 1.0,
+        "sequential": 1.0
+      }
+    },
+    "A4": {
+      "ndcg10": {
+        "mean": 0.3369168260989943,
+        "lo": 0.3029695556631647,
+        "hi": 0.369237401779316
+      },
+      "recall100": {
+        "mean": 0.3285296247532224,
+        "lo": 0.29768622254860033,
+        "hi": 0.3616693395908732
+      },
+      "recall100_is_soft": false,
+      "llm_calls": 0,
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "llm_cost_per_search_usd": 0.0,
+      "llm_cost_is_estimate": false,
+      "cost_per_search_usd": null,
+      "uncosted_calls": 0,
+      "estimated_calls": 0,
+      "fallbacks": 0,
+      "latency_relative_to_A0": {
+        "parallel": 28.788396412114857,
+        "sequential": 28.788396412114857
+      }
+    },
+    "A3": {
+      "ndcg10": {
+        "mean": 0.3204572940016933,
+        "lo": 0.28562528733760073,
+        "hi": 0.3523575456530036
+      },
+      "recall100": {
+        "mean": 0.31091677911320903,
+        "lo": 0.2795735345271643,
+        "hi": 0.3444122146429953
+      },
+      "recall100_is_soft": true,
+      "llm_calls": 324,
+      "tokens_in": 187732,
+      "tokens_out": 18755,
+      "llm_cost_per_search_usd": 8.342296296296297e-05,
+      "llm_cost_is_estimate": false,
+      "cost_per_search_usd": 8.342296296296297e-05,
+      "uncosted_calls": 0,
+      "estimated_calls": 0,
+      "fallbacks": 0,
+      "latency_relative_to_A0": {
+        "parallel": 3567.5013603552925,
+        "sequential": 3567.5013603552925
+      }
+    },
+    "H0": {
+      "ndcg10": {
+        "mean": 0.3363954779289352,
+        "lo": 0.3028578749712168,
+        "hi": 0.368315479365407
+      },
+      "recall100": {
+        "mean": 0.33013778344506767,
+        "lo": 0.3010459646532804,
+        "hi": 0.36240159336269373
+      },
+      "recall100_is_soft": false,
+      "llm_calls": 0,
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "llm_cost_per_search_usd": 0.0,
+      "llm_cost_is_estimate": false,
+      "cost_per_search_usd": null,
+      "uncosted_calls": 0,
+      "estimated_calls": 0,
+      "fallbacks": 0,
+      "latency_relative_to_A0": {
+        "parallel": 29.344378901733428,
+        "sequential": 30.34437890173343
+      }
+    },
+    "A5": {
+      "ndcg10": {
+        "mean": 0.3506131548299011,
+        "lo": 0.31627835262627485,
+        "hi": 0.38389185790876373
+      },
+      "recall100": {
+        "mean": 0.36222437238666977,
+        "lo": 0.32975295749493044,
+        "hi": 0.39680437505281585
+      },
+      "recall100_is_soft": false,
+      "llm_calls": 324,
+      "tokens_in": 187732,
+      "tokens_out": 18755,
+      "llm_cost_per_search_usd": 8.342296296296297e-05,
+      "llm_cost_is_estimate": false,
+      "cost_per_search_usd": null,
+      "uncosted_calls": 0,
+      "estimated_calls": 0,
+      "fallbacks": 0,
+      "latency_relative_to_A0": {
+        "parallel": 3568.0015496471437,
+        "sequential": 3596.7899460592585
+      }
+    }
+  },
+  "paired": {
+    "A4 vs A0": {
+      "ndcg10_diff": 0.05269383804916387,
+      "lo": 0.031739170062102244,
+      "hi": 0.07479106729397036,
+      "wins": 150,
+      "losses": 80
+    },
+    "A3 vs A0": {
+      "ndcg10_diff": 0.036234305951862916,
+      "lo": 0.021984097788536636,
+      "hi": 0.05114660580189663,
+      "wins": 117,
+      "losses": 76
+    },
+    "H0 vs A0": {
+      "ndcg10_diff": 0.05217248987910477,
+      "lo": 0.03720121127334962,
+      "hi": 0.06728030676993157,
+      "wins": 146,
+      "losses": 64
+    },
+    "A5 vs A0": {
+      "ndcg10_diff": 0.06639016678007066,
+      "lo": 0.04899453435160685,
+      "hi": 0.08422697197559378,
+      "wins": 156,
+      "losses": 60
+    },
+    "A5 vs H0": {
+      "ndcg10_diff": 0.014217676900965894,
+      "lo": 0.0027620824794062555,
+      "hi": 0.02439868533597042,
+      "wins": 117,
+      "losses": 80
+    },
+    "A5 vs A4": {
+      "ndcg10_diff": 0.013696328730906794,
+      "lo": -0.002755255407484737,
+      "hi": 0.029317229385625785,
+      "wins": 133,
+      "losses": 93
+    },
+    "H0 vs A4": {
+      "ndcg10_diff": -0.0005213481700590995,
+      "lo": -0.014093115013374633,
+      "hi": 0.011636189200447705,
+      "wins": 105,
+      "losses": 101
+    },
+    "A5 vs A3": {
+      "ndcg10_diff": 0.030155860828207755,
+      "lo": 0.01782696542794712,
+      "hi": 0.043117634827244206,
+      "wins": 141,
+      "losses": 75
+    }
+  },
+  "extras": {
+    "H0_vs_A4_misses": {
+      "a4_misses": 89,
+      "rescued": 14,
+      "a4_correct_at_1": 12,
+      "pushed_down": 6
+    },
+    "A5_vs_A4_misses": {
+      "a4_misses": 89,
+      "rescued": 16,
+      "a4_correct_at_1": 12,
+      "pushed_down": 4
+    },
+    "ceiling_best_of_A3_A4": 0.3920414300369338
+  }
+}

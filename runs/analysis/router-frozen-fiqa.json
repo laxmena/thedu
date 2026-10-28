@@ -1,0 +1,58 @@
+{
+  "meta": {
+    "inputs": {
+      "run": "890ad993c9",
+      "rules": "configs/router.yaml",
+      "rules_sha256": "facd7259363869b3a82a3c8b15106bd9dd0b1a0bdc0e2fd4757dd9a9e6956a39"
+    },
+    "git_commit": "9bcda21b02b109e8979d30e6d643b6fc2f9bb94e",
+    "code_hash": "180a520bbd6d"
+  },
+  "dataset": "fiqa",
+  "n": 500,
+  "rule": "mean_idf_norm >= 0.448",
+  "reference_mean_ndcg10": {
+    "A3": 0.24671454597080061,
+    "A4": 0.4291084492619722,
+    "H0": 0.37780831821797983,
+    "A5": 0.37340739941917334
+  },
+  "router_ndcg10": {
+    "mean": 0.4307614740169789,
+    "lo": 0.3971919117379497,
+    "hi": 0.4640858971696687
+  },
+  "share_calling_llm": 0.03,
+  "n_calling_llm": 15,
+  "llm_cost_per_search_usd": 2.3514408e-06,
+  "a5_llm_cost_per_search_usd": 7.838135999999999e-05,
+  "llm_cost_is_estimate": false,
+  "paired": {
+    "A4": {
+      "diff": 0.0016530247550067042,
+      "lo": -0.0014737481571740832,
+      "hi": 0.005901271493903382,
+      "wins": 4,
+      "losses": 2
+    },
+    "H0": {
+      "diff": 0.05295315579899905,
+      "lo": 0.030163657685968143,
+      "hi": 0.07588972859434101,
+      "wins": 182,
+      "losses": 107
+    },
+    "A5": {
+      "diff": 0.05735407459780555,
+      "lo": 0.034097701917265515,
+      "hi": 0.08209559908026376,
+      "wins": 180,
+      "losses": 108
+    }
+  },
+  "ceiling_best_of_A4_A5": 0.4874059244605669,
+  "criterion": {
+    "paired_vs_free_lower_bound_above": 0.0
+  },
+  "success": false
+}

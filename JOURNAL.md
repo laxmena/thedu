@@ -282,3 +282,19 @@ Why it matters: A router that is tested on the data it was picked from proves li
 Evidence: configs/router.yaml, runs/analysis/route-nfcorpus.json (the fit), tests/test_analysis.py
 Next: Embed FiQA, run A0, A3, A4, H0 and A5 on all 500 dev questions with the pinned provider, then `thedu analyze router --dataset fiqa`.
 Post: maybe
+
+## 2026-10-28 · finding · FiQA: the rewrite does not help, and the pre-registered router did not pass
+Who: human + Claude
+What: FiQA dev, 500 questions, fresh rewrites from DeepInfra (run 890ad993c9). nDCG@10: A0 0.2586, A3 0.2467, A4 0.4291, H0 0.3778, A5 0.3734. A4 beats A5 by 0.0557 (range 0.0318 to 0.0808, paired) and H0 by 0.0513; A5 vs H0 is -0.0044 (range -0.0156 to +0.0063). The frozen router (fire A5 when mean_idf_norm >= 0.448, else A4) called the LLM on 15 of 500 questions (3%) and scored +0.0017 against A4 (range -0.0015 to +0.0059): criterion NOT MET (lower bound must be above 0). Secondary rules R1 to R3 did not hold either; their groups are 16, 9 and 52 questions. Labels: embed-wins 244, rewrite-wins 51, tie 72, both-fail 133.
+Why it matters: On a third corpus the rewrite adds nothing to embeddings (SciFact: no gain; NFCorpus: small gain; FiQA: clear loss), and the router's feature does not transfer: FiQA questions are plain words, so almost none pass the 0.448 threshold and the router falls back to A4. It is safe here (it matches A4) but it is not evidence that "rare terms" predicts when rewriting pays.
+Evidence: runs/890ad993c9, runs/analysis/router-frozen-fiqa.json, runs/analysis/confirm-fiqa.json, configs/m3c_fiqa.yaml. FiQA A4 is not parity-checked against published scores (that needs the test answers, not read until M7); MTEB reports 0.46612 on the test split, for context only.
+Next: Report as is. No threshold or feature changes after this result.
+Post: yes, the pre-registered failure is part of the story
+
+## 2026-10-28 · finding · Re-running A3 and A5 with the pinned provider changes no M3 conclusion
+Who: human + Claude
+What: Fresh DeepInfra rewrites instead of the cached ones (runs eed781f01f SciFact, e9b3631de6 NFCorpus). SciFact A3 0.6941 (was 0.6874), A5 0.7375 (was 0.7357); A5 vs H0 -0.0034 (range -0.0117 to +0.0049), still no win. NFCorpus A3 0.3205 (was 0.3221), A5 0.3506 (was 0.3514); A5 vs H0 +0.0142 (range +0.0028 to +0.0244), still a win (was +0.0150). Frozen router on NFCorpus: +0.0156 vs A4 (range +0.0006 to +0.0294), lower bound barely above zero, 69% LLM calls; this is not a clean test since the feature was picked after seeing NFCorpus.
+Why it matters: Every post number can now come from one provider, and the choice of provider did not move any conclusion; differences are within 0.007.
+Evidence: runs/eed781f01f, runs/e9b3631de6, runs/analysis/router-frozen-nfcorpus.json, configs/m3d_*_pinned.yaml
+Next: Use the pinned runs for the post.
+Post: yes, one line

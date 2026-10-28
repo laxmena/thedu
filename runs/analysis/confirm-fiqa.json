@@ -1,0 +1,92 @@
+{
+  "meta": {
+    "inputs": {
+      "run": "890ad993c9",
+      "rules": "configs/m3b_rules.yaml",
+      "rules_sha256": "07e922c8ca93ca4b1ddd55e3eec7307156ef9aa535fb5d2d2d3715ebf6b30195"
+    },
+    "git_commit": "9bcda21b02b109e8979d30e6d643b6fc2f9bb94e",
+    "code_hash": "180a520bbd6d"
+  },
+  "dataset": "fiqa",
+  "n": 500,
+  "label_counts": {
+    "tie": 72,
+    "both-fail": 133,
+    "rewrite-wins": 51,
+    "embed-wins": 244
+  },
+  "criterion": {
+    "lower_bound_above": 0.0,
+    "min_group_share": 0.15
+  },
+  "rules": {
+    "R1": {
+      "rule": "gap_ratio >= 0.286",
+      "a3_minus_a4_in_vs_out": {
+        "n_group": 16,
+        "share": 0.032,
+        "effect": 0.024505566478629393,
+        "lo": -0.10416871901580967,
+        "hi": 0.14174620901678606
+      },
+      "a5_minus_a4_in_vs_out": {
+        "n_group": 16,
+        "share": 0.032,
+        "effect": 0.01698015483932417,
+        "lo": -0.05802651899195384,
+        "hi": 0.07173215507012258
+      },
+      "held": false,
+      "mean_a3_minus_a4": {
+        "in": -0.15867251493985834,
+        "out": -0.18317808141848774
+      }
+    },
+    "R2": {
+      "rule": "mean_idf_norm >= 0.474",
+      "a3_minus_a4_in_vs_out": {
+        "n_group": 9,
+        "share": 0.018,
+        "effect": 0.2513592480844865,
+        "lo": -0.061158678986532974,
+        "hi": 0.6238403564107547
+      },
+      "a5_minus_a4_in_vs_out": {
+        "n_group": 9,
+        "share": 0.018,
+        "effect": 0.1703833330992735,
+        "lo": 0.010120532310393929,
+        "hi": 0.36496480337506476
+      },
+      "held": false,
+      "mean_a3_minus_a4": {
+        "in": 0.06444087832779413,
+        "out": -0.18691836975669238
+      }
+    },
+    "R3": {
+      "rule": "max_idf_norm >= 0.761",
+      "a3_minus_a4_in_vs_out": {
+        "n_group": 52,
+        "share": 0.104,
+        "effect": 0.08159798773231214,
+        "lo": -0.01841943973868794,
+        "hi": 0.18908900906019824
+      },
+      "a5_minus_a4_in_vs_out": {
+        "n_group": 52,
+        "share": 0.104,
+        "effect": 0.0201897500716089,
+        "lo": -0.05575479999929375,
+        "hi": 0.09522223589690196
+      },
+      "held": false,
+      "mean_a3_minus_a4": {
+        "in": -0.10928210628301996,
+        "out": -0.1908800940153321
+      }
+    }
+  },
+  "held": []
+}
