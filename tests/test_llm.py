@@ -19,7 +19,7 @@ class FakeClient:
         self.calls += 1
         self.last = kw
         msg = SimpleNamespace(content="<think>x</think> hello  world")
-        return SimpleNamespace(choices=[SimpleNamespace(message=msg)],
+        return SimpleNamespace(choices=[SimpleNamespace(message=msg)], model_extra={"provider": "DeepInfra"},
                                usage=SimpleNamespace(prompt_tokens=100, completion_tokens=10))
 
 
@@ -92,3 +92,20 @@ def test_token_estimate_counts_the_chat_template_and_the_answer():
 
     tin, tout = estimate_tokens("hi", "hello world")
     assert tin == 8 + 1 and tout == 2 + 1  # 8 template tokens + "hi"; "hello world" + end-of-turn
+
+
+def test_the_serving_provider_is_recorded_in_the_cache_and_on_replay(tmp_path):
+    g = gw(tmp_path)
+    assert g.call("p").provider == "DeepInfra"
+    assert json.loads((tmp_path / "llm.jsonl").read_text())["provider"] == "DeepInfra"
+    assert gw(tmp_path).call("p").provider == "DeepInfra"  # a replay from disk keeps it
+    from thedu.llm import Usage
+
+    u = Usage()
+    u.add(g.call("p"))
+    assert u.providers == ["DeepInfra"]
+
+
+def test_spend_in_another_cache_counts_against_the_budget(tmp_path):
+    with pytest.raises(GatewayError, match="budget"):
+        gw(tmp_path, budget_usd=1.0, spent_elsewhere_usd=1.0).call("p")

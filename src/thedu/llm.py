@@ -42,6 +42,7 @@ class Result:
     cached: bool = False
     failed: bool = False
     estimated: bool = False  # tokens and cost counted offline, not billed by the provider
+    provider: str | None = None  # who served the call (OpenRouter reports it); None for the spike cache
 
 
 @dataclass
@@ -57,6 +58,7 @@ class Usage:
     estimated_calls: int = 0  # calls whose tokens and cost are offline estimates (spike cache)
     untimed_calls: int = 0
     failed_calls: int = 0
+    providers: list = field(default_factory=list)  # one entry per call; None where unknown
 
     @classmethod
     def combine(cls, usages: list[Usage]) -> Usage:
@@ -68,6 +70,7 @@ class Usage:
 
     def add(self, r: Result) -> None:
         self.calls += 1
+        self.providers.append(r.provider)
         self.failed_calls += r.failed
         if r.cost_usd is None:
             self.uncosted_calls += 1
@@ -90,6 +93,7 @@ class Gateway:
     legacy_path: Path | None = None  # the spike's rewrites.json, read-only
     offline: bool = False  # a cache miss is an error (used by tests)
     budget_usd: float | None = None
+    spent_elsewhere_usd: float = 0.0  # recorded spend in other cache files, counted against the same budget
     client: Any = None  # injectable for tests
     estimator: Callable[[str, str], tuple[int, int]] | None = None  # prices spike-cache hits (see tokens.py)
     _cache: dict[str, dict] = field(default_factory=dict, init=False)
@@ -130,14 +134,15 @@ class Gateway:
         with self._lock:
             if key in self._cache:
                 e = self._cache[key]
-                return Result(e["text"], e["tokens_in"], e["tokens_out"], e["cost_usd"], e["latency_ms"], cached=True)
+                return Result(e["text"], e["tokens_in"], e["tokens_out"], e["cost_usd"], e["latency_ms"],
+                              cached=True, provider=e.get("provider"))
             if legacy_key is not None and attempt == 0 and (lk := f"{c.model}::{legacy_key}") in self._legacy:
                 text = self._legacy[lk]
                 return self._price_legacy(prompt, text)
         if self.offline:
             raise GatewayError("cache miss while offline: the cached rewrites do not cover this call")
         self._ensure_ready()
-        if self.budget_usd is not None and self._spent >= self.budget_usd:
+        if self.budget_usd is not None and self._spent + self.spent_elsewhere_usd >= self.budget_usd:
             raise GatewayError(
                 f"budget reached: ${self._spent:.2f} recorded of ${self.budget_usd:.2f}. Stop and ask a human."
             )
@@ -203,13 +208,15 @@ class Gateway:
             tin = r.usage.prompt_tokens if r.usage else 0
             tout = r.usage.completion_tokens if r.usage else 0
             cost = call_cost(tin, tout, self.rate.input_per_mtok_usd, self.rate.output_per_mtok_usd)
-            entry = {"key": key, "model": c.model, "text": text, "tokens_in": tin, "tokens_out": tout,
-                     "cost_usd": cost, "latency_ms": latency, "ts": time.strftime("%Y-%m-%dT%H:%M:%S")}
+            provider = (getattr(r, "model_extra", None) or {}).get("provider") or getattr(r, "provider", None)
+            entry = {"key": key, "model": c.model, "provider": provider, "text": text, "tokens_in": tin,
+                     "tokens_out": tout, "cost_usd": cost, "latency_ms": latency,
+                     "ts": time.strftime("%Y-%m-%dT%H:%M:%S")}
             with self._lock:
                 self._append(entry)
                 self._cache[key] = entry
                 self._spent += cost
-            return Result(text, tin, tout, cost, latency)
+            return Result(text, tin, tout, cost, latency, provider=provider)
         return Result("", failed=True)
 
     def _append(self, entry: dict) -> None:

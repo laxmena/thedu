@@ -1,0 +1,10 @@
+# M3 part 2, label stability: regenerate A3's rewrites for the fixed 100-question SciFact sample (llm seed 7).
+# Fresh calls only (no spike cache) into their own cache file; the cache used elsewhere is untouched.
+dataset: scifact
+split: dev
+n: 100
+seed: 7            # which 100 questions: the same sample every time
+setups: [A0, A3]
+bm25: {k1: 0.9, b: 0.4}
+llm: {model: qwen/qwen3-14b, temperature: 0.0, seed: 7, max_tokens: 300, cache_file: runs/analysis/stability/llm.jsonl}
+planner: {grounded_prompt: grounded_v1, query_repeat: 3, feedback_k: 5, use_spike_cache: false}

@@ -61,6 +61,7 @@ class LLMConfig(_Frozen):
     seed: int = 7
     max_tokens: int = 300
     workers: int = 16  # parallel calls; does not change results, so not part of the hash
+    cache_file: str = "runs/cache/llm.jsonl"  # where responses are kept; not part of the hash
 
 
 class PlannerConfig(_Frozen):
@@ -102,7 +103,7 @@ class RunConfig(_Frozen):
 
     def hash(self, rates: dict[str, float] | None = None) -> str:
         payload = {
-            "config": self.model_dump(exclude={"llm": {"workers"}, "pricing": True}),
+            "config": self.model_dump(exclude={"llm": {"workers", "cache_file"}, "pricing": True}),
             "prompts": self.prompt_texts(),
             "rates": rates or {},
         }

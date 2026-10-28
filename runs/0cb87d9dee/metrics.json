@@ -1,0 +1,69 @@
+{
+  "n_questions": 100,
+  "dataset": "scifact",
+  "llm_latency_probe_ms": null,
+  "setups": {
+    "A0": {
+      "ndcg10": {
+        "mean": 0.7014530900048521,
+        "lo": 0.6292063925350114,
+        "hi": 0.7732669100584548
+      },
+      "recall100": {
+        "mean": 0.96,
+        "lo": 0.92,
+        "hi": 0.99
+      },
+      "recall100_is_soft": false,
+      "llm_calls": 0,
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "llm_cost_per_search_usd": 0.0,
+      "llm_cost_is_estimate": false,
+      "cost_per_search_usd": 0.0,
+      "uncosted_calls": 0,
+      "estimated_calls": 0,
+      "fallbacks": 0,
+      "latency_relative_to_A0": {
+        "parallel": 1.0,
+        "sequential": 1.0
+      }
+    },
+    "A3": {
+      "ndcg10": {
+        "mean": 0.6997074323746392,
+        "lo": 0.619190509432299,
+        "hi": 0.7771163906618942
+      },
+      "recall100": {
+        "mean": 0.965,
+        "lo": 0.93,
+        "hi": 0.995
+      },
+      "recall100_is_soft": false,
+      "llm_calls": 100,
+      "tokens_in": 61978,
+      "tokens_out": 7749,
+      "llm_cost_per_search_usd": 9.297119999999999e-05,
+      "llm_cost_is_estimate": false,
+      "cost_per_search_usd": 9.297119999999999e-05,
+      "uncosted_calls": 0,
+      "estimated_calls": 0,
+      "fallbacks": 0,
+      "latency_relative_to_A0": {
+        "parallel": 1466.213339993091,
+        "sequential": 1466.213339993091
+      }
+    }
+  },
+  "paired": {
+    "A3 vs A0": {
+      "ndcg10_diff": -0.0017456576302129745,
+      "lo": -0.03386116605186477,
+      "hi": 0.03227891107661981,
+      "wins": 14,
+      "losses": 16
+    }
+  },
+  "extras": {}
+}

@@ -58,8 +58,13 @@ def make_gateway(cfg: RunConfig, offline: bool = False) -> tuple[Gateway, dict[s
     pricing = load_pricing(cfg.pricing)
     rate = pricing.rate(cfg.llm.model)
     budget = yaml.safe_load((CONFIGS_DIR / "budget.yaml").read_text())["total_usd"]
+    main_cache = ROOT / "runs" / "cache" / "llm.jsonl"
+    cache = ROOT / cfg.llm.cache_file
+    elsewhere = 0.0
+    if cache != main_cache and main_cache.exists():  # a separate cache still counts against the one budget
+        elsewhere = sum(json.loads(ln).get("cost_usd") or 0.0 for ln in main_cache.read_text().splitlines() if ln.strip())
     gw = Gateway(
-        cfg.llm, rate, cache_path=ROOT / "runs" / "cache" / "llm.jsonl",
+        cfg.llm, rate, cache_path=cache, spent_elsewhere_usd=elsewhere,
         legacy_path=SPIKE_DIR / "rewrites.json" if cfg.planner.use_spike_cache else None,
         offline=offline, budget_usd=budget,
         estimator=estimate_tokens if cfg.planner.use_spike_cache else None,  # spike-cache calls have no token split
@@ -158,6 +163,7 @@ def execute(cfg: RunConfig, docs: dict[str, str], queries: dict[str, str], qrels
                 "llm_calls": usage.calls, "tokens_in": usage.tokens_in, "tokens_out": usage.tokens_out,
                 "cost_usd": usage.cost_usd, "uncosted_calls": usage.uncosted_calls,
                 "estimated_calls": usage.estimated_calls, "untimed_calls": usage.untimed_calls,
+                "providers": usage.providers,
                 "parts": {d: {"retrieval_ms": c.retrieval_ms, "llm_ms": c.usage.llm_ms, "untimed": c.usage.untimed_calls}
                           for d, c in zip(DEPS[s], parts)},
                 "rank_ms": rank_ms,

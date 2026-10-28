@@ -12,6 +12,8 @@ import typer
 from thedu.paths import QRELS_DIR, ROOT
 
 app = typer.Typer(add_completion=False, no_args_is_help=True, help="thedu: query-time rewriting over BM25 vs embeddings.")
+analyze_app = typer.Typer(no_args_is_help=True, help="Where does each method win? Reads finished runs; retrieves and calls nothing.")
+app.add_typer(analyze_app, name="analyze")
 
 MANIFEST = ROOT / "tests" / "frozen.sha256"
 
@@ -173,3 +175,80 @@ def freeze(add: list[Path] = typer.Option(None, "--add", help="Append this file 
     for rel in new:
         (ROOT / rel).chmod(0o444)
     typer.echo(f"Added {len(new)} file(s) to {MANIFEST.relative_to(ROOT)}: {', '.join(new)}. Log this in JOURNAL.md.")
+
+
+def _ci(x: dict | None) -> str:
+    return "n/a" if x is None else f"{x['mean']:+.3f} [{x['lo']:+.3f},{x['hi']:+.3f}]"
+
+
+@analyze_app.command("explore")
+def analyze_explore(run: str = typer.Option(..., help="The SciFact M3 run id (SciFact only).")) -> None:
+    """Win rates and A3-A4 difference by feature tercile, on SciFact dev."""
+    from thedu.analysis.steps import explore
+
+    r = explore(run)
+    typer.echo(f"scifact dev, {r['n']} questions. Labels: {r['label_counts']}. A3-A4 overall {_ci(r['a3_minus_a4'])}")
+    for f, t in r["tables"].items():
+        th = r["thresholds"][f]
+        typer.echo(f"\n{f}   (cut points {th[0]:.3f}, {th[1]:.3f})")
+        typer.echo(f"  {'bucket':<7}{'n':>5}{'rewrite':>9}{'embed':>8}{'tie':>7}{'fail':>7}   A3-A4 mean [95% range]      A5-A4")
+        for b, v in t.items():
+            typer.echo(f"  {b:<7}{v['n']:>5}{v['share_rewrite-wins']:>9.0%}{v['share_embed-wins']:>8.0%}{v['share_tie']:>7.0%}"
+                       f"{v['share_both-fail']:>7.0%}   {_ci(v['a3_minus_a4']):<27}{_ci(v['a5_minus_a4'])}")
+
+
+@analyze_app.command("stability")
+def analyze_stability(original: str = typer.Option(..., help="The SciFact M3 run id."),
+                      regen: list[str] = typer.Option(..., help="Run ids of the regenerated A3 runs (repeat).")) -> None:
+    """How many labels survive regenerating the rewrites."""
+    from thedu.analysis.steps import stability
+
+    r = stability(original, regen)
+    typer.echo(f"{r['n']} questions; A4 mean {r['a4_mean']:.4f}")
+    for k, v in r["sources"].items():
+        typer.echo(f"  {k}: A3 mean {v['a3_mean']:.4f}  labels {v['label_counts']}  providers {v['providers']}")
+    for k, v in r["pairs"].items():
+        typer.echo(f"\n{k}\n  " + "\n  ".join(f"{a}: {b}" for a, b in v.items()))
+
+
+@analyze_app.command("confirm")
+def analyze_confirm(run: str = typer.Option(..., help="The NFCorpus M3 run id."),
+                    rules: str = typer.Option("configs/m3b_rules.yaml")) -> None:
+    """Test the frozen rules, unchanged, on NFCorpus dev."""
+    from thedu.analysis.steps import confirm
+
+    try:
+        r = confirm(run, rules)
+    except RuntimeError as e:
+        typer.echo(f"\n{e}", err=True)
+        raise typer.Exit(1)
+    typer.echo(f"nfcorpus dev, {r['n']} questions. Labels: {r['label_counts']}")
+    for name, v in r["rules"].items():
+        e = v["a3_minus_a4_in_vs_out"]
+        typer.echo(f"\n{name}: {v['rule']}   {'HELD' if v['held'] else 'did not hold'}")
+        typer.echo(f"  group {e['n_group']} questions ({e['share']:.0%}); A3-A4 in vs out: {e['effect']:+.4f} [{e['lo']:+.4f}, {e['hi']:+.4f}]")
+        a = v["a5_minus_a4_in_vs_out"]
+        typer.echo(f"  A5-A4 in vs out: {a['effect']:+.4f} [{a['lo']:+.4f}, {a['hi']:+.4f}]")
+
+
+@analyze_app.command("route")
+def analyze_route(scifact_run: str = typer.Option(...), nfcorpus_run: str = typer.Option(...)) -> None:
+    """A router fit on SciFact pre-search features, evaluated on NFCorpus (only if a rule held)."""
+    from thedu.analysis.steps import route
+
+    try:
+        r = route(scifact_run, nfcorpus_run)
+    except RuntimeError as e:
+        typer.echo(f"\n{e}", err=True)
+        raise typer.Exit(1)
+    typer.echo(f"features allowed (held on NFCorpus): {r['allowed_features']}")
+    typer.echo(f"NFCorpus nDCG@10: {r['reference_mean_ndcg10']}; ceilings A4/A5 {r['ceiling_best_of_A4_A5']:.4f}, A3/A4 {r['ceiling_best_of_A3_A4']:.4f}")
+    for ver, v in r["versions"].items():
+        s = v["stump_fit_on_scifact"]
+        typer.echo(f"\n{ver}: fire when {s['feature']} {s['op']} {s['threshold']}")
+        typer.echo(f"  SciFact: fires on {v['scifact_share_fired']:.0%}; cross-validated gain vs always-free {v['scifact_cv_mean_gain_vs_always_free']:+.4f} "
+                   f"(always-paid {v['scifact_always_paid_mean_gain']:+.4f})")
+        typer.echo(f"  NFCorpus: nDCG@10 {_ci(v['nfcorpus_ndcg10'])}; calls the LLM on {v['nfcorpus_share_calling_llm']:.0%}; "
+                   f"LLM $/search {v['llm_cost_per_search_usd']:.6f}{'~' if v['llm_cost_is_estimate'] else ''}")
+        for k, p in v["paired"].items():
+            typer.echo(f"    {k}: {p['diff']:+.4f} [{p['lo']:+.4f}, {p['hi']:+.4f}] wins {p['wins']}, losses {p['losses']}")

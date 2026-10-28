@@ -1,0 +1,84 @@
+{
+  "meta": {
+    "inputs": {
+      "original": "2a4eb7b8d0",
+      "regens": [
+        "ced207d5ec",
+        "0cb87d9dee"
+      ]
+    },
+    "git_commit": "f1a5cdb22dd5ff7303c36a3ca04d58199810f154",
+    "code_hash": "51c1a0bd5460"
+  },
+  "n": 100,
+  "a4_mean": 0.7579007597524071,
+  "sources": {
+    "cached": {
+      "a3_mean": 0.7031461010479318,
+      "label_counts": {
+        "tie": 46,
+        "rewrite-wins": 20,
+        "embed-wins": 25,
+        "both-fail": 9
+      },
+      "providers": "unknown (spike cache)"
+    },
+    "regen ced207d5ec": {
+      "a3_mean": 0.694705096566413,
+      "label_counts": {
+        "tie": 48,
+        "rewrite-wins": 19,
+        "embed-wins": 24,
+        "both-fail": 9
+      },
+      "providers": {
+        "DeepInfra": 40,
+        "NextBit": 60
+      }
+    },
+    "regen 0cb87d9dee": {
+      "a3_mean": 0.6997074323746392,
+      "label_counts": {
+        "tie": 46,
+        "rewrite-wins": 19,
+        "embed-wins": 25,
+        "both-fail": 10
+      },
+      "providers": {
+        "DeepInfra": 44,
+        "NextBit": 56
+      }
+    }
+  },
+  "pairs": {
+    "cached vs regen ced207d5ec": {
+      "same_label": 94,
+      "same_rewrite_text": 48,
+      "mean_abs_ndcg_change": 0.024193775763614797,
+      "rewrite_wins_in_first": 20,
+      "of_those_still_rewrite_wins": 19
+    },
+    "cached vs regen 0cb87d9dee": {
+      "same_label": 95,
+      "same_rewrite_text": 37,
+      "mean_abs_ndcg_change": 0.03221684360424511,
+      "rewrite_wins_in_first": 20,
+      "of_those_still_rewrite_wins": 19
+    },
+    "regen ced207d5ec vs regen 0cb87d9dee": {
+      "same_label": 93,
+      "same_rewrite_text": 48,
+      "mean_abs_ndcg_change": 0.0344704324238084,
+      "rewrite_wins_in_first": 19,
+      "of_those_still_rewrite_wins": 18,
+      "rewrites_that_differ": 52,
+      "of_those_same_provider": 11,
+      "of_those_different_provider": 41,
+      "same_provider_overall": 58,
+      "rewrite_differs_rate_same_provider": 0.1896551724137931,
+      "rewrite_differs_rate_different_provider": 0.9761904761904762,
+      "questions_same_provider": 58,
+      "questions_different_provider": 42
+    }
+  }
+}

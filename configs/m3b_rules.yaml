@@ -1,0 +1,25 @@
+# Pre-registered rules for M3 part 2, written from the SciFact exploration only (runs/analysis/explore-scifact.json).
+# Frozen before NFCorpus features were computed; `thedu analyze confirm` refuses to run unless this file is frozen.
+# Each rule fires on a group of questions and predicts that the rewrite (A3) does better against embeddings (A4)
+# on that group than on the rest. Thresholds are SciFact upper/lower tercile cut points, on scale-free features.
+criterion:
+  # A rule HOLDS on NFCorpus when the 95% range of (mean A3-A4 in the group minus mean A3-A4 outside it) is above this,
+  lower_bound_above: 0.0
+  # and the group is at least this share of the questions.
+  min_group_share: 0.15
+rules:
+  - name: R1
+    feature: gap_ratio        # (BM25 top-1 score minus top-2 score) / top-1 score
+    op: ">="
+    threshold: 0.286
+    meaning: BM25 is confident about its top result
+  - name: R2
+    feature: mean_idf_norm    # mean IDF of the question's terms / the collection's maximum possible IDF
+    op: ">="
+    threshold: 0.474
+    meaning: the question's terms are rare on average
+  - name: R3
+    feature: max_idf_norm     # largest term IDF / the collection's maximum possible IDF
+    op: ">="
+    threshold: 0.761
+    meaning: the question has at least one fairly rare term
