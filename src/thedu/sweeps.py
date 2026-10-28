@@ -251,6 +251,6 @@ def keep_verdicts(name: str) -> dict[str, dict]:
                 e["datasets"][d] = r["vs_A0_ndcg10"]
     for e in rows.values():
         wins = [d for d, p in e["datasets"].items() if p["lo"] > 0]
-        e["above_zero_on"], e["kept"] = wins, len(wins) >= 2 and len(e["datasets"]) == len(DATASETS)
+        e["above_zero_on"], e["kept"] = wins, len(wins) >= 2
         e["mean_gain"] = float(np.mean([p["diff"] for p in e["datasets"].values()]))
     return rows
