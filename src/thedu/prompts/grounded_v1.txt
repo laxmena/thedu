@@ -1,0 +1,13 @@
+You help a keyword search engine (BM25) find documents relevant to a query.
+Below are the current top search results for the query. Some are relevant, some are not.
+
+{snippets}
+
+Query: {q}
+
+Write up to 15 search terms that would help find documents about exactly this query.
+Take terms from the results that are relevant to the query: specific names, technical terms,
+abbreviations, the wording those documents use. Ignore results about a different topic.
+No generic words (study, trial, effect, analysis, outcome, research, patients).
+Output only the terms, separated by spaces.
+/no_think

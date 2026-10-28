@@ -1,0 +1,7 @@
+# The spike's settings on all SciFact dev questions, A0 and A3 only (needs no network: rewrites are cached).
+dataset: scifact
+split: dev
+setups: [A0, A3]
+bm25: {k1: 0.9, b: 0.4}
+llm: {model: qwen/qwen3-14b, temperature: 0.0, seed: 7, max_tokens: 300}
+planner: {grounded_prompt: grounded_v1, query_repeat: 3, feedback_k: 5, use_spike_cache: true}

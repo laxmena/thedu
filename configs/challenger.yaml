@@ -1,0 +1,13 @@
+# The setup under test. Agents edit this file; `thedu dev configs/challenger.yaml` runs it.
+# Starts identical to the champion.
+dataset: scifact
+split: dev
+setups: [A0, A4, A3]
+bm25: {k1: 0.9, b: 0.4}
+dense: {model: Qwen/Qwen3-Embedding-0.6B, max_seq_length: 512}
+llm: {model: qwen/qwen3-14b, temperature: 0.0, seed: 7, max_tokens: 300}
+planner:
+  grounded_prompt: grounded_v1
+  query_repeat: 3
+  feedback_k: 5
+  use_spike_cache: true

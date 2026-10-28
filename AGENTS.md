@@ -14,7 +14,7 @@ feature-rich. This is not a library and has no users to support.
 
 When two of these conflict, the higher one wins.
 
-1. **The judge is never wrong.** Never edit `judge/`, `data/qrels/`, or `tests/golden/`.
+1. **The judge is never wrong.** Never edit `src/thedu/judge/`, `data/qrels/`, or `tests/golden/`.
    If you believe they are wrong, stop and report. Do not "fix" them.
 2. **No leakage.** Tune on dev splits only. Test answers load only through
    `thedu parity` (frozen baselines, once, in M1) and `thedu test-eval` (the final run).
@@ -46,11 +46,16 @@ Do not add a sixth part without a human decision.
 
 | Path | Edit? |
 | --- | --- |
-| `planner/`, `prompts/`, `ranker/` | Yes |
+| `src/thedu/planner/`, `src/thedu/prompts/`, `src/thedu/ranker/` | Yes |
 | `configs/challenger.yaml` | Yes |
-| `retrievers/` | Settings and bug fixes; keep the contract |
+| `src/thedu/retrievers/` | Settings and bug fixes; keep the contract |
 | `configs/champion.yaml` | Only through `thedu promote` |
-| `judge/`, `data/qrels/`, `tests/golden/`, `tests/expected.yaml` | Never |
+| `src/thedu/judge/`, `data/qrels/`, `tests/golden/`, `tests/expected.yaml`, `tests/frozen.sha256` | Never |
+
+Code lives in `src/thedu/` (the `thedu` package); part names elsewhere in this file
+(`planner/`, `judge/`, ...) mean the subpackages there. Frozen files are read-only and
+checksummed in `tests/frozen.sha256`; `thedu check` fails if one changes. `thedu freeze`
+wrote that file once and refuses to run again.
 
 ## How to make a change
 
@@ -91,8 +96,15 @@ some wins are luck. The unseen NFCorpus check catches those.
 - Seeds, temperature, model names, and k values come from config. Never hard-code them.
 - Secrets live only in `.env` (git-ignored). Never print, log, commit, or copy a key
   anywhere else, and never read `.env` except through the code that loads it.
-- Planner output must pass the JSON schema. On failure: retry once, then fall back to
-  the raw question and count the fallback.
+- Prompts are plain text files in `src/thedu/prompts/`; the LLM returns search terms, not
+  JSON (the spike's cached rewrites depend on it). The planner wraps them in a `Plan`
+  (pydantic: `queries`, `must_keep`, `stop`), which must validate. On an empty or unusable
+  answer: retry once, then fall back to the raw question and count the fallback. A run
+  with more than 5% fallbacks refuses to report. JSON-output prompts come with the
+  multi-round planner.
+- A run records the git commit and a hash of the package source. Resuming a run under
+  different code is refused (`--restart` sets the old run aside); a run never mixes two
+  code versions.
 - `must_keep` terms (IDs, codenames, quoted phrases) are copied exactly from the question.
 - Notebooks only read `runs/`. They never produce numbers the post depends on.
 - Log; don't print.
@@ -101,8 +113,8 @@ some wins are luck. The unseen NFCorpus check catches those.
 
 | Command | What it runs | When |
 | --- | --- | --- |
-| `thedu check` | Unit, contract, schema, checksum, leakage tests | Every change |
-| `thedu smoke` | 20 questions end to end, under 2 minutes | Before `thedu dev` |
+| `thedu check` | Unit, contract, schema, checksum, leakage tests, and the A0/A3 reproduction of the spike's SciFact numbers from cached rewrites | Every change |
+| `thedu smoke` | A4 (embeddings) reproduction of the spike's SciFact number, and 20 questions end to end; under 2 minutes | Before `thedu dev` |
 | `thedu parity` | Frozen baselines vs published scores, on test | Once in M1, and after any retriever change |
 | `thedu all` | Every number in the post, from scratch | Before release |
 

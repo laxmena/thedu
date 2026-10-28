@@ -162,3 +162,19 @@ Why it matters: M0 builds on measured behaviour, not on the original guess.
 Evidence: this journal, 2026-10-27 entries
 Next: M0 in a Claude Code session working from AGENTS.md. Hybrid (A5) moves up in priority.
 Post: no
+
+## 2026-10-27 · decision · M0 layout: src/thedu, plain-text prompts behind a Plan wrapper, and three guards
+Who: human + Claude
+What: Code lives in `src/thedu/` (judge, data, retrievers, planner, ranker, prompts as subpackages); AGENTS.md now names the frozen paths that way. Prompts stay plain text (the LLM returns search terms, not JSON) so the spike's cached rewrites keep working; the planner wraps terms in a validated `Plan` and falls back to the raw question after one retry. Test answers sit behind one function that only `thedu parity` and `thedu test-eval` import, enforced by a grep test instead of a call-stack check. A run records its git commit plus a hash of the package source and refuses to resume under different code.
+Why it matters: Keeps the spike's numbers reproducible while M0 builds the real parts, and makes leakage and mixed-code runs hard to do by accident.
+Evidence: AGENTS.md, src/thedu/, tests/test_data.py, tests/test_registry.py
+Next: JSON-output prompts arrive with the multi-round planner (M2). The code hash is a small addition to "record the commit": with an uncommitted tree, the commit alone could not tell two code versions apart.
+Post: no
+
+## 2026-10-27 · learning · M0 done: the spike's SciFact numbers reproduce from the new package
+Who: human + Claude
+What: `thedu dev` on the spike's settings, with cached rewrites and no network, gives A0 0.6945, A3 0.6874 and (embeddings) A4 0.7376 on all 809 SciFact dev questions, matching the spike. The judge matches pytrec_eval to 1e-12 on stored BM25 runs for SciFact and NFCorpus (graded relevance). Dataset sizes match the published counts for SciFact (5183 docs, 809 dev, 300 test), NFCorpus (3633, 324, 323) and FiQA (57638, 500, 648); FiQA is downloaded but not embedded. Top-10 of BM25 is identical at k=10 and k=100 on 100 questions, so keeping 100 results per question (for Recall@100) did not change nDCG@10. `thedu check` takes about 3 seconds; `thedu smoke` about 30.
+Why it matters: The foundation is trustworthy before any new method is built on it.
+Evidence: tests/test_reproduction.py, tests/smoke/test_smoke.py, tests/golden/. Recall@100: A0 0.926, A3 0.941, A4 0.959; A4 vs A0 +0.043 nDCG@10 (range +0.022 to +0.065), A3 vs A0 -0.007 (range -0.018 to +0.005).
+Next: Two known gaps. (1) The spike's cached rewrites recorded no token split, so A3's cost per search shows n/a until its rewrites are re-run through the gateway (new calls are priced at $0.12 / $0.24 per million tokens, qwen/qwen3-14b on OpenRouter, fetched 2026-10-27). (2) Embedding search has no reference price yet, so its cost shows n/a. Then M1: parity against published scores.
+Post: no

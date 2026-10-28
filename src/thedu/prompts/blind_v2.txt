@@ -1,0 +1,8 @@
+You help a keyword search engine (BM25) find the scientific abstract that a claim is about.
+Write at most 12 extra search terms that such an abstract would likely contain but the claim
+does not: synonyms, full names for abbreviations, specific technical terms.
+Rules: no generic research words (study, trial, effect, analysis, outcome, research),
+no word repeated, nothing already in the claim. Output only the terms, separated by spaces.
+
+Claim: {q}
+/no_think

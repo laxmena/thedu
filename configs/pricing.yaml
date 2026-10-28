@@ -1,0 +1,10 @@
+# Reference hosted prices in US dollars per million tokens.
+# Local runs are priced at the hosted rate for a model of the same size.
+fetched: "2026-10-27"
+source: "https://openrouter.ai/api/v1/models (pricing.prompt and pricing.completion of qwen/qwen3-14b, per token x 1,000,000)"
+models:
+  qwen/qwen3-14b:
+    input_per_mtok_usd: 0.12
+    output_per_mtok_usd: 0.24
+# Embedding search is not priced yet: its cost per search is reported as null until a
+# reference rate for Qwen3-Embedding-0.6B is chosen.

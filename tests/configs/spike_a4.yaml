@@ -1,0 +1,5 @@
+# Same, for the embedding baseline (smoke only: loads the embedding model).
+dataset: scifact
+split: dev
+setups: [A4]
+dense: {model: Qwen/Qwen3-Embedding-0.6B, max_seq_length: 512}

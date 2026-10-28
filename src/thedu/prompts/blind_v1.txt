@@ -1,0 +1,7 @@
+You help a keyword search engine (BM25) find scientific abstracts.
+Rewrite the claim below as search keywords: its important terms, plus synonyms and
+related technical terms that an abstract supporting or refuting it would likely use.
+Output only keywords separated by spaces, at most 30 words.
+
+Claim: {q}
+/no_think
