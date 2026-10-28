@@ -402,3 +402,11 @@ Why it matters: A reranker is a standard RAG stage, so the fair benchmark for a 
 Evidence: configs/rerank_a4_*.yaml; runs/analysis/recall50-{scifact,nfcorpus,fiqa}.json (`thedu analyze recall50`)
 Next: Report when the three runs finish; `thedu analyze paired` for the primary tests.
 Post: yes
+
+## 2026-10-28 · decision · Budget raised to $25; LLM listwise reranker proposed (no call made)
+Who: human + Claude
+What: configs/budget.yaml total_usd 10 to 25 (recorded spend so far $0.16). Proposal in docs/llm_rerank.md: `qwen/qwen3.5-397b-a17b` pinned to DeepInfra (fp8), $0.45 per 1M input and $3.00 per 1M output, from OpenRouter's endpoints list read 2026-10-28 (https://openrouter.ai/api/v1/models/qwen/qwen3.5-397b-a17b/endpoints); no Qwen model sits at $1 per million input, the neighbours being this one ($0.45) and `qwen/qwen3.7-max` ($1.475, Alibaba, precision unknown). Fixed 100-question sample per dataset (seed 7), top 50 of A0 and A3 reordered by one listwise prompt per question. Primary test per dataset: A3+L minus A3+R, paired range above zero. Expectation written before any call: a gain of at least 0.02 over bge on SciFact or NFCorpus, small on FiQA; within +-0.01 everywhere would mean the candidates, not the judge, are the limit. Estimated cost about $2.5 (reasoning off), up to about $9 if reasoning cannot be switched off.
+Why it matters: Tests directly whether judge quality is the bottleneck that Phase A and the depth check point to.
+Evidence: docs/llm_rerank.md; OpenRouter endpoints listing
+Next: Human approves the model and the first (1-call) smoke test; then build and run.
+Post: maybe
