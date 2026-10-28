@@ -1,0 +1,15 @@
+[project]
+name = "thedu"
+version = "0.0.1"
+description = "Query-time LLM rewriting over BM25 vs embeddings: a research experiment"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "Apache-2.0" }
+dependencies = [
+    "bm25s>=0.2",
+    "PyStemmer>=2.2",
+    "numpy>=1.26",
+    "python-dotenv>=1.0",
+    "openai>=1.40",
+    "sentence-transformers>=3.0",
+]

@@ -1,0 +1,21 @@
+# secrets
+.env
+.env.*
+
+# data and model outputs (downloaded or regenerated)
+data/
+runs/
+*.npy
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# os / editors
+.DS_Store
+.vscode/
+.idea/
