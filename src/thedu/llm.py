@@ -131,6 +131,8 @@ class Gateway:
         parts = [c.model, c.temperature, c.seed, c.max_tokens, prompt, attempt]
         if c.provider:  # pinned calls never reuse unpinned answers; unpinned keys stay as they were
             parts.append(c.provider.model_dump())
+        if c.reasoning is not None:
+            parts.append({"reasoning": c.reasoning})
         key = hashlib.sha256(json.dumps(parts).encode()).hexdigest()
         with self._lock:
             if key in self._cache:
@@ -193,8 +195,12 @@ class Gateway:
             self._checked = True
 
     def _routing(self) -> dict:
-        p = self.cfg.provider
-        return {"extra_body": {"provider": {"order": p.order, "allow_fallbacks": p.allow_fallbacks}}} if p else {}
+        p, body = self.cfg.provider, {}
+        if p:
+            body["provider"] = {"order": p.order, "allow_fallbacks": p.allow_fallbacks}
+        if self.cfg.reasoning is not None:
+            body["reasoning"] = {"enabled": self.cfg.reasoning}
+        return {"extra_body": body} if body else {}
 
     def _request(self, key: str, prompt: str) -> Result:
         c = self.cfg
@@ -217,8 +223,10 @@ class Gateway:
             provider = (getattr(r, "model_extra", None) or {}).get("provider") or getattr(r, "provider", None)
             if c.provider and provider and provider.lower() not in {x.lower() for x in c.provider.order}:
                 raise GatewayError(f"pinned to {c.provider.order} but the call was served by {provider!r}")
+            details = getattr(getattr(r, "usage", None), "completion_tokens_details", None)
             entry = {"key": key, "model": c.model, "provider": provider, "text": text, "tokens_in": tin,
-                     "tokens_out": tout, "cost_usd": cost, "latency_ms": latency,
+                     "tokens_out": tout, "reasoning_tokens": getattr(details, "reasoning_tokens", None),
+                     "cost_usd": cost, "latency_ms": latency,
                      "ts": time.strftime("%Y-%m-%dT%H:%M:%S")}
             with self._lock:
                 self._append(entry)

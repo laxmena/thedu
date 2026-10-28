@@ -1,6 +1,6 @@
 # Proposal: LLM listwise reranker on a fixed sample
 
-Status: PROPOSAL, pre-registered by commit. **No call has been made.** The first call waits for your OK. Question: does a
+Status: APPROVED 2026-10-28 (model, provider, one smoke-test call). The smoke test ran; the 600-call run starts after the A4+R runs finish. Question: does a
 better judge capture more of the headroom that the zero-shot bge cross-encoder left?
 
 ## Model and provider (prices read from OpenRouter on 2026-10-28)
@@ -13,15 +13,14 @@ better judge capture more of the headroom that the zero-shot bge cross-encoder l
   ($1.475 in, $4.425 out, Alibaba only, precision unknown). The 397B model is cheaper, open-weight and precision-labelled, so
   I propose it; the max model is the alternative if you want a flagship regardless of price.
 - **Reasoning:** the model can think before answering, which could multiply the output tokens. The plan switches reasoning
-  off through OpenRouter's `reasoning` option (a small gateway change, with a test). Whether it can be switched off on this
-  provider is checked with one 1-call smoke test, which is the only call before the sample run and needs your OK.
+  off through OpenRouter's `reasoning` option (a small gateway change, with a test). **Smoke test (2026-10-28):** one real SciFact question, 50 candidates: reasoning switched off (`reasoning_tokens` 0), served by DeepInfra, 8,408 input and 190 output tokens, $0.00435, 3.3 s, a valid ranking with no skipped or repeated ids. About $0.0044 per call times 600 calls is about $2.6.
 
 ## Design
 
 - **Sample:** 100 dev questions per dataset, `select_qids(queries, 100, seed 7)`, the same questions for every arm.
-- **Candidates:** the top 50 of A0 and of A3 (score-zero filler dropped), exactly as for bge. Passages cut to 100 words.
+- **Candidates:** the top 50 of A0 and of A3 (score-zero filler dropped), exactly as for bge. Passages cut to 100 words (a prompt is about 8,400 tokens, under the 10K ceiling).
 - **Prompt:** the question and the 50 numbered passages in retrieval order; the model returns the passage numbers from most
-  to least relevant, one line. Numbers it omits are appended in their original order; repeats are ignored. One call per
+  to least relevant, one line. Numbers it omits are appended in their original order; repeats and out-of-range numbers are ignored; each of these is counted and the counts are printed and saved per dataset (`listwise_fallbacks`: questions with a fallback, ids missing, repeated, invalid, failed calls). One call per
   question and candidate set, temperature 0, seed 7, max 1,000 output tokens. The reranked 50 sit above ranks 51-100.
 - **Arms on the sample:** A0+L and A3+L (LLM), against A0+R and A3+R (bge, from runs 8dbc179fa6 / d8fe5f9aff / 00fb868eaa),
   A4, A4+R and the top-50 perfect-rerank ceiling, all restricted to the same 100 questions.

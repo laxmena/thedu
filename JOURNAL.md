@@ -410,3 +410,11 @@ Why it matters: Tests directly whether judge quality is the bottleneck that Phas
 Evidence: docs/llm_rerank.md; OpenRouter endpoints listing
 Next: Human approves the model and the first (1-call) smoke test; then build and run.
 Post: maybe
+
+## 2026-10-28 · decision · LLM listwise reranker approved: qwen3.5-397b-a17b on DeepInfra (fp8); smoke test passed
+Who: human + Claude
+What: Approved by the human, with fallbacks off. Reasons: open weights, known precision (fp8), the same provider as the rewriter, and cheaper input (reranking is input-heavy; $0.45 per 1M input, $3.00 per 1M output, written to configs/pricing.yaml with the OpenRouter endpoints source read 2026-10-28). Additions from the human: each candidate cut to about 100 words so the prompt stays under about 10K tokens; if the ranking skips or repeats ids, the missing ones are appended in their original order and those fallbacks are counted per dataset in the report. Built: `llm.reasoning` option (sent to OpenRouter as `reasoning: {enabled: false}`, part of the cache key only when set), `ListwiseConfig`, setups A0L and A3L, `ListwiseReranker` (src/thedu/ranker/listwise.py, prompt listwise_v1), report fields `listwise_fallbacks`, `thedu analyze llm-rerank`. **Smoke test (one real call, SciFact sample question 1, 50 candidates):** served by DeepInfra, reasoning tokens 0 (reasoning switched off works), 8,408 input and 190 output tokens, $0.00435, 3.3 s, valid answer (no missing, repeated or invalid ids). Projected full cost: 600 calls x $0.00435 = about $2.6, not the worst case of about $9. The pre-registered tests in docs/llm_rerank.md are unchanged. The run waits for the A4+R runs to finish.
+Why it matters: The cost question the human asked about (can reasoning be switched off on DeepInfra) is answered with a measurement: yes, and a call costs under half a cent.
+Evidence: docs/llm_rerank.md; configs/llm_rerank_{scifact,nfcorpus,fiqa}.yaml; tests/test_listwise.py; runs/cache/llm.jsonl (the smoke call)
+Next: Run the three sample configs after A4+R finishes; `thedu analyze llm-rerank` for the primary test.
+Post: maybe

@@ -20,6 +20,7 @@ from thedu.paths import CONFIGS_DIR, ROOT, SPIKE_DIR, runs_dir
 from thedu.planner import BlindPlanner, GroundedPlanner
 from thedu.pricing import load_pricing, load_rerank_pricing
 from thedu.ranker import RrfRanker, drop_zero_scores
+from thedu.ranker.listwise import ListwiseReranker
 from thedu.ranker.rerank import CrossEncoderReranker
 from thedu.registry import RunDir
 from thedu.report import summarize
@@ -28,11 +29,12 @@ from thedu.tokens import estimate_tokens
 
 log = logging.getLogger(__name__)
 
-ORDER = ["A0", "A4", "A2", "A3", "H0", "A5", "A0R", "A3R", "A4R"]
+ORDER = ["A0", "A4", "A2", "A3", "H0", "A5", "A0R", "A3R", "A4R", "A0L", "A3L"]
 # What each setup is built from. H0 and A5 fuse two components with the ranker.
 DEPS = {"A0": ("A0",), "A4": ("A4",), "A2": ("A2",), "A3": ("A3",), "H0": ("A0", "A4"), "A5": ("A3", "A4"),
-        "A0R": ("A0",), "A3R": ("A3",), "A4R": ("A4",)}
+        "A0R": ("A0",), "A3R": ("A3",), "A4R": ("A4",), "A0L": ("A0",), "A3L": ("A3",)}
 RERANKED = {"A0R", "A3R", "A4R"}  # one component, its top reordered by the cross-encoder
+LISTWISE = {"A0L", "A3L"}  # one component, its top reordered by an LLM
 BM25_BASED = {"A0", "A2", "A3"}  # lists whose zero-score filler is dropped before fusion
 PROBE_QUESTIONS = 30
 PROBE_ATTEMPT = 9  # a salt that skips both caches, so the probe measures real calls
@@ -57,24 +59,29 @@ def fuse(ranker: RrfRanker, named_lists: dict[str, list[tuple[str, float]]], que
     return ranker.rank(lists, question)
 
 
-def make_gateway(cfg: RunConfig, offline: bool = False) -> tuple[Gateway, dict[str, float]]:
+def make_gateway(cfg: RunConfig, offline: bool = False, llm=None) -> tuple[Gateway, dict[str, float]]:
+    """The gateway for the rewrite model, or for `llm` (the listwise judge) with the same cache and budget."""
+    llm = llm or cfg.llm
     pricing = load_pricing(cfg.pricing)
-    rate = pricing.rate(cfg.llm.model)
+    rate = pricing.rate(llm.model)
     budget = yaml.safe_load((CONFIGS_DIR / "budget.yaml").read_text())["total_usd"]
     main_cache = ROOT / "runs" / "cache" / "llm.jsonl"
-    cache = ROOT / cfg.llm.cache_file
+    cache = ROOT / llm.cache_file
     elsewhere = 0.0
     if cache != main_cache and main_cache.exists():  # a separate cache still counts against the one budget
         elsewhere = sum(json.loads(ln).get("cost_usd") or 0.0 for ln in main_cache.read_text().splitlines() if ln.strip())
     gw = Gateway(
-        cfg.llm, rate, cache_path=cache, spent_elsewhere_usd=elsewhere,
+        llm, rate, cache_path=cache, spent_elsewhere_usd=elsewhere,
         legacy_path=SPIKE_DIR / "rewrites.json" if cfg.planner.use_spike_cache else None,
         offline=offline, budget_usd=budget,
-        estimator=estimate_tokens if cfg.planner.use_spike_cache else None,  # spike-cache calls have no token split
+        estimator=estimate_tokens if cfg.planner.use_spike_cache and llm is cfg.llm else None,  # spike-cache calls have no token split
     )
     rates = {"input": rate.input_per_mtok_usd, "output": rate.output_per_mtok_usd}
-    if cfg.uses_rerank():
+    if cfg.uses_rerank() and llm is cfg.llm:
         rates["rerank"] = load_rerank_pricing().price_per_mtok_usd
+    if cfg.listwise and llm is cfg.llm:
+        lr = pricing.rate(cfg.listwise.llm.model)
+        rates["listwise_input"], rates["listwise_output"] = lr.input_per_mtok_usd, lr.output_per_mtok_usd
     return gw, rates
 
 
@@ -120,7 +127,13 @@ def execute(cfg: RunConfig, docs: dict[str, str], queries: dict[str, str], qrels
     grounded = GroundedPlanner(gateway, cfg.planner, docs, cfg.dataset) if {"A3", "A5", "A3R"} & set(setups) else None
     ranker = RrfRanker(cfg.ranker.rrf_k, cfg.ranker.depth)
     reranker = CrossEncoderReranker(docs, cfg.rerank.model, cfg.rerank.depth, cfg.rerank.max_length) \
-        if cfg.uses_rerank() else None
+        if any(x in RERANKED for x in setups) else None
+    listwise = None
+    if any(x in LISTWISE for x in setups):
+        if cfg.listwise is None:
+            raise ValueError("the A0L and A3L setups need a `listwise:` section in the config")
+        lgw, _ = make_gateway(cfg, offline, cfg.listwise.llm)
+        listwise = ListwiseReranker(docs, lgw, cfg.rerank.depth, cfg.listwise.words, cfg.listwise.prompt)
 
     def timed_search(text: str):
         t0 = time.perf_counter()
@@ -158,8 +171,12 @@ def execute(cfg: RunConfig, docs: dict[str, str], queries: dict[str, str], qrels
 
         for s in todo[qid]:
             parts = [comp(d) for d in DEPS[s]]
-            rank_ms, rerank_tokens = 0.0, 0
-            if s in RERANKED:
+            rank_ms, rerank_tokens, lw_stats, lw_usage = 0.0, 0, None, Usage()
+            if s in LISTWISE:
+                t0 = time.perf_counter()
+                hits, lw_usage, lw_stats = listwise.rerank(parts[0].hits, queries[qid])
+                rank_ms = (time.perf_counter() - t0) * 1000
+            elif s in RERANKED:
                 t0 = time.perf_counter()
                 hits, rerank_tokens = reranker.rerank(parts[0].hits, queries[qid])
                 rank_ms = (time.perf_counter() - t0) * 1000
@@ -169,7 +186,7 @@ def execute(cfg: RunConfig, docs: dict[str, str], queries: dict[str, str], qrels
                 t0 = time.perf_counter()
                 hits = fuse(ranker, {d: c.hits for d, c in zip(DEPS[s], parts)}, queries[qid])
                 rank_ms = (time.perf_counter() - t0) * 1000
-            usage = Usage.combine([c.usage for c in parts])
+            usage = Usage.combine([c.usage for c in parts] + [lw_usage])
             run.append(s, qid, hits, {
                 **question_scores(hits, qrels[qid]),
                 "llm_calls": usage.calls, "tokens_in": usage.tokens_in, "tokens_out": usage.tokens_out,
@@ -179,6 +196,9 @@ def execute(cfg: RunConfig, docs: dict[str, str], queries: dict[str, str], qrels
                 "parts": {d: {"retrieval_ms": c.retrieval_ms, "llm_ms": c.usage.llm_ms, "untimed": c.usage.untimed_calls}
                           for d, c in zip(DEPS[s], parts)},
                 "rank_ms": rank_ms,
+                "listwise": None if lw_stats is None else {"missing": lw_stats.missing, "repeated": lw_stats.repeated,
+                                                           "invalid": lw_stats.invalid, "failed": lw_stats.failed,
+                                                           "fallback": lw_stats.fallback},
                 "rerank_tokens": rerank_tokens,
                 "rerank_cost_usd": rerank_tokens * rates.get("rerank", 0.0) / 1e6,
                 "fallback": any(c.fallback for c in parts),

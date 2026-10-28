@@ -75,6 +75,11 @@ def dev(
         typer.echo(f"{s:<6}{nd['mean']:>9.4f}  [{nd['lo']:.4f}, {nd['hi']:.4f}]{rc['mean']:>10.4f}{flag}{cost:>14}{rr:>17}{lat:>17}")
     if soft:
         typer.echo("* soft: many questions match fewer than 100 documents, so the rest of this BM25 top 100 is arbitrary filler.")
+    for s_, v in m["setups"].items():
+        if "listwise_fallbacks" in v:
+            f = v["listwise_fallbacks"]
+            typer.echo(f"  {s_} listwise fallbacks: {f['questions_with_fallback']} of {f['questions']} questions "
+                       f"(missing ids {f['ids_missing']}, repeated {f['ids_repeated']}, invalid {f['ids_invalid']}, failed calls {f['failed_calls']})")
     if any(v["llm_cost_is_estimate"] for v in m["setups"].values()):
         typer.echo("~ estimated offline from cached rewrites (hidden thinking tokens not counted).")
     typer.echo("\nPaired nDCG@10 difference (second minus first, same questions, 95% range):")
@@ -436,3 +441,46 @@ def analyze_paired(a: str = typer.Option(..., help="RUN:SETUP, the base, e.g. 00
         OUT.mkdir(parents=True, exist_ok=True)
         (OUT / f"paired-{label}.json").write_text(json.dumps(res, indent=2))
     typer.echo(f"{b} minus {a}, {len(qids)} questions: {p.mean:+.4f} [{p.lo:+.4f}, {p.hi:+.4f}] wins {p.wins}, losses {p.losses}")
+
+
+@analyze_app.command("llm-rerank")
+def analyze_llm_rerank(dataset: str = typer.Option(...), sample_run: str = typer.Option(..., help="The 100-question run with A0, A3, A4, A0L, A3L."),
+                       bge_run: str = typer.Option(..., help="The full run with A0R and A3R."),
+                       a4r_run: str = typer.Option(..., help="The full run with A4R.")) -> None:
+    """LLM vs bge reranking on the fixed sample: nDCG@10, headroom captured, paired tests. Retrieves nothing."""
+    import json
+
+    import numpy as np
+
+    from thedu import data
+    from thedu.analysis.diagnosis import ceiling_top, read_trec
+    from thedu.analysis.steps import OUT, load_rows
+    from thedu.judge import paired_difference
+    from thedu.paths import ROOT
+
+    _, _, qrels = data.load(dataset, "dev")
+    s, b, c = load_rows(sample_run), load_rows(bge_run), load_rows(a4r_run)
+    qids = sorted(s["A0"])
+    arm = {n: np.array([s[n][q]["ndcg10"] for q in qids]) for n in ("A0", "A3", "A4", "A0L", "A3L")}
+    arm["A0R"], arm["A3R"] = (np.array([b[n][q]["ndcg10"] for q in qids]) for n in ("A0R", "A3R"))
+    arm["A4R"] = np.array([c["A4R"][q]["ndcg10"] for q in qids])
+    ceil = {n: float(np.mean([ceiling_top(read_trec(ROOT / "runs" / sample_run / f"{n}.trec")[q], qrels[q]) for q in qids])) for n in ("A0", "A3")}
+    out: dict = {"dataset": dataset, "n": len(qids), "ndcg10": {k: float(v.mean()) for k, v in arm.items()}, "ceiling_top50": ceil,
+                 "headroom_captured": {}, "paired": {}}
+    for base in ("A0", "A3"):
+        for kind in ("R", "L"):
+            n = f"{base}{kind}"
+            out["headroom_captured"][n] = float((arm[n].mean() - arm[base].mean()) / (ceil[base] - arm[base].mean()))
+    def pair(x: str, y: str, role: str) -> None:
+        p = paired_difference(arm[x], arm[y])
+        out["paired"][f"{y} vs {x}"] = {"diff": p.mean, "lo": p.lo, "hi": p.hi, "wins": p.wins, "losses": p.losses, "role": role}
+    pair("A3R", "A3L", "primary")
+    for x, y in (("A0R", "A0L"), ("A4R", "A3L"), ("A4R", "A0L"), ("A4", "A3L"), ("A4", "A0L"), ("A3", "A3L")):
+        pair(x, y, "secondary")
+    OUT.mkdir(parents=True, exist_ok=True)
+    (OUT / f"llm-rerank-{dataset}.json").write_text(json.dumps(out, indent=2))
+    typer.echo(f"{dataset}: {len(qids)} sample questions   nDCG@10: " + "  ".join(f"{k} {v:.4f}" for k, v in out["ndcg10"].items()))
+    typer.echo(f"  top-50 ceiling: A0 {ceil['A0']:.4f}  A3 {ceil['A3']:.4f}   headroom captured: " +
+               "  ".join(f"{k} {v:.0%}" for k, v in out["headroom_captured"].items()))
+    for k, p in out["paired"].items():
+        typer.echo(f"  {k}: {p['diff']:+.4f} [{p['lo']:+.4f}, {p['hi']:+.4f}] wins {p['wins']}, losses {p['losses']}  [{p['role']}]")

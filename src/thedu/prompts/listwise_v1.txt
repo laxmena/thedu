@@ -1,0 +1,8 @@
+I will give you a question and {n} numbered passages. Rank the passages from most to least useful for answering the question.
+
+Answer with the passage numbers only, from most useful to least useful, separated by " > ", for example: 3 > 1 > 2. Include every number from 1 to {n} exactly once. Do not explain.
+
+Question: {q}
+
+Passages:
+{passages}

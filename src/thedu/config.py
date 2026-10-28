@@ -12,8 +12,8 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from thedu.prompts import load_prompt
 
-Setup = Literal["A0", "A2", "A3", "A4", "H0", "A5", "A0R", "A3R", "A4R"]
-# H0 = RRF(A0, A4); A5 = RRF(A3, A4); xR = the top of x reordered by a cross-encoder
+Setup = Literal["A0", "A2", "A3", "A4", "H0", "A5", "A0R", "A3R", "A4R", "A0L", "A3L"]
+# H0 = RRF(A0, A4); A5 = RRF(A3, A4); xR = the top of x reordered by a cross-encoder; xL = by an LLM (listwise)
 
 
 # The instruction MTEB gives Qwen3-Embedding for each dataset's queries. SciFact and NFCorpus: sources in
@@ -73,6 +73,7 @@ class LLMConfig(_Frozen):
     workers: int = 16  # parallel calls; does not change results, so not part of the hash
     cache_file: str = "runs/cache/llm.jsonl"  # where responses are kept; not part of the hash
     provider: ProviderConfig | None = None  # None: whoever OpenRouter picks (what the spike cache used)
+    reasoning: bool | None = None  # None: not sent; False: ask OpenRouter to switch the model's thinking off
 
 
 class PlannerConfig(_Frozen):
@@ -96,6 +97,12 @@ class RerankConfig(_Frozen):
     max_length: int = Field(512, ge=1)  # query + document tokens per pair
 
 
+class ListwiseConfig(_Frozen):
+    llm: LLMConfig  # the judge model (not the rewriter)
+    words: int = Field(100, ge=1)  # each candidate is cut to this many words
+    prompt: Literal["listwise_v1"] = "listwise_v1"
+
+
 class RunConfig(_Frozen):
     dataset: Literal["scifact", "nfcorpus", "fiqa"]
     split: Literal["dev", "test"] = "dev"  # `thedu dev` refuses "test"; only `thedu parity` runs it
@@ -108,7 +115,8 @@ class RunConfig(_Frozen):
     llm: LLMConfig = LLMConfig()
     planner: PlannerConfig = PlannerConfig()
     ranker: RankerConfig = RankerConfig()
-    rerank: RerankConfig = RerankConfig()  # used only by the xR setups; left out of the hash otherwise
+    rerank: RerankConfig = RerankConfig()  # candidate depth (and the cross-encoder for xR); left out of the hash if unused
+    listwise: ListwiseConfig | None = None  # required by the xL setups
     pricing: str = "configs/pricing.yaml"
 
     def prompt_texts(self) -> dict[str, str]:
@@ -120,15 +128,23 @@ class RunConfig(_Frozen):
         return {n: load_prompt(n) for n in names}
 
     def uses_rerank(self) -> bool:
-        return any(s.endswith("R") for s in self.setups)
+        return any(x.endswith(("R", "L")) for x in self.setups)
+
+    def uses_listwise(self) -> bool:
+        return any(x.endswith("L") for x in self.setups)
 
     def hash(self, rates: dict[str, float] | None = None) -> str:
-        exclude: dict = {"llm": {"workers", "cache_file"}, "pricing": True}
+        llm_ex = {"workers", "cache_file"} | ({"reasoning"} if self.llm.reasoning is None else set())
+        exclude: dict = {"llm": llm_ex, "pricing": True}
         if not self.uses_rerank():
             exclude["rerank"] = True  # keeps the hashes of runs made before reranking existed
+        if self.listwise is None:
+            exclude["listwise"] = True
+        else:
+            exclude["listwise"] = {"llm": {"workers", "cache_file"} | ({"reasoning"} if self.listwise.llm.reasoning is None else set())}
         payload = {
             "config": self.model_dump(exclude=exclude),
-            "prompts": self.prompt_texts(),
+            "prompts": {**self.prompt_texts(), **({self.listwise.prompt: load_prompt(self.listwise.prompt)} if self.listwise else {})},
             "rates": rates or {},
         }
         blob = json.dumps(payload, sort_keys=True, ensure_ascii=False)

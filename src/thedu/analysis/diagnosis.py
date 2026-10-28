@@ -103,3 +103,9 @@ def recall_at(rankings: dict[str, Ranking], qrels: dict[str, dict[str, int]], qi
     for v in out.values():
         del v["values"]
     return out
+
+
+def ceiling_top(hits: list[tuple[str, float]], rels: dict[str, int], depth: int = 50) -> float:
+    """nDCG@10 if the top `depth` candidates (score-zero filler dropped) were ordered by the answer key."""
+    cands = [d for d, s in hits if s > 0]
+    return ndcg_at_k(sorted(cands[:depth], key=lambda d: -rels.get(d, 0)) + cands[depth:], rels)

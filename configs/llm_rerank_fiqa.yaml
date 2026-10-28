@@ -1,0 +1,28 @@
+# LLM listwise reranking on a fixed 100-question sample of fiqa dev (docs/llm_rerank.md; JOURNAL.md 2026-10-28).
+# Rewrites (A3) come from the pinned-provider cache; the judge is qwen3.5-397b-a17b on DeepInfra, reasoning off.
+dataset: fiqa
+split: dev
+n: 100
+seed: 7
+setups: [A0, A3, A4, A0L, A3L]
+bm25: {k1: 0.9, b: 0.4}
+dense: {model: Qwen/Qwen3-Embedding-0.6B, max_seq_length: 512}
+llm:
+  model: qwen/qwen3-14b
+  temperature: 0.0
+  seed: 7
+  max_tokens: 300
+  provider: {order: [DeepInfra], allow_fallbacks: false}
+planner: {grounded_prompt: grounded_v1, query_repeat: 3, feedback_k: 5, use_spike_cache: false}
+ranker: {rrf_k: 60, depth: 100}
+rerank: {depth: 50}
+listwise:
+  words: 100
+  prompt: listwise_v1
+  llm:
+    model: qwen/qwen3.5-397b-a17b
+    temperature: 0.0
+    seed: 7
+    max_tokens: 1000
+    provider: {order: [DeepInfra], allow_fallbacks: false}
+    reasoning: false

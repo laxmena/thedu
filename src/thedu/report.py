@@ -8,8 +8,9 @@ from thedu.judge import bootstrap_interval, cost_per_search, paired_difference, 
 
 # (base, other): "other vs base" is other minus base, question by question.
 PAIRS = [("H0", "A5"), ("A4", "A5"), ("A4", "H0"), ("A3", "A5"),
-         ("A4", "A3R"), ("A4", "A0R"), ("A3", "A3R"), ("A0R", "A3R"), ("A4", "A4R")]
-PRIMARY = {"A3R vs A4"}  # pre-registered (JOURNAL.md, 2026-10-28); every other comparison involving a reranker is secondary
+         ("A4", "A3R"), ("A4", "A0R"), ("A3", "A3R"), ("A0R", "A3R"), ("A4", "A4R"),
+         ("A0R", "A0L"), ("A3R", "A3L"), ("A4", "A3L"), ("A4", "A0L"), ("A4R", "A3L"), ("A4R", "A0L"), ("A3", "A3L")]
+PRIMARY = {"A3R vs A4", "A3L vs A3R"}  # pre-registered (JOURNAL.md, 2026-10-28); every other comparison involving a reranker is secondary
 USES_EMBEDDINGS = {"A4", "H0", "A5", "A4R"}  # embedding search has no reference price yet
 UNFUSED_BM25 = {"A0", "A2", "A3"}  # their top 100 can hold zero-score filler; fused lists have it removed
 
@@ -69,6 +70,12 @@ def summarize(rows: dict[tuple[str, str], dict], setups: list[str], qids: list[s
             "estimated_calls": estimated,
             "fallbacks": sum(r["fallback"] for r in rs),
         }
+        lw = [r["listwise"] for r in rs if r.get("listwise")]
+        if lw:  # the model skipped, repeated or invented ids; the missing ones were appended in their original order
+            out["setups"][s]["listwise_fallbacks"] = {
+                "questions_with_fallback": sum(x["fallback"] for x in lw), "questions": len(lw),
+                "ids_missing": sum(x["missing"] for x in lw), "ids_repeated": sum(x["repeated"] for x in lw),
+                "ids_invalid": sum(x["invalid"] for x in lw), "failed_calls": sum(x["failed"] for x in lw)}
     rel_par, rel_seq = relative_latency(par_ms), relative_latency(seq_ms)
     for s in setups:
         out["setups"][s]["latency_relative_to_A0"] = (
@@ -78,7 +85,7 @@ def summarize(rows: dict[tuple[str, str], dict], setups: list[str], qids: list[s
         p = paired_difference(col(base, "ndcg10"), col(other, "ndcg10"))
         name = f"{other} vs {base}"
         out["paired"][name] = {"ndcg10_diff": p.mean, "lo": p.lo, "hi": p.hi, "wins": p.wins, "losses": p.losses}
-        if other.endswith("R") or base.endswith("R"):
+        if other.endswith(("R", "L")) or base.endswith(("R", "L")):
             out["paired"][name]["role"] = "primary" if name in PRIMARY else "secondary"
 
     if "A0" in setups:
