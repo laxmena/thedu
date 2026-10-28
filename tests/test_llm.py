@@ -109,3 +109,19 @@ def test_the_serving_provider_is_recorded_in_the_cache_and_on_replay(tmp_path):
 def test_spend_in_another_cache_counts_against_the_budget(tmp_path):
     with pytest.raises(GatewayError, match="budget"):
         gw(tmp_path, budget_usd=1.0, spent_elsewhere_usd=1.0).call("p")
+
+
+def test_provider_pin_is_sent_keyed_and_enforced(tmp_path):
+    from thedu.config import ProviderConfig
+
+    pinned = LLMConfig(provider=ProviderConfig(order=["DeepInfra"]))
+    g = Gateway(pinned, RATE, tmp_path / "pinned.jsonl", client=FakeClient())
+    assert g.call("p").provider == "DeepInfra"
+    assert g.client.last["extra_body"] == {"provider": {"order": ["DeepInfra"], "allow_fallbacks": False}}
+    unpinned = gw(tmp_path)
+    unpinned.call("p")
+    assert "extra_body" not in unpinned.client.last
+    assert next(iter(g._cache)) != next(iter(unpinned._cache))  # a pinned answer is never an unpinned one
+    wrong = Gateway(LLMConfig(provider=ProviderConfig(order=["NextBit"])), RATE, tmp_path / "w.jsonl", client=FakeClient())
+    with pytest.raises(GatewayError, match="served by 'DeepInfra'"):
+        wrong.call("p")

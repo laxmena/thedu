@@ -95,3 +95,11 @@ def test_exploration_is_scifact_only():
 
     with pytest.raises(ValueError, match="SciFact only"):
         explore("anything", dataset="nfcorpus")
+
+
+def test_router_config_is_frozen_and_says_what_was_pre_registered():
+    from thedu.analysis.steps import load_frozen_rules
+
+    r = load_frozen_rules("configs/router.yaml")
+    assert (r["feature"], r["op"], r["threshold"], r["free"], r["paid"]) == ("mean_idf_norm", ">=", 0.448, "A4", "A5")
+    assert r["criterion"]["paired_vs_free_lower_bound_above"] == 0.0

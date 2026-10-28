@@ -1,0 +1,15 @@
+# Pre-registered router for a clean test on FiQA (written and frozen before any FiQA result was looked at).
+# Fire the paid option (A5: rewrite fused with embeddings) when the rule is true; otherwise use A4 (embeddings only).
+# The feature was chosen after R2 held on NFCorpus (see JOURNAL.md), and the threshold was fit on SciFact only.
+feature: mean_idf_norm    # mean IDF of the question's terms / the collection's maximum possible IDF
+op: ">="
+threshold: 0.448          # the value that is frozen
+fit_value_on_scifact: 0.44847520450042516   # what the SciFact fit gave; rounded down to 0.448 by decision
+free: A4
+paid: A5
+criterion:
+  # SUCCESS: the 95% range of (router nDCG@10 minus A4 nDCG@10), paired per question, is above this.
+  paired_vs_free_lower_bound_above: 0.0
+# Reported with the verdict, but not part of it: router vs H0 and vs A5, the share of questions that call the LLM,
+# and the rewrite cost per search. If the rule fires on no question, router = A4, the difference is exactly 0,
+# and the criterion FAILS by definition; if it fires on every question, router = A5 and the test is A5 vs A4.

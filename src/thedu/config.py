@@ -53,6 +53,14 @@ class DenseConfig(_Frozen):
     query_instruction: str = "task"
 
 
+class ProviderConfig(_Frozen):
+    """OpenRouter routing: which provider may serve the call. With allow_fallbacks False, a provider that is down
+    makes the call fail loudly instead of being served by a different one."""
+
+    order: list[str]
+    allow_fallbacks: bool = False
+
+
 class LLMConfig(_Frozen):
     model: str = "qwen/qwen3-14b"
     base_url: str = "https://openrouter.ai/api/v1"
@@ -62,6 +70,7 @@ class LLMConfig(_Frozen):
     max_tokens: int = 300
     workers: int = 16  # parallel calls; does not change results, so not part of the hash
     cache_file: str = "runs/cache/llm.jsonl"  # where responses are kept; not part of the hash
+    provider: ProviderConfig | None = None  # None: whoever OpenRouter picks (what the spike cache used)
 
 
 class PlannerConfig(_Frozen):

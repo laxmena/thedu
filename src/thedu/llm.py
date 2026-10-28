@@ -128,9 +128,10 @@ class Gateway:
         entries by "<model>::<question-derived key>" and recorded text but no tokens.
         """
         c = self.cfg
-        key = hashlib.sha256(
-            json.dumps([c.model, c.temperature, c.seed, c.max_tokens, prompt, attempt]).encode()
-        ).hexdigest()
+        parts = [c.model, c.temperature, c.seed, c.max_tokens, prompt, attempt]
+        if c.provider:  # pinned calls never reuse unpinned answers; unpinned keys stay as they were
+            parts.append(c.provider.model_dump())
+        key = hashlib.sha256(json.dumps(parts).encode()).hexdigest()
         with self._lock:
             if key in self._cache:
                 e = self._cache[key]
@@ -177,11 +178,12 @@ class Gateway:
 
             try:
                 self.client.chat.completions.create(
-                    model=self.cfg.model, max_tokens=5, messages=[{"role": "user", "content": "ok"}]
-                )
+                    model=self.cfg.model, max_tokens=5, messages=[{"role": "user", "content": "ok"}],
+                    **self._routing())
             except NotFoundError as e:
+                pinned = f" served by {self.cfg.provider.order}" if self.cfg.provider else ""
                 raise GatewayError(
-                    f"model {self.cfg.model!r} was not found at {self.cfg.base_url}. "
+                    f"model {self.cfg.model!r}{pinned} was not found at {self.cfg.base_url}. "
                     "List the models with: curl -s https://openrouter.ai/api/v1/models"
                 ) from e
             except (AuthenticationError, PermissionDeniedError) as e:
@@ -190,6 +192,10 @@ class Gateway:
                 ) from e
             self._checked = True
 
+    def _routing(self) -> dict:
+        p = self.cfg.provider
+        return {"extra_body": {"provider": {"order": p.order, "allow_fallbacks": p.allow_fallbacks}}} if p else {}
+
     def _request(self, key: str, prompt: str) -> Result:
         c = self.cfg
         for attempt in range(3):
@@ -197,7 +203,7 @@ class Gateway:
             try:
                 r = self.client.chat.completions.create(
                     model=c.model, temperature=c.temperature, seed=c.seed, max_tokens=c.max_tokens,
-                    messages=[{"role": "user", "content": prompt}],
+                    messages=[{"role": "user", "content": prompt}], **self._routing(),
                 )
             except Exception as e:  # noqa: BLE001 - retry any provider error, then report a failed call
                 log.warning("llm call failed (try %d/3): %s: %s", attempt + 1, type(e).__name__, str(e)[:120])
@@ -209,6 +215,8 @@ class Gateway:
             tout = r.usage.completion_tokens if r.usage else 0
             cost = call_cost(tin, tout, self.rate.input_per_mtok_usd, self.rate.output_per_mtok_usd)
             provider = (getattr(r, "model_extra", None) or {}).get("provider") or getattr(r, "provider", None)
+            if c.provider and provider and provider.lower() not in {x.lower() for x in c.provider.order}:
+                raise GatewayError(f"pinned to {c.provider.order} but the call was served by {provider!r}")
             entry = {"key": key, "model": c.model, "provider": provider, "text": text, "tokens_in": tin,
                      "tokens_out": tout, "cost_usd": cost, "latency_ms": latency,
                      "ts": time.strftime("%Y-%m-%dT%H:%M:%S")}

@@ -212,17 +212,18 @@ def analyze_stability(original: str = typer.Option(..., help="The SciFact M3 run
 
 
 @analyze_app.command("confirm")
-def analyze_confirm(run: str = typer.Option(..., help="The NFCorpus M3 run id."),
-                    rules: str = typer.Option("configs/m3b_rules.yaml")) -> None:
-    """Test the frozen rules, unchanged, on NFCorpus dev."""
+def analyze_confirm(run: str = typer.Option(..., help="The M3 run id of the dataset."),
+                    rules: str = typer.Option("configs/m3b_rules.yaml"),
+                    dataset: str = typer.Option("nfcorpus", help="nfcorpus (the pre-registered test) or fiqa (secondary).")) -> None:
+    """Test the frozen rules, unchanged, on a dev set."""
     from thedu.analysis.steps import confirm
 
     try:
-        r = confirm(run, rules)
+        r = confirm(run, rules, dataset)
     except RuntimeError as e:
         typer.echo(f"\n{e}", err=True)
         raise typer.Exit(1)
-    typer.echo(f"nfcorpus dev, {r['n']} questions. Labels: {r['label_counts']}")
+    typer.echo(f"{dataset} dev, {r['n']} questions. Labels: {r['label_counts']}")
     for name, v in r["rules"].items():
         e = v["a3_minus_a4_in_vs_out"]
         typer.echo(f"\n{name}: {v['rule']}   {'HELD' if v['held'] else 'did not hold'}")
@@ -252,3 +253,27 @@ def analyze_route(scifact_run: str = typer.Option(...), nfcorpus_run: str = type
                    f"LLM $/search {v['llm_cost_per_search_usd']:.6f}{'~' if v['llm_cost_is_estimate'] else ''}")
         for k, p in v["paired"].items():
             typer.echo(f"    {k}: {p['diff']:+.4f} [{p['lo']:+.4f}, {p['hi']:+.4f}] wins {p['wins']}, losses {p['losses']}")
+
+
+@analyze_app.command("router")
+def analyze_router(run: str = typer.Option(..., help="The M3-style run id with A3, A4, A5 and H0."),
+                   dataset: str = typer.Option(...), rules: str = typer.Option("configs/router.yaml")) -> None:
+    """Evaluate the frozen router (no fitting) on a dev set."""
+    from thedu.analysis.steps import router_eval
+
+    try:
+        r = router_eval(run, rules, dataset)
+    except RuntimeError as e:
+        typer.echo(f"\n{e}", err=True)
+        raise typer.Exit(1)
+    typer.echo(f"{dataset} dev, {r['n']} questions. Router: fire A5 when {r['rule']}, else A4")
+    typer.echo(f"nDCG@10  A4 {r['reference_mean_ndcg10']['A4']:.4f}  H0 {r['reference_mean_ndcg10']['H0']:.4f}  "
+               f"A5 {r['reference_mean_ndcg10']['A5']:.4f}  A3 {r['reference_mean_ndcg10']['A3']:.4f}  "
+               f"ceiling(A4,A5) {r['ceiling_best_of_A4_A5']:.4f}")
+    typer.echo(f"router   {_ci(r['router_ndcg10'])}; calls the LLM on {r['n_calling_llm']} questions ({r['share_calling_llm']:.0%}); "
+               f"rewrite $/search {r['llm_cost_per_search_usd']:.6f} vs A5 {r['a5_llm_cost_per_search_usd']:.6f}"
+               f"{' (estimated)' if r['llm_cost_is_estimate'] else ''}")
+    for k, p in r["paired"].items():
+        typer.echo(f"  router vs {k}: {p['diff']:+.4f} [{p['lo']:+.4f}, {p['hi']:+.4f}] wins {p['wins']}, losses {p['losses']}")
+    typer.echo(f"\n{'SUCCESS' if r['success'] else 'NOT MET'}: router minus A4, lower bound {r['paired']['A4']['lo']:+.4f} "
+               f"(needs > {r['criterion']['paired_vs_free_lower_bound_above']})")

@@ -16,7 +16,7 @@ from thedu import data
 from thedu.analysis.features import (POST_HOC, PRE_SEARCH, SCALE_FREE, CollectionStats, post_hoc_features,
                                      pre_search_features)
 from thedu.analysis.labels import LABELS, label
-from thedu.analysis.stats import (apply_stump, bucket, cross_validated_gain, fit_stump, group_effect,
+from thedu.analysis.stats import (apply_stump, bucket, condition, cross_validated_gain, fit_stump, group_effect,
                                   mean_interval, tercile_thresholds)
 from thedu.judge import paired_difference
 from thedu.paths import ROOT
@@ -225,4 +225,34 @@ def route(scifact_run: str, nfcorpus_run: str, dataset: str = "nfcorpus") -> dic
             "paired": {k: {"diff": p.mean, "lo": p.lo, "hi": p.hi, "wins": p.wins, "losses": p.losses} for k, p in comps.items()},
         }
     _save(f"route-{dataset}.json", out, {"scifact_run": scifact_run, "nfcorpus_run": nfcorpus_run})
+    return out
+
+
+# ---------- 5. the frozen router, evaluated (no fitting) ----------
+
+def router_eval(run: str, rules_path: str, dataset: str) -> dict:
+    spec = load_frozen_rules(rules_path)
+    table = question_table(dataset, run, post_hoc=False)
+    arr = {k: np.array([r[k] for r in table]) for k in ("a3", "a4", "a5", "h0")}
+    fire = condition(_col(table, spec["feature"]), spec["op"], spec["threshold"])
+    routed = np.where(fire, arr["a5"], arr["a4"])
+    metrics = json.loads((_run_dir(run) / "metrics.json").read_text())["setups"]
+    paid = metrics["A5"]["llm_cost_per_search_usd"]
+    paired = {k: paired_difference(arr[key], routed) for k, key in (("A4", "a4"), ("H0", "h0"), ("A5", "a5"))}
+    primary = paired["A4"]
+    out = {
+        "dataset": dataset, "n": len(table), "rule": f"{spec['feature']} {spec['op']} {spec['threshold']}",
+        "reference_mean_ndcg10": {"A3": float(arr["a3"].mean()), "A4": float(arr["a4"].mean()),
+                                  "H0": float(arr["h0"].mean()), "A5": float(arr["a5"].mean())},
+        "router_ndcg10": mean_interval(routed), "share_calling_llm": float(fire.mean()),
+        "n_calling_llm": int(fire.sum()),
+        "llm_cost_per_search_usd": None if paid is None else float(fire.mean() * paid),
+        "a5_llm_cost_per_search_usd": paid, "llm_cost_is_estimate": metrics["A5"]["llm_cost_is_estimate"],
+        "paired": {k: {"diff": p.mean, "lo": p.lo, "hi": p.hi, "wins": p.wins, "losses": p.losses} for k, p in paired.items()},
+        "ceiling_best_of_A4_A5": float(np.maximum(arr["a4"], arr["a5"]).mean()),
+        "criterion": spec["criterion"],
+        "success": bool(primary.lo > spec["criterion"]["paired_vs_free_lower_bound_above"]),
+    }
+    _save(f"router-frozen-{dataset}.json", out, {"run": run, "rules": rules_path,
+                                                 "rules_sha256": hashlib.sha256((ROOT / rules_path).read_bytes()).hexdigest()})
     return out
