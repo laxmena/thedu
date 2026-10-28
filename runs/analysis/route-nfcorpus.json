@@ -1,0 +1,102 @@
+{
+  "meta": {
+    "inputs": {
+      "scifact_run": "2a4eb7b8d0",
+      "nfcorpus_run": "f8a880adfa"
+    },
+    "git_commit": "efbc68d3294850c0601280d2eebd0d13d7a6ef0e",
+    "code_hash": "51c1a0bd5460"
+  },
+  "allowed_features": [
+    "mean_idf_norm"
+  ],
+  "fit_on": "scifact",
+  "evaluated_on": "nfcorpus",
+  "versions": {
+    "A4 vs A5 (main)": {
+      "stump_fit_on_scifact": {
+        "feature": "mean_idf_norm",
+        "op": ">=",
+        "threshold": 0.44847520450042516,
+        "total_gain": 13.993371109954843
+      },
+      "scifact_cv_mean_gain_vs_always_free": 0.016368366366598008,
+      "scifact_always_paid_mean_gain": -0.001137238828703068,
+      "scifact_share_fired": 0.449938195302843,
+      "nfcorpus_ndcg10": {
+        "mean": 0.35394411060632236,
+        "lo": 0.3197303145154635,
+        "hi": 0.38801967259947323
+      },
+      "nfcorpus_share_calling_llm": 0.6820987654320988,
+      "llm_cost_per_search_usd": 5.706185642432556e-05,
+      "llm_cost_is_estimate": true,
+      "paired": {
+        "vs A4": {
+          "diff": 0.01702728450732809,
+          "lo": 0.0015627227127220085,
+          "hi": 0.03151388635983601,
+          "wins": 99,
+          "losses": 62
+        },
+        "vs H0": {
+          "diff": 0.01754863267738719,
+          "lo": 0.006755794072881115,
+          "hi": 0.028083568773079867,
+          "wins": 124,
+          "losses": 82
+        },
+        "vs A5": {
+          "diff": 0.002514353508670065,
+          "lo": -0.004308270219889134,
+          "hi": 0.009738670028868565,
+          "wins": 35,
+          "losses": 31
+        }
+      }
+    },
+    "A4 vs A3": {
+      "stump_fit_on_scifact": {
+        "feature": "mean_idf_norm",
+        "op": ">=",
+        "threshold": 0.46856967474416045,
+        "total_gain": 4.600474535347947
+      },
+      "scifact_cv_mean_gain_vs_always_free": -0.002846738926813332,
+      "scifact_always_paid_mean_gain": -0.04940120953584941,
+      "scifact_share_fired": 0.34981458590852904,
+      "nfcorpus_ndcg10": {
+        "mean": 0.34007163645414107,
+        "lo": 0.3059938083519006,
+        "hi": 0.3731714047824936
+      },
+      "nfcorpus_share_calling_llm": 0.6388888888888888,
+      "llm_cost_per_search_usd": 5.344707818930041e-05,
+      "llm_cost_is_estimate": true,
+      "paired": {
+        "vs A4": {
+          "diff": 0.0031548103551467736,
+          "lo": -0.015577335146891039,
+          "hi": 0.020657881351049897,
+          "wins": 82,
+          "losses": 73
+        },
+        "vs A3": {
+          "diff": 0.017931790394152273,
+          "lo": 0.006928165366726631,
+          "hi": 0.03051903859207505,
+          "wins": 52,
+          "losses": 31
+        }
+      }
+    }
+  },
+  "reference_mean_ndcg10": {
+    "A4": 0.3369168260989943,
+    "H0": 0.3363954779289352,
+    "A5": 0.35142975709765234,
+    "A3": 0.3221398460599888
+  },
+  "ceiling_best_of_A4_A5": 0.389614564342013,
+  "ceiling_best_of_A3_A4": 0.39411253699519777
+}

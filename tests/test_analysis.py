@@ -80,3 +80,18 @@ def test_stump_finds_the_planted_rule_and_cross_validation_is_honest():
     pure_noise = rng.normal(0, 0.1, 500)  # no real rule: out-of-sample gain should not be clearly positive
     assert cross_validated_gain(feats, pure_noise, ["x", "noise"]) < 0.01
     assert apply_stump({"feature": None}, feats, 500).sum() == 0
+
+
+def test_confirm_refuses_rules_that_are_not_frozen():
+    from thedu.analysis.steps import load_frozen_rules
+
+    with pytest.raises(RuntimeError, match="frozen"):
+        load_frozen_rules("configs/champion.yaml")  # a real file, but not in the frozen manifest
+    assert load_frozen_rules("configs/m3b_rules.yaml")["rules"][0]["name"] == "R1"
+
+
+def test_exploration_is_scifact_only():
+    from thedu.analysis.steps import explore
+
+    with pytest.raises(ValueError, match="SciFact only"):
+        explore("anything", dataset="nfcorpus")

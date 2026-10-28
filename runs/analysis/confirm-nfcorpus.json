@@ -1,0 +1,97 @@
+{
+  "meta": {
+    "inputs": {
+      "run": "f8a880adfa",
+      "rules": "configs/m3b_rules.yaml",
+      "rules_sha256": "07e922c8ca93ca4b1ddd55e3eec7307156ef9aa535fb5d2d2d3715ebf6b30195"
+    },
+    "git_commit": "efbc68d3294850c0601280d2eebd0d13d7a6ef0e",
+    "code_hash": "51c1a0bd5460"
+  },
+  "dataset": "nfcorpus",
+  "n": 324,
+  "label_counts": {
+    "tie": 104,
+    "rewrite-wins": 70,
+    "embed-wins": 82,
+    "both-fail": 68
+  },
+  "criterion": {
+    "lower_bound_above": 0.0,
+    "min_group_share": 0.15
+  },
+  "rules": {
+    "R1": {
+      "rule": "gap_ratio >= 0.286",
+      "a3_minus_a4_in_vs_out": {
+        "n_group": 35,
+        "share": 0.10802469135802469,
+        "effect": 0.018928795361481565,
+        "lo": -0.05868005679280634,
+        "hi": 0.09939673766201643
+      },
+      "a5_minus_a4_in_vs_out": {
+        "n_group": 35,
+        "share": 0.10802469135802469,
+        "effect": -0.0062649675634907556,
+        "lo": -0.06438308705884617,
+        "hi": 0.05088404547782138
+      },
+      "held": false,
+      "mean_a3_minus_a4": {
+        "in": 0.0021070380457728147,
+        "out": -0.01682175731570875
+      }
+    },
+    "R2": {
+      "rule": "mean_idf_norm >= 0.474",
+      "a3_minus_a4_in_vs_out": {
+        "n_group": 204,
+        "share": 0.6296296296296297,
+        "effect": 0.05703934670263159,
+        "lo": 0.015469810287959598,
+        "hi": 0.09852178554509029
+      },
+      "a5_minus_a4_in_vs_out": {
+        "n_group": 204,
+        "share": 0.6296296296296297,
+        "effect": 0.03306264600574842,
+        "lo": 0.002484345748653226,
+        "hi": 0.06322733528842812
+      },
+      "held": true,
+      "mean_a3_minus_a4": {
+        "in": 0.006348703924932134,
+        "out": -0.050690642777699454
+      }
+    },
+    "R3": {
+      "rule": "max_idf_norm >= 0.761",
+      "a3_minus_a4_in_vs_out": {
+        "n_group": 142,
+        "share": 0.4382716049382716,
+        "effect": 0.03470812994013852,
+        "lo": -0.008130134541043851,
+        "hi": 0.07752592898497095
+      },
+      "a5_minus_a4_in_vs_out": {
+        "n_group": 142,
+        "share": 0.4382716049382716,
+        "effect": 0.01780582075637371,
+        "lo": -0.01528066645700954,
+        "hi": 0.04896515203217574
+      },
+      "held": false,
+      "mean_a3_minus_a4": {
+        "in": 0.004719562087862438,
+        "out": -0.02998856785227608
+      }
+    }
+  },
+  "held": [
+    {
+      "name": "R2",
+      "feature": "mean_idf_norm"
+    }
+  ]
+}
