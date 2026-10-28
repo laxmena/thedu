@@ -1,11 +1,15 @@
 # secrets
 .env
 .env.*
+!.env.example
 
-# data and model outputs (downloaded or regenerated)
+# downloaded datasets (re-downloaded on first run)
 data/
-runs/
+
+# large, regenerable model outputs
 *.npy
+
+# run results ARE committed: runs/**/*.json (summaries, history, rewrite cache)
 
 # python
 __pycache__/
