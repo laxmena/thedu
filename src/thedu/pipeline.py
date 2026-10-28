@@ -10,10 +10,10 @@ from pathlib import Path
 import yaml
 
 from thedu import data
-from thedu.config import RunConfig
+from thedu.config import RunConfig, resolve_instruction
 from thedu.judge import question_scores
 from thedu.llm import Gateway, Usage
-from thedu.paths import SPIKE_DIR, runs_dir
+from thedu.paths import ROOT, SPIKE_DIR, runs_dir
 from thedu.planner import BlindPlanner, GroundedPlanner
 from thedu.pricing import load_pricing
 from thedu.ranker import rank
@@ -37,7 +37,7 @@ def make_gateway(cfg: RunConfig, offline: bool = False) -> tuple[Gateway, dict[s
     rate = pricing.rate(cfg.llm.model)
     budget = yaml.safe_load((CONFIGS_DIR / "budget.yaml").read_text())["total_usd"]
     gw = Gateway(
-        cfg.llm, rate, cache_path=runs_dir() / "cache" / "llm.jsonl",
+        cfg.llm, rate, cache_path=ROOT / "runs" / "cache" / "llm.jsonl",
         legacy_path=SPIKE_DIR / "rewrites.json" if cfg.planner.use_spike_cache else None,
         offline=offline, budget_usd=budget,
     )
@@ -45,14 +45,22 @@ def make_gateway(cfg: RunConfig, offline: bool = False) -> tuple[Gateway, dict[s
 
 
 def run_dev(cfg: RunConfig, offline: bool = False, restart: bool = False, root: Path | None = None) -> tuple[RunDir, dict]:
+    if cfg.split != "dev":
+        raise PermissionError("`thedu dev` runs dev questions only. Test runs belong to `thedu parity` and `thedu test-eval`.")
     docs, queries, qrels = data.load(cfg.dataset, cfg.split)
+    return execute(cfg, docs, queries, qrels, offline, restart, root)
+
+
+def execute(cfg: RunConfig, docs: dict[str, str], queries: dict[str, str], qrels: dict[str, dict[str, int]],
+            offline: bool = False, restart: bool = False, root: Path | None = None, kind: str = "dev") -> tuple[RunDir, dict]:
+    """Run a config's setups on the given questions and save the run. Callers decide which split's answers to pass."""
     qids = data.select_qids(queries, cfg.n, cfg.seed)
     doc_ids, texts = list(docs), list(docs.values())
     setups = [s for s in ORDER if s in cfg.setups]
 
     gateway, rates = make_gateway(cfg, offline)
     run_hash = cfg.hash(rates)
-    run = RunDir.open(cfg, run_hash, root or runs_dir(), rates, restart)
+    run = RunDir.open(cfg, run_hash, root or runs_dir(), rates, restart, kind)
     todo = {q: [s for s in setups if (s, q) not in run.rows] for q in qids}
     todo = {q: s for q, s in todo.items() if s}
     log.info("run %s: %d questions, %d to do", run_hash, len(qids), len(todo))
@@ -60,7 +68,9 @@ def run_dev(cfg: RunConfig, offline: bool = False, restart: bool = False, root: 
     bm25 = Bm25Retriever(doc_ids, texts, cfg.bm25.k1, cfg.bm25.b)
     dense_hits: dict[str, tuple[list, float]] = {}
     if "A4" in setups and any("A4" in s for s in todo.values()):
-        dense = DenseRetriever.from_model(cfg.dataset, doc_ids, texts, cfg.dense.model, cfg.dense.max_seq_length)
+        dense = DenseRetriever.from_model(
+            cfg.dataset, doc_ids, texts, cfg.dense.model, cfg.dense.max_seq_length,
+            resolve_instruction(cfg.dataset, cfg.dense.query_instruction))
         need = [q for q, s in todo.items() if "A4" in s]
         t0 = time.perf_counter()
         found = dense.search_many([queries[q] for q in need], cfg.k)

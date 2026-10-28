@@ -4,7 +4,7 @@ dataset: scifact
 split: dev
 setups: [A0, A4, A3]
 bm25: {k1: 0.9, b: 0.4}
-dense: {model: Qwen/Qwen3-Embedding-0.6B, max_seq_length: 512}
+dense: {model: Qwen/Qwen3-Embedding-0.6B, max_seq_length: 512, query_instruction: model-default}
 llm: {model: qwen/qwen3-14b, temperature: 0.0, seed: 7, max_tokens: 300}
 planner:
   grounded_prompt: grounded_v1

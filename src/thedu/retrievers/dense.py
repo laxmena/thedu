@@ -10,6 +10,7 @@ from pathlib import Path
 import numpy as np
 
 from thedu.paths import SPIKE_DIR, runs_dir
+from thedu.retrievers.order import tie_ranks, top_k
 
 log = logging.getLogger(__name__)
 
@@ -23,17 +24,18 @@ class DenseRetriever:
         self.doc_ids = doc_ids
         self._docs = doc_vecs
         self._encode = encode_queries
+        self._ranks = tie_ranks(doc_ids)
 
     def search(self, text: str, k: int) -> list[tuple[str, float]]:
         return self.search_many([text], k)[0]
 
     def search_many(self, texts: list[str], k: int) -> list[list[tuple[str, float]]]:
         sims = self._encode(texts) @ self._docs.T
-        top = np.argsort(-sims, axis=1)[:, : min(k, len(self.doc_ids))]
-        return [[(self.doc_ids[i], float(sims[r, i])) for i in row] for r, row in enumerate(top)]
+        return [[(self.doc_ids[i], float(sims[r, i])) for i in top_k(sims[r], self._ranks, k)] for r in range(len(sims))]
 
     @classmethod
-    def from_model(cls, dataset: str, doc_ids: list[str], texts: list[str], model_name: str, max_seq_length: int):
+    def from_model(cls, dataset: str, doc_ids: list[str], texts: list[str], model_name: str, max_seq_length: int,
+                   query_instruction: str | None = None):
         from sentence_transformers import SentenceTransformer
 
         model = SentenceTransformer(model_name)
@@ -54,6 +56,9 @@ class DenseRetriever:
             np.save(cache, vecs)
 
         def encode(queries: list[str]) -> np.ndarray:
-            return model.encode(queries, prompt_name="query", normalize_embeddings=True)
+            if query_instruction is None:
+                return model.encode(queries, prompt_name="query", normalize_embeddings=True)
+            prefix = f"Instruct: {query_instruction}\nQuery:"  # the template MTEB uses for Qwen3-Embedding
+            return model.encode([prefix + q for q in queries], normalize_embeddings=True)
 
         return cls(doc_ids, vecs, encode)

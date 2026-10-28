@@ -1,0 +1,22 @@
+{
+  "tolerance": 0.01,
+  "n_questions": 300,
+  "results": [
+    {
+      "setup": "A0",
+      "ours": 0.6761883106409642,
+      "published": 0.6789,
+      "diff": -0.0027116893590357627,
+      "passed": true,
+      "source_url": "https://github.com/castorini/anserini/blob/master/docs/reproduce/from-document-collection/beir-v1.0.0-scifact.flat.md"
+    },
+    {
+      "setup": "A4",
+      "ours": 0.6971987140588829,
+      "published": 0.69718,
+      "diff": 1.8714058882873807e-05,
+      "passed": true,
+      "source_url": "https://github.com/embeddings-benchmark/results/blob/main/results/Qwen__Qwen3-Embedding-0.6B/b22da495047858cce924d27d76261e96be6febc0/SciFact.json"
+    }
+  ]
+}

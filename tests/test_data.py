@@ -45,10 +45,9 @@ def test_only_parity_and_test_eval_import_the_test_answers_door():
     assert not offenders, f"these files reach for test answers: {offenders}"
 
 
-def test_dev_runs_cannot_be_configured_for_test():
-    from pydantic import ValidationError
-
+def test_dev_command_refuses_a_test_config():
     from thedu.config import RunConfig
+    from thedu.pipeline import run_dev
 
-    with pytest.raises(ValidationError):
-        RunConfig(dataset="scifact", split="test", setups=["A0"])
+    with pytest.raises(PermissionError):
+        run_dev(RunConfig(dataset="scifact", split="test", setups=["A0"]), offline=True)

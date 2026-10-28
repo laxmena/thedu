@@ -3,19 +3,22 @@
 from __future__ import annotations
 
 import bm25s
+import numpy as np
 import Stemmer
 
-STEMMER = Stemmer.Stemmer("english")
+from thedu.retrievers.order import tie_ranks, top_k
 
 
 class Bm25Retriever:
     def __init__(self, doc_ids: list[str], texts: list[str], k1: float = 0.9, b: float = 0.4):
         self.doc_ids = doc_ids
-        tokens = bm25s.tokenize(texts, stopwords="en", stemmer=STEMMER, show_progress=False)
+        self._stemmer = Stemmer.Stemmer("english")
+        tokens = bm25s.tokenize(texts, stopwords="en", stemmer=self._stemmer, show_progress=False)
         self._index = bm25s.BM25(k1=k1, b=b)
         self._index.index(tokens, show_progress=False)
+        self._ranks = tie_ranks(doc_ids)
 
     def search(self, text: str, k: int) -> list[tuple[str, float]]:
-        tokens = bm25s.tokenize([text], stopwords="en", stemmer=STEMMER, show_progress=False)
-        results, scores = self._index.retrieve(tokens, k=min(k, len(self.doc_ids)), show_progress=False)
-        return [(self.doc_ids[i], float(s)) for i, s in zip(results[0], scores[0])]
+        tokens = bm25s.tokenize([text], stopwords="en", stemmer=self._stemmer, return_ids=False, show_progress=False)[0]
+        scores = self._index.get_scores(tokens) if tokens else np.zeros(len(self.doc_ids))
+        return [(self.doc_ids[i], float(scores[i])) for i in top_k(scores, self._ranks, k)]

@@ -178,3 +178,51 @@ Why it matters: The foundation is trustworthy before any new method is built on 
 Evidence: tests/test_reproduction.py, tests/smoke/test_smoke.py, tests/golden/. Recall@100: A0 0.926, A3 0.941, A4 0.959; A4 vs A0 +0.043 nDCG@10 (range +0.022 to +0.065), A3 vs A0 -0.007 (range -0.018 to +0.005).
 Next: Two known gaps. (1) The spike's cached rewrites recorded no token split, so A3's cost per search shows n/a until its rewrites are re-run through the gateway (new calls are priced at $0.12 / $0.24 per million tokens, qwen/qwen3-14b on OpenRouter, fetched 2026-10-27). (2) Embedding search has no reference price yet, so its cost shows n/a. Then M1: parity against published scores.
 Post: no
+
+## 2026-10-27 · decision · Published reference scores frozen; `thedu freeze --add` appends only
+Who: human + Claude
+What: `tests/expected.yaml` holds the published test nDCG@10 that parity checks against, each with source URL, fetch date and the setup the source describes. Anserini BEIR v1.0.0 flat BM25: SciFact 0.6789, NFCorpus 0.3218 (docs page in the Anserini repo). MTEB results for Qwen3-Embedding-0.6B (mteb 1.38.9, model revision b22da49): SciFact 0.69718, NFCorpus 0.36709. Tolerance is an absolute difference of 0.010. The file was added to `tests/frozen.sha256` with `thedu freeze --add tests/expected.yaml`. That command only appends lines for files named explicitly and never changes or removes an existing line; this is the first addition after the M0 freeze.
+Why it matters: The numbers we must match cannot be adjusted after seeing our own results.
+Evidence: tests/expected.yaml, tests/frozen.sha256, tests/test_frozen.py, tests/test_expected.py
+Next: Any later file frozen this way gets its own journal line. The rendered Anserini page on castorini.github.io returned 404 when fetched, so the value was read from the page's source in the GitHub repo, which says it is the page's own generated table.
+Post: no
+
+## 2026-10-27 · finding · M1 parity passes: A0 and A4 are within 0.006 of the published test scores
+Who: human + Claude
+What: Test-split nDCG@10, ours vs published. Attempt 0 (defaults: bm25s k1=0.9 b=0.4, embeddings at 512 tokens with the model's generic query prompt): A0 SciFact 0.6762 vs 0.6789 (-0.0027), A0 NFCorpus 0.3179 vs 0.3218 (-0.0039), A4 SciFact 0.6972 vs 0.6972 (+0.0000), A4 NFCorpus 0.3566 vs 0.3671 (-0.0105, just over the 0.010 limit), so parity failed on one number. Fix 1, the only fix tried: put MTEB's task instruction in front of each query ("Instruct: Given a question, retrieve relevant documents that best answer the question" for NFCorpus, the claim-checking one for SciFact). Result: A4 SciFact 0.7001 (+0.0029), A4 NFCorpus 0.3617 (-0.0054). All four within tolerance, parity passes.
+Why it matters: The gate is open. The BM25 and embedding baselines reproduce published numbers, so later gains are measured against baselines that can be trusted.
+Evidence: runs/55e0f4c1e7 and runs/47f7f0d24b (attempt 0); runs/fc4262ace8 and runs/1cb69a2a1e (fix 1); runs/c9b67a9ab1 and runs/850fbee2c4 (final confirmation after tidying the code, same numbers). Each has parity.json.
+Next: What I learned. (1) BM25 needed no change: bm25s's "en" stopword list is exactly Lucene's 33-word English set, so the list I was told to check first is not a difference. Two differences remain and were not needed: Snowball vs Porter stemming, and bm25s's tokenizer vs Lucene's StandardTokenizer. Our A0 is a little below Anserini on both sets (-0.003, -0.004), which is inside tolerance, and I do not know why. (2) A4: MTEB runs with the model's full 32768-token limit; we use 512. 9.0% of SciFact documents and 9.6% of NFCorpus documents are longer than 512 tokens. Parity passes anyway, so the limit stays at 512 and nothing was re-embedded; this is a known difference, not a fixed one. (3) SciFact A4 matched MTEB to four decimals with the generic prompt, which is not the prompt MTEB's configuration says it used, so I treat that as chance and kept the documented instruction. (4) Test answers were read in three parity runs per dataset, to reproduce published numbers (one fix tried, no tuning for a higher score). (5) The task instruction is now the default for new configs (`query_instruction: task`); the spike configs and champion/challenger are pinned to `model-default`. On dev it moves A4 only slightly: SciFact 0.7376 to 0.7368, NFCorpus 0.3363 to 0.3373 (runs/0511fd41c5, runs/75abfee242, runs/6fd1962ecb). BM25 settings did not change, so A0 and A3 on dev did not need re-running. FiQA has no verified instruction yet, so A4 on FiQA stops with an error rather than guessing.
+Post: yes, as the "we reproduced the published baselines first" section
+
+## 2026-10-27 · observation · BM25 results depend on k when scores tie
+Who: Claude
+What: On NFCorpus dev, A0 scores 0.2854 nDCG@10 when 10 results are kept and 0.2838 when 100 are kept (same engine, same settings). 90 of 324 questions get a different top 10; 113 have tied scores inside the top 11 (many questions match nothing, so documents tie at zero). bm25s breaks ties in an order that changes with k. SciFact showed no difference on the 100 questions I checked in M0, and its pinned reproduction numbers (0.6945, 0.6874) are computed at k=100.
+Why it matters: "Same config, same numbers" holds because k is fixed, but tied documents are ordered arbitrarily, so a 0.002 change can come from the tie order alone. This also corrects my M0 note that the top 10 was identical at k=10 and k=100: that held for the SciFact sample, not for NFCorpus.
+Evidence: check run on NFCorpus dev, not saved as a run; reproduce with Bm25Retriever.search(q, 10) vs search(q, 100)
+Next: Not fixed in M1, because ordering ties by document position would move the pinned numbers and need a parity rerun. Proposed: break ties by document order inside the retriever, then re-pin the reproduction numbers and rerun parity. Needs a human OK.
+Post: maybe, as a short "ties" aside
+
+## 2026-10-27 · decision · One tie rule for every retriever: score, then doc id (largest first), whole collection ranked
+Who: human + Claude
+What: Retrievers now rank the whole collection by score, break ties by document id with the larger id first (trec_eval's convention), and cut to k afterwards. Before, bm25s ordered tied documents in a way that changed with k (see the 2026-10-27 observation on ties). A test now checks that the top 10 equals the first 10 of a longer list across 150 NFCorpus dev questions plus empty and unmatched queries. The dense retriever uses the same rule. The reproduction pins in `thedu check` stay at the SciFact values and gain NFCorpus values (below); `thedu smoke` keeps A4 at 0.7376. Parity was rerun once, as allowed after a retriever change.
+Why it matters: "Same config, same numbers" no longer depends on how many results are kept, and our ranking order matches the one the judge's reference tool (trec_eval, pytrec_eval) would use for ties.
+Evidence: src/thedu/retrievers/order.py, tests/test_retrievers.py, tests/test_reproduction.py; superseded "before" runs are kept as runs/*.superseded-*
+Next: The spike's own figures (SciFact A0 0.6945, A3 0.6874; NFCorpus A0 0.285, A3 0.325) are historical: they were taken at k=10 with the old tie order. SciFact reproduces exactly under the new rule; NFCorpus differs in the third decimal.
+Post: no
+
+## 2026-10-27 · finding · The tie rule moved NFCorpus by 0.0004 nDCG@10 and nothing else that matters
+Who: human + Claude
+What: Dev, all questions, k=100, before (old tie order) vs after (new rule). SciFact (809): A0 0.6945 vs 0.6945, A3 0.6874 vs 0.6874, Recall@100 0.9264 / 0.9406 unchanged; A3 vs A0 -0.0070 (range -0.0181 to +0.0048) both times. NFCorpus (324): A0 0.2838 vs 0.2842, A3 0.3219 vs 0.3221; A3 vs A0 +0.0381 (range +0.0234 to +0.0529) vs +0.0379 (range +0.0236 to +0.0523). NFCorpus Recall@100 for A0 fell from 0.2376 to 0.2269 and for A3 from 0.3091 to 0.3085. Parity on test: SciFact unchanged; NFCorpus A0 0.3179 to 0.3177 (diff -0.0041), A4 0.3617 to 0.3613 (diff -0.0058); still PASS.
+Why it matters: The ordering fix does not change any conclusion. The larger drop in NFCorpus A0 Recall@100 is a reminder that many NFCorpus questions match fewer than 100 documents, so the rest of the top 100 is filler with score zero; which filler is chosen is arbitrary (now: largest ids) and can move Recall@100 by about a point without meaning anything. Treat NFCorpus Recall@100 as soft.
+Evidence: before: runs/566043e182.superseded-* and runs/e071f828ec.superseded-* (dev), runs/c9b67a9ab1.superseded-* and runs/850fbee2c4.superseded-* (parity); after: runs/566043e182, runs/e071f828ec, runs/c9b67a9ab1, runs/850fbee2c4. Running NFCorpus A3 again cost 63 new rewrite calls because its first-search top 5 changed for some questions (the rewrite cache is keyed on those five documents); the cache in runs/cache/llm.jsonl now covers both datasets, so `thedu check` stays offline.
+Next: Pinned in check: NFCorpus A0 0.2842, A3 0.3221. Read-only parity reads were not repeated beyond the one rerun.
+Post: no
+
+## 2026-10-27 · decision · No per-run NOTES.md; the run folder is the record
+Who: human
+What: Removed the rule that every run writes `runs/<hash>/NOTES.md` in five lines. The run folder (config, per-question scores, rankings, metrics) records what ran and what it scored; JOURNAL.md holds the reasoning. AGENTS.md ("After every run") and the `thedu dev` closing message were updated.
+Why it matters: One place for reasoning instead of two, and no extra step on every run.
+Evidence: AGENTS.md, src/thedu/cli.py
+Next: Journal entries link to run folders when a run taught something.
+Post: no

@@ -55,7 +55,9 @@ Do not add a sixth part without a human decision.
 Code lives in `src/thedu/` (the `thedu` package); part names elsewhere in this file
 (`planner/`, `judge/`, ...) mean the subpackages there. Frozen files are read-only and
 checksummed in `tests/frozen.sha256`; `thedu check` fails if one changes. `thedu freeze`
-wrote that file once and refuses to run again.
+wrote that file once and refuses to run again. The one allowed change is
+`thedu freeze --add PATH`, which appends a named file and never alters or removes a line;
+log each addition in `JOURNAL.md`.
 
 ## How to make a change
 
@@ -168,6 +170,6 @@ Types: `decision`, `attempt`, `finding`, `learning`, `blocker`, `observation`.
 
 ## After every run
 
-Write `runs/<hash>/NOTES.md` in five lines: what changed, why, the result with its
-range, the gate decision, and what to try next. Short, factual, no hype. If the run
-taught you something, also add a journal entry.
+The run folder (`runs/<hash>/`) is the record of what ran and what it scored. There is no
+per-run notes file. If the run taught you something, or you made a decision because of it,
+add a journal entry that links to the folder.

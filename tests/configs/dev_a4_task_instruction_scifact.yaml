@@ -1,0 +1,4 @@
+# Dev: A0 and A4 with the new default A4 query instruction (MTEB task instruction), for the before/after in JOURNAL.md.
+dataset: scifact
+split: dev
+setups: [A0, A4]

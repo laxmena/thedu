@@ -1,0 +1,52 @@
+{
+  "n_questions": 324,
+  "setups": {
+    "A0": {
+      "ndcg10": {
+        "mean": 0.2838214319195262,
+        "lo": 0.25167824832647456,
+        "hi": 0.31279562166466013
+      },
+      "recall100": {
+        "mean": 0.23764361012708773,
+        "lo": 0.20894729506183904,
+        "hi": 0.2658322432472902
+      },
+      "llm_calls": 0,
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "cost_per_search_usd": 0.0,
+      "uncosted_calls": 0,
+      "fallbacks": 0,
+      "latency_relative_to_A0": 1.0
+    },
+    "A4": {
+      "ndcg10": {
+        "mean": 0.33728116816484655,
+        "lo": 0.3033112347250292,
+        "hi": 0.3698836529082861
+      },
+      "recall100": {
+        "mean": 0.3285296247532224,
+        "lo": 0.29768622254860033,
+        "hi": 0.3616693395908732
+      },
+      "llm_calls": 0,
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "cost_per_search_usd": null,
+      "uncosted_calls": 0,
+      "fallbacks": 0,
+      "latency_relative_to_A0": 65.84153988132978
+    }
+  },
+  "paired_vs_A0": {
+    "A4": {
+      "ndcg10_diff": 0.05345973624532035,
+      "lo": 0.03234750081163551,
+      "hi": 0.07570818904166968,
+      "wins": 150,
+      "losses": 80
+    }
+  }
+}

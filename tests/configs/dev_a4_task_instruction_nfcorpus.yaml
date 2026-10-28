@@ -1,0 +1,3 @@
+dataset: nfcorpus
+split: dev
+setups: [A0, A4]

@@ -42,3 +42,23 @@ def test_dense_returns_k_sorted_pairs():
     for k in (1, 10, 100):
         check_contract(r.search("anything", k), k)
     assert r.search("anything", 3)[0][0] == "d0"  # the query vector is document 0's own
+
+
+def test_ties_are_ordered_by_doc_id_descending_like_trec_eval():
+    from thedu.retrievers.order import tie_ranks, top_k
+
+    ids = ["a", "c", "b", "d"]
+    scores = np.array([1.0, 1.0, 1.0, 0.5])
+    assert [ids[i] for i in top_k(scores, tie_ranks(ids), 4)] == ["c", "b", "a", "d"]
+    assert [ids[i] for i in top_k(scores, tie_ranks(ids), 2)] == ["c", "b"]
+
+
+def test_bm25_ranking_does_not_depend_on_k_even_with_ties():
+    docs, queries, _ = data.load("nfcorpus", "dev")  # many questions match nothing, so many ties
+    r = Bm25Retriever(list(docs), list(docs.values()))
+    tied = 0
+    for q in list(queries.values())[:150] + ["zzzqqq", "the and of"]:
+        full = r.search(q, 100)
+        assert r.search(q, 10) == full[:10] and r.search(q, 37) == full[:37]
+        tied += len({s for _, s in full[:11]}) < 11
+    assert tied > 0  # the sample really contains ties

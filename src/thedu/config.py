@@ -15,6 +15,25 @@ from thedu.prompts import load_prompt
 Setup = Literal["A0", "A2", "A3", "A4"]
 
 
+# The instruction MTEB gives Qwen3-Embedding for each dataset's queries (sources in tests/expected.yaml).
+# FiQA is absent on purpose: its instruction has not been checked against MTEB yet.
+TASK_INSTRUCTIONS = {
+    "scifact": "Given a scientific claim, retrieve documents that support or refute the claim",
+    "nfcorpus": "Given a question, retrieve relevant documents that best answer the question",
+}
+
+
+def resolve_instruction(dataset: str, setting: str) -> str | None:
+    """The instruction text to use, or None for the model's own default query prompt."""
+    if setting == "model-default":
+        return None
+    if setting == "task":
+        if dataset not in TASK_INSTRUCTIONS:
+            raise KeyError(f"no verified MTEB task instruction for {dataset!r}; add it to TASK_INSTRUCTIONS or set one in the config")
+        return TASK_INSTRUCTIONS[dataset]
+    return setting
+
+
 class _Frozen(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -27,6 +46,11 @@ class Bm25Config(_Frozen):
 class DenseConfig(_Frozen):
     model: str = "Qwen/Qwen3-Embedding-0.6B"
     max_seq_length: int = 512
+    # Text put in front of each query as "Instruct: <text>\nQuery:".
+    #   "task"          the dataset's MTEB task instruction (TASK_INSTRUCTIONS); the default for new configs
+    #   "model-default" the model's own generic query prompt (what the spike used)
+    #   anything else   used as the instruction text
+    query_instruction: str = "task"
 
 
 class LLMConfig(_Frozen):
@@ -51,7 +75,7 @@ class PlannerConfig(_Frozen):
 
 class RunConfig(_Frozen):
     dataset: Literal["scifact", "nfcorpus", "fiqa"]
-    split: Literal["dev"] = "dev"  # test answers are not reachable from a config
+    split: Literal["dev", "test"] = "dev"  # `thedu dev` refuses "test"; only `thedu parity` runs it
     n: int | None = None  # None = every dev question
     seed: int = 7  # question sampling
     k: int = Field(100, ge=10)  # results kept per question (Recall@100 needs 100)

@@ -59,7 +59,8 @@ class RunDir:
     # ---------- open / resume ----------
 
     @classmethod
-    def open(cls, cfg: RunConfig, run_hash: str, root: Path, rates: dict[str, float], restart: bool = False) -> RunDir:
+    def open(cls, cfg: RunConfig, run_hash: str, root: Path, rates: dict[str, float], restart: bool = False,
+             kind: str = "dev") -> RunDir:
         path = root / run_hash
         version = code_version()
         if path.exists():
@@ -79,7 +80,7 @@ class RunDir:
         if not path.exists():
             path.mkdir(parents=True)
             (path / "config.yaml").write_text(yaml.safe_dump(cfg.model_dump(mode="json"), sort_keys=False))
-            meta = {"hash": run_hash, "status": "running", "started": time.strftime("%Y-%m-%dT%H:%M:%S"),
+            meta = {"hash": run_hash, "kind": kind, "status": "running", "started": time.strftime("%Y-%m-%dT%H:%M:%S"),
                     "rates_usd_per_mtok": rates, **version}
             (path / "meta.json").write_text(json.dumps(meta, indent=2))
         rows = cls._load_rows(path)

@@ -1,0 +1,5 @@
+# Same, with the spike's generic query prompt, for the before side of the comparison.
+dataset: nfcorpus
+split: dev
+setups: [A0, A4]
+dense: {query_instruction: model-default}

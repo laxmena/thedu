@@ -67,15 +67,26 @@ def dev(
     typer.echo("\nPaired nDCG@10 difference vs A0 (same questions):")
     for s, p in m["paired_vs_A0"].items():
         typer.echo(f"  {s}: {p['ndcg10_diff']:+.4f}  [{p['lo']:+.4f}, {p['hi']:+.4f}]  wins {p['wins']}, losses {p['losses']}")
-    typer.echo(f"\nSaved to {run.path}. Write {run.path.name}/NOTES.md (five lines) when you have read the result.")
+    typer.echo(f"\nSaved to {run.path}.")
 
 
 @app.command()
-def parity() -> None:
-    """Frozen baselines vs published scores, on test (built in M1)."""
+def parity(restart: bool = typer.Option(False, help="Set an existing parity run aside and start again.")) -> None:
+    """Frozen baselines (A0, A4) vs published scores on test; passes within the tolerance in tests/expected.yaml."""
+    _logging()
     from thedu.parity import run_parity
+    from thedu.registry import VersionMismatch
 
-    run_parity()
+    try:
+        ok, rows = run_parity(restart=restart)
+    except (VersionMismatch, RuntimeError) as e:
+        typer.echo(f"\n{e}", err=True)
+        raise typer.Exit(1)
+    typer.echo(f"\n{'dataset':<10}{'setup':<6}{'ours':>9}{'published':>11}{'diff':>9}  run")
+    for r in rows:
+        typer.echo(f"{r.dataset:<10}{r.setup:<6}{r.ours:>9.4f}{r.published:>11.4f}{r.diff:>+9.4f}  {r.run_hash}")
+    typer.echo("\nPARITY PASS" if ok else "\nPARITY FAIL")
+    raise typer.Exit(0 if ok else 1)
 
 
 @app.command(name="test-eval")
@@ -99,15 +110,51 @@ def frozen_digests() -> dict[str, str]:
     return {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in _frozen_files()}
 
 
+def read_manifest() -> dict[str, str]:
+    stored = {}
+    for ln in MANIFEST.read_text().splitlines():
+        digest, path = ln.split("  ", 1)
+        stored[path] = digest
+    return stored
+
+
 @app.command()
-def freeze() -> None:
-    """Make the judge, answer keys and golden files read-only and store their checksums (once)."""
-    if MANIFEST.exists():
-        typer.echo(f"{MANIFEST.relative_to(ROOT)} already exists. Frozen files are never re-frozen; "
-                   "if one is wrong, stop and report.", err=True)
+def freeze(add: list[Path] = typer.Option(None, "--add", help="Append this file to the manifest (repeatable).")) -> None:
+    """Make files read-only and store their checksums. The manifest only ever grows.
+
+    With no options, freezes the judge, answer keys and golden files (once). With --add PATH,
+    appends the named files; existing lines are never changed or removed.
+    """
+    if not add:
+        if MANIFEST.exists():
+            typer.echo(f"{MANIFEST.relative_to(ROOT)} already exists. Use --add PATH to freeze one more file; "
+                       "frozen files are never re-frozen, and if one is wrong, stop and report.", err=True)
+            raise typer.Exit(1)
+        digests = frozen_digests()
+        MANIFEST.write_text("".join(f"{h}  {p}\n" for p, h in digests.items()))
+        for p in _frozen_files() + [MANIFEST]:
+            p.chmod(0o444)
+        typer.echo(f"Froze {len(digests)} files; checksums in {MANIFEST.relative_to(ROOT)}.")
+        return
+    if not MANIFEST.exists():
+        typer.echo("Nothing is frozen yet: run `thedu freeze` first.", err=True)
         raise typer.Exit(1)
-    digests = frozen_digests()
-    MANIFEST.write_text("".join(f"{h}  {p}\n" for p, h in digests.items()))
-    for p in _frozen_files() + [MANIFEST]:
-        p.chmod(0o444)
-    typer.echo(f"Froze {len(digests)} files; checksums in {MANIFEST.relative_to(ROOT)}.")
+    stored = read_manifest()
+    new: dict[str, str] = {}
+    for p in add:
+        path = (ROOT / p).resolve() if not p.is_absolute() else p.resolve()
+        if not path.is_file() or ROOT not in path.parents:
+            typer.echo(f"{p}: not a file inside the repo.", err=True)
+            raise typer.Exit(1)
+        rel = str(path.relative_to(ROOT))
+        if rel in stored or rel in new:
+            typer.echo(f"{rel} is already frozen; frozen lines are never changed.", err=True)
+            raise typer.Exit(1)
+        new[rel] = hashlib.sha256(path.read_bytes()).hexdigest()
+    MANIFEST.chmod(0o644)
+    with open(MANIFEST, "a") as f:
+        f.writelines(f"{h}  {p}\n" for p, h in new.items())
+    MANIFEST.chmod(0o444)
+    for rel in new:
+        (ROOT / rel).chmod(0o444)
+    typer.echo(f"Added {len(new)} file(s) to {MANIFEST.relative_to(ROOT)}: {', '.join(new)}. Log this in JOURNAL.md.")

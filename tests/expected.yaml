@@ -1,0 +1,45 @@
+# Published test-split nDCG@10 that our frozen baselines must match (`thedu parity`).
+# Every value was read from the source named beside it on the date given; none is estimated.
+# Frozen after writing (`thedu freeze --add tests/expected.yaml`): never edit.
+tolerance_ndcg10: 0.010   # parity passes when |ours - published| <= this (absolute)
+
+scores:
+  scifact:
+    A0:
+      ndcg10: 0.6789
+      fetched: "2026-10-27"
+      source_url: https://github.com/castorini/anserini/blob/master/docs/reproduce/from-document-collection/beir-v1.0.0-scifact.flat.md
+      source_version: anserini docs page last changed in commit 0ae24ab (2026-08-20)
+      setup: >-
+        Anserini BEIR v1.0.0 "flat" BM25 (BeirFlatCollection, title+text in one field),
+        default Lucene English analyzer, -bm25 with default k1=0.9, b=0.4, trec_eval -c -m ndcg_cut.10
+        on the test qrels. The page's own table also lists R@100 0.9253.
+    A4:
+      ndcg10: 0.69718
+      fetched: "2026-10-27"
+      source_url: https://github.com/embeddings-benchmark/results/blob/main/results/Qwen__Qwen3-Embedding-0.6B/b22da495047858cce924d27d76261e96be6febc0/SciFact.json
+      source_version: mteb 1.38.9, model revision b22da495047858cce924d27d76261e96be6febc0, split test
+      setup: >-
+        MTEB retrieval, Qwen/Qwen3-Embedding-0.6B. Queries are prefixed "Instruct: <task instruction>\nQuery:"
+        (instruction for SciFact: "Given a scientific claim, retrieve documents that support or refute the claim");
+        documents get no instruction. Max sequence length is read from the model config (32768 tokens).
+        Instruction text from mteb/tasks/retrieval/eng/sci_fact_retrieval.py, template from
+        mteb/models/model_implementations/qwen3_models.py (mteb main, read 2026-10-27).
+  nfcorpus:
+    A0:
+      ndcg10: 0.3218
+      fetched: "2026-10-27"
+      source_url: https://github.com/castorini/anserini/blob/master/docs/reproduce/from-document-collection/beir-v1.0.0-nfcorpus.flat.md
+      source_version: anserini docs page, same regression family as SciFact (commit 0ae24ab for the SciFact page)
+      setup: >-
+        Anserini BEIR v1.0.0 "flat" BM25, same settings as SciFact above.
+        The page's own table also lists R@100 0.2457.
+    A4:
+      ndcg10: 0.36709
+      fetched: "2026-10-27"
+      source_url: https://github.com/embeddings-benchmark/results/blob/main/results/Qwen__Qwen3-Embedding-0.6B/b22da495047858cce924d27d76261e96be6febc0/NFCorpus.json
+      source_version: mteb 1.38.9, model revision b22da495047858cce924d27d76261e96be6febc0, split test
+      setup: >-
+        MTEB retrieval, same model and template as SciFact. Instruction for NFCorpus:
+        "Given a question, retrieve relevant documents that best answer the question"
+        (mteb/tasks/retrieval/eng/nf_corpus_retrieval.py). Max sequence length 32768 tokens.

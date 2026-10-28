@@ -1,0 +1,33 @@
+dataset: nfcorpus
+split: test
+n: null
+seed: 7
+k: 100
+setups:
+- A0
+- A4
+bm25:
+  k1: 0.9
+  b: 0.4
+  stemmer: english
+dense:
+  model: Qwen/Qwen3-Embedding-0.6B
+  max_seq_length: 512
+  query_instruction: null
+llm:
+  model: qwen/qwen3-14b
+  base_url: https://openrouter.ai/api/v1
+  key_env: OPENROUTER_API_KEY
+  temperature: 0.0
+  seed: 7
+  max_tokens: 300
+  workers: 16
+planner:
+  blind_prompt: blind_v1
+  grounded_prompt: grounded_v1
+  query_repeat: 3
+  feedback_k: 5
+  snippet_words: 60
+  use_spike_cache: false
+  max_fallback_rate: 0.05
+pricing: configs/pricing.yaml

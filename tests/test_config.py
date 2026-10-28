@@ -33,3 +33,18 @@ def test_prompt_text_is_part_of_the_hash(monkeypatch):
     base = cfg().hash(RATES)
     monkeypatch.setattr(c, "load_prompt", lambda name: "a different prompt")
     assert cfg().hash(RATES) != base
+
+
+def test_new_configs_use_the_task_instruction_and_spike_configs_stay_pinned():
+    from thedu.config import TASK_INSTRUCTIONS, resolve_instruction
+
+    assert cfg().dense.query_instruction == "task"
+    assert resolve_instruction("scifact", "task") == TASK_INSTRUCTIONS["scifact"]
+    assert resolve_instruction("scifact", "model-default") is None
+    assert resolve_instruction("scifact", "custom words") == "custom words"
+    assert load_config(ROOT / "tests/configs/spike_a4.yaml").dense.query_instruction == "model-default"
+    assert load_config(ROOT / "configs/champion.yaml").dense.query_instruction == "model-default"
+    import pytest
+
+    with pytest.raises(KeyError):
+        resolve_instruction("fiqa", "task")  # not verified against MTEB yet
