@@ -64,3 +64,24 @@ def diagnose(rankings: dict[str, Ranking], qrels: dict[str, dict[str, int]], qid
                 p = paired_difference(actual["A4"], ceiling[s])
                 out["paired_ceiling_vs_a4"][s] = {"diff": p.mean, "lo": p.lo, "hi": p.hi}
     return out
+
+
+def depth_table(rankings: dict[str, Ranking], qrels: dict[str, dict[str, int]], qids: list[str], depths=(50, 100)) -> dict:
+    """Would deeper candidates help a reranker? Relevant documents at ranks 51-100 and the perfect-rerank ceiling
+    when only the top `depth` is reordered (ranks below keep their order). Score-zero filler is not a candidate."""
+    out: dict = {}
+    for s, run in rankings.items():
+        hit = {q: [d for d, sc in run.get(q, []) if sc > 0][:100] for q in qids}
+        deep = [sum(1 for d in hit[q][50:] if qrels[q].get(d, 0) > 0) for q in qids]
+        shallow = [sum(1 for d in hit[q][:50] if qrels[q].get(d, 0) > 0) for q in qids]
+        total = [len(qrels[q]) for q in qids]
+        only_deep = [q for q, a, b in zip(qids, shallow, deep) if a == 0 and b > 0]
+        row = {"relevant_at_51_100": int(sum(deep)), "per_question_mean": float(np.mean(deep)),
+               "share_questions_with_any_at_51_100": float(np.mean([x > 0 for x in deep])),
+               "share_questions_relevant_only_at_51_100": len(only_deep) / len(qids),
+               "relevant_in_top50": int(sum(shallow)), "relevant_total": int(sum(total))}
+        for k in depths:
+            vals = [ndcg_at_k(sorted(hit[q][:k], key=lambda d: -qrels[q].get(d, 0)) + hit[q][k:], qrels[q]) for q in qids]
+            row[f"ceiling_top{k}"] = float(np.mean(vals))
+        out[s] = row
+    return out

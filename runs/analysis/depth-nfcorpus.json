@@ -1,0 +1,25 @@
+{
+  "run": "8dbc179fa6",
+  "dataset": "nfcorpus",
+  "n_questions": 324,
+  "A0": {
+    "relevant_at_51_100": 406,
+    "per_question_mean": 1.2530864197530864,
+    "share_questions_with_any_at_51_100": 0.33641975308641975,
+    "share_questions_relevant_only_at_51_100": 0.024691358024691357,
+    "relevant_in_top50": 1552,
+    "relevant_total": 11385,
+    "ceiling_top50": 0.48194680187220124,
+    "ceiling_top100": 0.5219487307369777
+  },
+  "A3": {
+    "relevant_at_51_100": 607,
+    "per_question_mean": 1.873456790123457,
+    "share_questions_with_any_at_51_100": 0.5185185185185185,
+    "share_questions_relevant_only_at_51_100": 0.040123456790123455,
+    "relevant_in_top50": 1915,
+    "relevant_total": 11385,
+    "ceiling_top50": 0.5637230897842976,
+    "ceiling_top100": 0.6256501096572592
+  }
+}

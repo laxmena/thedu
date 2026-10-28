@@ -1,0 +1,14 @@
+You are helping build a test in which real names in finance questions are replaced by invented codenames.
+Below are numbered phrases taken from finance questions and answers, each with a short example of use.
+
+For each phrase, decide whether it is a proper name of a specific thing: a company, fund or index, exchange, government body or agency, country, region, city, nationality, person, named account or tax type (for example Roth IRA, RRSP, TFSA), or a named product or website. Generic terms (credit card, ETF, interest rate, index fund, mutual fund, stock market), ordinary words, contractions and shouted words are not names.
+
+Answer with exactly one line per phrase, in this form, and nothing else:
+number | KEEP or DROP | canonical name | type | plain description
+
+- canonical name: the full, usual name (for example "UK" -> United Kingdom). Phrases that are the same thing must get the same canonical name.
+- type: one of company, fund, exchange, agency, country, place, nationality, person, account, product, website, other.
+- plain description: for KEEP only, 4 to 12 words that identify what it is without using the name or any part of it (for example "a large American retail bank"). For DROP write a dash.
+
+Phrases:
+{items}

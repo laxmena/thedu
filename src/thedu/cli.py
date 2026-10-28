@@ -357,3 +357,38 @@ def sweep_rm3(dataset: str = typer.Option(None)) -> None:
 def sweep_efb(dataset: str = typer.Option(None)) -> None:
     """Embedding-filtered feedback (an embedding model at query time only, as a term filter)."""
     _sweep("efb", dataset, "efb_sweep")
+
+
+@analyze_app.command("depth")
+def analyze_depth(run: str = typer.Option(..., help="A run with A0, A3 and A4."), dataset: str = typer.Option(...)) -> None:
+    """Relevant documents at ranks 51-100, and the perfect-rerank ceiling of the top 50 vs the top 100. No runs."""
+    import json
+
+    from thedu import data
+    from thedu.analysis.diagnosis import depth_table, read_trec
+    from thedu.analysis.steps import OUT
+    from thedu.paths import ROOT
+
+    _, queries, qrels = data.load(dataset, "dev")
+    qids = sorted(queries)
+    r = depth_table({s: read_trec(ROOT / "runs" / run / f"{s}.trec") for s in ("A0", "A3")}, qrels, qids)
+    OUT.mkdir(parents=True, exist_ok=True)
+    (OUT / f"depth-{dataset}.json").write_text(json.dumps({"run": run, "dataset": dataset, "n_questions": len(qids), **r}, indent=2))
+    typer.echo(f"{dataset} dev, {len(qids)} questions (run {run})")
+    for s, v in r.items():
+        typer.echo(f"  {s}: relevant at ranks 51-100: {v['relevant_at_51_100']} (top 50: {v['relevant_in_top50']} of {v['relevant_total']} in all); "
+                   f"questions with any there {v['share_questions_with_any_at_51_100']:.1%}, only there {v['share_questions_relevant_only_at_51_100']:.1%}; "
+                   f"ceiling top 50 {v['ceiling_top50']:.4f}, top 100 {v['ceiling_top100']:.4f}")
+
+
+m5_app = typer.Typer(no_args_is_help=True, help="M5, the made-up names test (docs/m5_codenames.md).")
+app.add_typer(m5_app, name="m5")
+
+
+@m5_app.command("entities")
+def m5_entities() -> None:
+    """Write the entity check list (configs/m5_entities.csv) for review. Uses the pinned model through the gateway."""
+    _logging()
+    from thedu.m5.entities import build
+
+    typer.echo(f"wrote {build()}")

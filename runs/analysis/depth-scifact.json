@@ -1,0 +1,25 @@
+{
+  "run": "d8fe5f9aff",
+  "dataset": "scifact",
+  "n_questions": 809,
+  "A0": {
+    "relevant_at_51_100": 35,
+    "per_question_mean": 0.04326328800988875,
+    "share_questions_with_any_at_51_100": 0.0407911001236094,
+    "share_questions_relevant_only_at_51_100": 0.02843016069221261,
+    "relevant_in_top50": 818,
+    "relevant_total": 919,
+    "ceiling_top50": 0.8958322913735973,
+    "ceiling_top100": 0.9275199461690499
+  },
+  "A3": {
+    "relevant_at_51_100": 27,
+    "per_question_mean": 0.03337453646477132,
+    "share_questions_with_any_at_51_100": 0.029666254635352288,
+    "share_questions_relevant_only_at_51_100": 0.02595797280593325,
+    "relevant_in_top50": 840,
+    "relevant_total": 919,
+    "ceiling_top50": 0.9148167420649421,
+    "ceiling_top100": 0.941542937578225
+  }
+}

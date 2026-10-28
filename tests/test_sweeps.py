@@ -56,3 +56,15 @@ def test_rm3_weights_sum_to_one_and_split_by_orig_weight():
     assert sum(w.values()) == pytest.approx(1.0)
     assert w["kidney"] > w["dialysi"] > 0
     assert rm3_weights("x", [("a", 0.0)], docs) is None
+
+
+def test_m5_codenames_and_candidate_cleanup():
+    from thedu.m5.entities import clean, codenames, merge
+
+    names = codenames(50, {"banana"})
+    assert len(set(names)) == 50 and all(6 <= len(n) <= 8 and n.isalpha() for n in names)
+    assert names == codenames(50, {"banana"})  # same seed, same names
+    assert clean("The UK") == "UK" and clean("In Canada") == "Canada"
+    out = merge([{"phrase": "The UK", "dev_questions": 3, "docs": 10}, {"phrase": "UK", "dev_questions": 4, "docs": 7},
+                 {"phrase": "Don't", "dev_questions": 9, "docs": 9}])
+    assert [g["phrase"] for g in out] == ["UK"] and out[0]["dev_questions"] == 4

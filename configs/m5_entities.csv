@@ -1,0 +1,81 @@
+entity,type,aliases,dev_questions,docs,codename,description,keep,note
+United States,country,America|Americans|US|USA|United States|United States of America,18,6867,Kodatrar,a federal republic consisting of fifty states and a federal district,y,merged with United States of America
+United Kingdom,country,UK|United Kingdom,10,1031,Trodugel,a sovereign island country off the northwestern coast of its continent,y,description rewritten by hand: it must not contain the name of any swapped entity
+Individual Retirement Account,account,IRA|IRAs|Individual Retirement Account,7,1218,Rokugur,a retirement savings account with tax advantages,y,
+Roth Individual Retirement Account,account,ROTH IRA|Roth IRA|Roth Individual Retirement Account,4,447,Kevodran,a tax-advantaged retirement savings account,y,
+Internal Revenue Service,agency,IRS|Internal Revenue Service,3,1325,Vupezur,the American federal agency responsible for tax collection,y,description: 'U.S.' replaced by 'American'
+India,country,India,3,715,Vamamon,a South Asian country with the world's second-largest population,y,
+Canada,country,Canada,3,615,Sudabun,a North American country with a parliamentary democracy and a constitutional monarchy,y,
+Individual Savings Account,account,ISA|Individual Savings Account,3,90,Linutrur,a tax-advantaged savings account available to British residents,y,description rewritten by hand: it must not contain the name of any swapped entity
+Europe,region,Europe|European,2,808,Fobrofen,a continent in the northern hemisphere,y,
+Standard & Poor's,other,S&P|Standard & Poor's,2,511,Beklokus,a financial services company that provides credit ratings and market indices,y,
+United States Dollar,currency,USD|United States Dollar,2,499,Tetruka,"the official American currency, used for trade around the world",y,description rewritten by hand: it must not contain the name of any swapped entity
+New York Stock Exchange,exchange,NYSE|New York Stock Exchange,2,160,Fosugrus,the largest American stock exchange,y,description rewritten by hand: it must not contain the name of any swapped entity
+Federal Housing Administration,agency,FHA|Federal Housing Administration,2,67,Grosomir,an American government agency that insures mortgages,y,description: 'U.S.' replaced by 'American'
+Bombay Stock Exchange,exchange,BSE|Bombay Stock Exchange,2,9,Tasubrol,the oldest Indian stock exchange,y,description rewritten by hand: it must not contain the name of any swapped entity
+Jakarta Composite Index,index,JCI|Jakarta Composite Index,2,3,Vigruru,a stock market index for the Indonesian stock exchange,y,
+China,country,China,1,680,Nafipan,a country in East Asia,y,
+Vanguard Group,company,Vanguard|Vanguard Group,1,398,Fifunar,a financial services company that offers investment funds,y,
+Securities and Exchange Commission,agency,SEC|Securities and Exchange Commission,1,349,Brasuzis,an American government agency that regulates the securities industry,y,description: 'U.S.' replaced by 'American'
+New York,city,NEW YORK|New York,1,343,Dunali,the largest American city and a global financial center,y,description rewritten by hand: it must not contain the name of any swapped entity
+Australia,country,Australia,1,295,Mirumix,a country in Oceania,y,
+Federal Reserve System,agency,Federal Reserve|Federal Reserve System,1,246,Kotaka,the American central banking system,y,description rewritten by hand: it must not contain the name of any swapped entity
+Traditional Individual Retirement Account,account,Traditional IRA|Traditional Individual Retirement Account,1,235,Rabrelix,a retirement savings account with tax-deferred growth,y,
+Investopedia,website,Investopedia,1,212,Pisuse,online financial education platform and dictionary,y,
+Federal Deposit Insurance Corporation,agency,FDIC|Federal Deposit Insurance Corporation,1,189,Milaso,an American government agency that insures bank deposits,y,description: 'U.S.' replaced by 'American'
+SPDR S&P 500 ETF Trust,fund,SPDR S&P 500 ETF Trust|SPY,1,128,Fevudo,an exchange-traded fund tracking the 500 largest listed American companies,y,description rewritten by hand: it must not contain the name of any swapped entity
+Bank of America Corporation,company,Bank Of America|Bank of America Corporation,1,123,Refugrel,large American multinational financial services company,y,
+Registered Retirement Savings Plan,account,RRSP|RRSPs|Registered Retirement Savings Plan|Registered Retirement Savings Plans,1,102,Fubriven,a Canadian retirement savings account with tax benefits,y,merged with Registered Retirement Savings Plans
+Apple Inc.,company,AAPL|Apple Inc.,1,99,Bobrorex,a multinational technology company,y,
+England,country,England,1,86,Vigibir,a constituent nation of the British island kingdom,y,description rewritten by hand: it must not contain the name of any swapped entity
+Canadian Dollar,currency,CAD|Canadian Dollar,1,85,Gebipi,the official currency of a large North American country,y,description rewritten by hand: it must not contain the name of any swapped entity
+British Pound,currency,British Pound|GBP,1,84,Vufizi,the official currency of the British island kingdom,y,description rewritten by hand: it must not contain the name of any swapped entity
+US Bank,company,US Bank,1,76,Zetrenan,a large American commercial bank,y,description rewritten by hand: it must not contain the name of any swapped entity
+Google Finance,website,Google Finance,1,75,Trasetis,a financial data and stock tracking website,y,
+Tax-Free Savings Account,account,TFSA|Tax-Free Savings Account,1,70,Zibedol,a Canadian savings account with tax-free growth,y,
+Singapore,country,Singapore,1,68,Klobavux,a city-state in Southeast Asia,y,
+Hong Kong,place,Hong Kong,1,65,Grumopes,"a dense financial hub on the southern coast of a large East Asian country, run as a special administrative region",y,description rewritten by hand: it must not contain the name of any swapped entity
+BMW,company,BMW,1,61,Buropil,a German maker of luxury cars and motorcycles,y,fixed by hand: the model gave the wrong company name (Bayer AG)
+Pakistan,country,Pakistan,1,60,Drununax,a country in South Asia,y,
+Motley Fool,company,Motley Fool,1,51,Dalobril,a financial education and media company,y,
+Western Union,company,Western Union,1,48,Divison,a global money transfer service,y,
+Ontario,place,Ontario,1,42,Bapato,the most populous Canadian province,y,description rewritten by hand: it must not contain the name of any swapped entity
+Financial Times Stock Exchange,exchange,FTSE|Financial Times Stock Exchange,1,36,Tromito,a British family of stock market indices,y,description rewritten by hand: it must not contain the name of any swapped entity
+Russell Investment Group,company,Russell|Russell Investment Group,1,35,Maplitir,a provider of stock market indices,y,
+SPDR Gold Shares,fund,GLD|SPDR Gold Shares,1,33,Gobropox,an exchange-traded fund tracking the price of gold,y,
+Philadelphia,place,Philadelphia,1,20,Lezados,a large city in the American state of Pennsylvania,y,description rewritten by hand: it must not contain the name of any swapped entity
+State Bank of India,company,SBI|State Bank of India,1,20,Zobrenex,a major Indian banking institution,y,
+Self-Invested Personal Pension,account,SIPP|Self-Invested Personal Pension,1,15,Gamukle,a retirement savings account available in Britain,y,description rewritten by hand: it must not contain the name of any swapped entity
+National Stock Exchange,exchange,NSE|National Stock Exchange,1,13,Paplebix,a major Indian stock exchange based in Mumbai,y,description rewritten by hand: it must not contain the name of any swapped entity
+Series I Savings Bonds,product,I-Bonds|I-bonds|Series I Savings Bonds,1,12,Fogotrel,government-issued inflation-protected savings bonds,y,
+Companies House,agency,Companies House,1,8,Klizobil,a British government agency that manages company registrations,y,description rewritten by hand: it must not contain the name of any swapped entity
+Edward Jones,company,Edward Jones,1,6,Grekires,a financial services firm offering investment advice,y,
+Joel Greenblatt,person,Joel Greenblatt,1,5,Favomin,"American investor, author, and professor known for his Magic Formula investing strategy",y,
+Lifetime Individual Savings Account,account,Lifetime ISA|Lifetime Individual Savings Account,1,4,Driduval,a British tax-advantaged savings account for first-time homebuyers,y,description rewritten by hand: it must not contain the name of any swapped entity
+Trading Places,product,Trading Places,1,4,Dogrevi,1983 American comedy film about stock market trading,y,
+Initial Public Offering,other,IPO|Initial Public Offering,5,301,Klofapol,the process of offering shares of a private company to the public for the first time,n,"generic term or concept, not a name (borderline; set y to include)"
+Foreign Exchange,other,FX|Foreign Exchange,3,232,Drifegil,the global market for trading currencies,n,"generic term or concept, not a name (borderline; set y to include)"
+Employee Stock Purchase Plan,product,ESPP|Employee Stock Purchase Plan,3,55,Bapopel,a company-sponsored plan allowing employees to buy stock,n,"generic term or concept, not a name (borderline; set y to include)"
+Limited Liability Company,other,LLC|Limited Liability Company|US LLC,2,342,Grutrogu,a business structure that provides personal liability protection for its owners,n,"generic term or concept, not a name (borderline; set y to include)"
+Gross Domestic Product,other,GDP|Gross Domestic Product,2,279,Midagros,a measure of the total value of goods and services produced within a country,n,"generic term or concept, not a name (borderline; set y to include)"
+Value Added Tax,tax,VAT|Value Added Tax,2,98,Sanofel,a consumption tax on goods and services,n,"generic term or concept, not a name (borderline; set y to include)"
+Automated Clearing House,other,ACH|Automated Clearing House,2,96,Getepex,an electronic network for financial transactions,n,"generic term or concept, not a name (borderline; set y to include)"
+United States Citizen,nationality,US Citizen|United States Citizen,2,68,Godrenel,a person who is a citizen of the United States,n,"generic term or concept, not a name (borderline; set y to include)"
+Tax Return,account,Tax Return,1,482,Kopokus,a form used to report income and calculate taxes owed,n,"generic term or concept, not a name (borderline; set y to include)"
+Sales Tax,tax,Sales Tax,1,142,Pumegra,a tax on the sale of goods and services,n,"generic term or concept, not a name (borderline; set y to include)"
+Credit Unions,company,Credit Unions,1,113,Mebrovax,member-owned financial cooperatives,n,"generic term or concept, not a name (borderline; set y to include)"
+S Corporation,company,S Corporation|S-Corp|S-corp,1,102,Klakupin,a type of corporation with pass-through taxation,n,"generic term or concept, not a name (borderline; set y to include)"
+Dollar Cost Averaging,product,Dollar Cost Averaging,1,82,Garenix,an investment strategy of regularly investing a fixed amount of money,n,"generic term or concept, not a name (borderline; set y to include)"
+Sole Proprietorship,company,Sole Proprietorship,1,74,Bovogrex,a business owned and operated by one individual,n,"generic term or concept, not a name (borderline; set y to include)"
+Treasury Bonds,product,Treasury Bonds,1,66,Nanekul,government-issued debt securities with long-term maturities,n,"generic term or concept, not a name (borderline; set y to include)"
+Current Account,account,Current Account,1,57,Marufex,a type of bank account used for everyday transactions,n,"generic term or concept, not a name (borderline; set y to include)"
+Wash Sale,other,Wash Sale,1,56,Renonir,tax rule that disallows loss deductions when similar securities are repurchased within 30 days,n,"generic term or concept, not a name (borderline; set y to include)"
+Free Cash Flow,product,FCF|Free Cash Flow,1,48,Feselul,a financial metric representing a company's cash flow after capital expenditures,n,"generic term or concept, not a name (borderline; set y to include)"
+Internal Revenue Service Form,account,IRS Form|Internal Revenue Service Form,1,21,Sotufun,a form used for tax reporting in the United States,n,"generic term or concept, not a name (borderline; set y to include)"
+Tax Loss Harvesting,other,Tax Loss Harvesting,1,18,Kiklesax,investment strategy to offset capital gains taxes by selling losing investments,n,"generic term or concept, not a name (borderline; set y to include)"
+Cap Rate,product,Cap Rate,1,15,Nugrego,a metric used to evaluate real estate investment potential,n,"generic term or concept, not a name (borderline; set y to include)"
+Initial Coin Offering,product,ICO|Initial Coin Offering,1,15,Bonotar,a fundraising method for cryptocurrencies or blockchain projects,n,"generic term or concept, not a name (borderline; set y to include)"
+Pattern Day Trader,other,Pattern Day Trader,1,14,Grebrupa,regulatory classification for traders who execute four or more day trades in a five-business-day period,n,"generic term or concept, not a name (borderline; set y to include)"
+Compound Annual Growth Rate,product,Compound Annual Growth Rate,1,9,Feviziro,a measure of growth over time for investments or markets,n,"generic term or concept, not a name (borderline; set y to include)"
+F-1 Student Visa,account,F-1|F-1 Student Visa,1,7,Vomazex,a visa category for international students in the United States,n,"generic term or concept, not a name (borderline; set y to include)"
+Brit,nationality,Brit,1,6,Dukofus,a person from the United Kingdom,n,"generic term or concept, not a name (borderline; set y to include)"

@@ -362,3 +362,27 @@ Why it matters: Under the strict rules, an embedding-free pipeline matched A4 on
 Evidence: runs/8dbc179fa6 (NFCorpus), runs/d8fe5f9aff (SciFact), runs/00fb868eaa (FiQA); configs/rerank_*.yaml; pre-registration entry of 2026-10-28. The NFCorpus run recorded commit 49f1f08, the other two c6cf2cb; the changes between them are sweep code only, outside the pipeline.
 Next: Decide with the human: deeper candidates (top 100) for FiQA, a stronger or tuned reranker, or A4+R as context (planned, lower priority). Nothing was tuned after seeing these results.
 Post: yes
+
+## 2026-10-28 · decision · M5 design v3: primary test named; FiQA yields 54 entities, not 200
+Who: human + Claude
+What: `docs/m5_codenames.md` now has the arms A0, A3, A0+R, A3+R and A0C (words plus character 3 to 5-grams) against A4, with H0/A5/router as context. **Primary test:** at 100% swapped, does any embedding-free arm match (lower bound of arm minus A4 above -0.01) or beat (above 0) A4; asked in condition A and in condition B, verdict reported for each; everything else is secondary (S1 A4 falls; S2 each arm's gap to A4 rises; lowest level at which an arm matches). Glossary: one short document per codename. Entities: FiQA dev questions name few things, so the list is 54 proper names (companies, agencies, exchanges, funds, countries and places, one person, named account types, currencies, websites) found by rule, filtered and described by the pinned model, then hand-corrected (merged duplicates, one wrong answer fixed, 20 descriptions rewritten so none contains a swapped name; every edit is in the note column); 26 generic terms (IPO, GDP, VAT, ...) are listed with keep=n. 92 of 500 dev questions contain at least one of the 54, and 14,647 documents change at 100%. With 92 questions the ranges are wide, so a failure to match is read as "A4 is better" only if the gap's upper bound is below 0.
+Why it matters: The expectation and the primary test are fixed before any swapped-corpus number exists; the smaller entity count changes what the test can detect.
+Evidence: docs/m5_codenames.md, configs/m5_entities.csv (draft, not frozen), src/thedu/m5/, src/thedu/prompts/m5_entities.txt
+Next: Human reviews configs/m5_entities.csv; then freeze it, build the swap, run.
+Post: yes
+
+## 2026-10-28 · finding · Deeper candidates: relevant documents at ranks 51-100 are few, and the top-50 ceiling is already far above A4
+Who: agent
+What: From existing runs (no new retrieval), score-zero filler excluded. Relevant documents at ranks 51-100 (A0 / A3): SciFact 35 / 27 (4.1% / 3.0% of questions have any; 2.8% / 2.6% have them only there); NFCorpus 406 / 607 (33.6% / 51.9%; 2.5% / 4.0% only there, because NFCorpus questions have many relevant documents); FiQA 73 / 108 (13.2% / 18.0%; 4.0% / 7.2% only there). Perfect-rerank ceiling, top 50 vs top 100 (A0 / A3): SciFact 0.896 vs 0.928 / 0.915 vs 0.942; NFCorpus 0.482 vs 0.522 / 0.564 vs 0.626; FiQA 0.503 vs 0.554 / 0.487 vs 0.565. Actual A4: 0.737, 0.337, 0.429. The reranker run's A0+R / A3+R scores were 0.739 / 0.739 (SciFact), 0.313 / 0.324 (NFCorpus), 0.389 / 0.377 (FiQA).
+Why it matters: Going to top 100 would lift the ceilings by 0.03 to 0.08, but the actual rerankers sit 0.16 to 0.22 below even the top-50 ceilings (SciFact 0.896 vs 0.739, NFCorpus 0.564 vs 0.324, FiQA 0.503 vs 0.389), so judge quality, not depth, is what limits them; doubling the candidates doubles rerank time and cost for a small ceiling gain. FiQA's A3 top-50 ceiling (0.487) is below A0's (0.503): the rewrite pushes some relevant documents down.
+Evidence: runs/analysis/depth-{scifact,nfcorpus,fiqa}.json; `thedu analyze depth`
+Next: A better judge (queued listwise LLM reranker on a fixed sample) before deeper candidates.
+Post: no
+
+## 2026-10-28 · decision · Queued, not run: LLM listwise reranker on a fixed sample, and A4+R overnight
+Who: human + Claude
+What: **(1) LLM listwise reranker**, to measure whether a better judge captures more headroom. Fixed 100-question sample per dataset (the same questions for every arm, drawn with a recorded seed). Candidates: top 50 of A0 and of A3, score-zero filler dropped, passages cut to about 100 words. One listwise prompt per question returning an order of the 50; the reranked top 50 sits above ranks 51-100 as in the bge run. Compared on the same 100 questions with A0+R / A3+R (bge), A4 and the Phase A top-50 ceiling; the measure is the share of headroom captured, (score - keyword baseline) / (top-50 ceiling - keyword baseline), with paired ranges. To be pre-registered (model, price, sample seed, primary test) before the first call. **Needs a decision first:** which hosted model and what budget. Rough size: 600 calls (100 questions x 3 datasets x 2 candidate sets) of about 8,000 input tokens is about 4.8M tokens, which is about $5 at $1 per million and about $14 at $3 per million, against the $10 total in configs/budget.yaml. **(2) A4+R**, context only: the bge reranker over A4's top 50 on all three datasets, configs/rerank_a4_{scifact,nfcorpus,fiqa}.yaml (written, not run); about 2.4 hours (SciFact 78 min, NFCorpus 27, FiQA 35 by the measured rates), overnight under caffeinate, with a completion notice this time.
+Why it matters: Phase A and the depth check say judge quality, not candidate depth, is the limit on reranking; (1) tests that directly, (2) tells the post whether a reranker also lifts embeddings.
+Evidence: runs/analysis/depth-*.json; configs/rerank_a4_*.yaml
+Next: Human picks the model and budget for (1); say when to start (2).
+Post: maybe

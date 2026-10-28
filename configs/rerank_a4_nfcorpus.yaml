@@ -1,0 +1,16 @@
+# QUEUED, not run. A4+R: the cross-encoder over A4's top 50, nfcorpus dev. Context only (does a reranker help embeddings too).
+# Same reranker settings as configs/rerank_nfcorpus.yaml. Run overnight under caffeinate with a completion notice.
+dataset: nfcorpus
+split: dev
+setups: [A4, A4R]
+bm25: {k1: 0.9, b: 0.4}
+dense: {model: Qwen/Qwen3-Embedding-0.6B, max_seq_length: 512}
+llm:
+  model: qwen/qwen3-14b
+  temperature: 0.0
+  seed: 7
+  max_tokens: 300
+  provider: {order: [DeepInfra], allow_fallbacks: false}
+planner: {grounded_prompt: grounded_v1, query_repeat: 3, feedback_k: 5, use_spike_cache: false}
+ranker: {rrf_k: 60, depth: 100}
+rerank: {model: BAAI/bge-reranker-v2-m3, depth: 50, max_length: 512}
