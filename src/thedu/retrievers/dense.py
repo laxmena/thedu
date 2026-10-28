@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import logging
+import math
 import shutil
+import time
 from collections.abc import Callable
 from pathlib import Path
 
@@ -15,6 +17,37 @@ from thedu.retrievers.order import tie_ranks, top_k
 log = logging.getLogger(__name__)
 
 SPIKE_MODEL = "Qwen/Qwen3-Embedding-0.6B"
+
+
+def embed_documents(model, texts: list[str], cache: Path, label: str, chunk: int = 2048) -> np.ndarray:
+    """Embed in chunks, each saved the moment it is done, so a crash or a closed laptop loses at most one chunk.
+    Rerunning picks up from the saved chunks. The finished matrix is saved to `cache` and the chunks removed."""
+    part = cache.with_suffix(".partial")
+    part.mkdir(parents=True, exist_ok=True)
+    cache.parent.mkdir(parents=True, exist_ok=True)
+    n_chunks = math.ceil(len(texts) / chunk)
+    pieces, t0, done_now = [], time.perf_counter(), 0
+    for i in range(n_chunks):
+        f = part / f"{i:05d}.npy"
+        want = min(chunk, len(texts) - i * chunk)
+        arr = np.load(f) if f.exists() else None
+        if arr is None or len(arr) != want:
+            arr = model.encode(texts[i * chunk : i * chunk + want], batch_size=16, normalize_embeddings=True,
+                               show_progress_bar=False)
+            tmp = f.with_name(f.name + ".tmp")
+            with open(tmp, "wb") as fh:
+                np.save(fh, arr)
+            tmp.replace(f)  # a chunk file is either whole or absent
+            done_now += want
+            elapsed = time.perf_counter() - t0
+            left = len(texts) - i * chunk - want
+            log.info("%s: chunk %d/%d done (%d of %d docs); %.0f docs/s; about %.0f min left", label, i + 1, n_chunks,
+                     i * chunk + want, len(texts), done_now / elapsed, left / (done_now / elapsed) / 60)
+        pieces.append(arr)
+    vecs = np.concatenate(pieces)
+    np.save(cache, vecs)
+    shutil.rmtree(part)
+    return vecs
 
 
 class DenseRetriever:
@@ -47,13 +80,7 @@ class DenseRetriever:
         if not cache.exists() and legacy.exists() and (model_name, max_seq_length) == (SPIKE_MODEL, 512):
             cache.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy(legacy, cache)
-        if cache.exists():
-            vecs = np.load(cache)
-        else:
-            log.info("embedding %d %s documents (one time, cached)", len(texts), dataset)
-            vecs = model.encode(texts, batch_size=16, normalize_embeddings=True, show_progress_bar=True)
-            cache.parent.mkdir(parents=True, exist_ok=True)
-            np.save(cache, vecs)
+        vecs = np.load(cache) if cache.exists() else embed_documents(model, texts, cache, dataset)
 
         def encode(queries: list[str]) -> np.ndarray:
             if query_instruction is None:

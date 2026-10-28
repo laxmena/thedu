@@ -88,6 +88,22 @@ def dev(
 
 
 @app.command()
+def embed(dataset: str) -> None:
+    """Embed a dataset's documents with the default embedding model and cache them (resumable, saved in chunks)."""
+    _logging()
+    from thedu.config import DenseConfig
+    from thedu.data import DATASETS, read_docs
+    from thedu.retrievers import DenseRetriever
+
+    if dataset not in DATASETS:
+        typer.echo(f"unknown dataset {dataset!r}; choose from {DATASETS}", err=True)
+        raise typer.Exit(1)
+    docs, cfg = read_docs(dataset), DenseConfig()
+    DenseRetriever.from_model(dataset, list(docs), list(docs.values()), cfg.model, cfg.max_seq_length)
+    typer.echo(f"{dataset}: {len(docs)} documents embedded and cached.")
+
+
+@app.command()
 def parity(restart: bool = typer.Option(False, help="Set an existing parity run aside and start again.")) -> None:
     """Frozen baselines (A0, A4) vs published scores on test; passes within the tolerance in tests/expected.yaml."""
     _logging()

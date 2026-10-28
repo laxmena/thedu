@@ -15,11 +15,12 @@ from thedu.prompts import load_prompt
 Setup = Literal["A0", "A2", "A3", "A4", "H0", "A5"]  # H0 = RRF(A0, A4); A5 = RRF(A3, A4)
 
 
-# The instruction MTEB gives Qwen3-Embedding for each dataset's queries (sources in tests/expected.yaml).
-# FiQA is absent on purpose: its instruction has not been checked against MTEB yet.
+# The instruction MTEB gives Qwen3-Embedding for each dataset's queries. SciFact and NFCorpus: sources in
+# tests/expected.yaml. FiQA: mteb/tasks/retrieval/eng/fi_qa2018_retrieval.py (mteb main, read 2026-10-27).
 TASK_INSTRUCTIONS = {
     "scifact": "Given a scientific claim, retrieve documents that support or refute the claim",
     "nfcorpus": "Given a question, retrieve relevant documents that best answer the question",
+    "fiqa": "Given a financial question, retrieve user replies that best answer the question",
 }
 
 

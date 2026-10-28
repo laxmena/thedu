@@ -62,3 +62,29 @@ def test_bm25_ranking_does_not_depend_on_k_even_with_ties():
         assert r.search(q, 10) == full[:10] and r.search(q, 37) == full[:37]
         tied += len({s for _, s in full[:11]}) < 11
     assert tied > 0  # the sample really contains ties
+
+
+def test_chunked_embedding_resumes_after_a_crash(tmp_path):
+    import types
+
+    from thedu.retrievers.dense import embed_documents
+
+    texts = [f"doc {i}" for i in range(10)]
+    calls = []
+
+    class Model:
+        def encode(self, batch, **kw):
+            calls.append(list(batch))
+            if len(calls) == 3:
+                raise RuntimeError("laptop closed")
+            return np.array([[float(t.split()[1]), 1.0] for t in batch])
+
+    cache = tmp_path / "x.npy"
+    with pytest.raises(RuntimeError):
+        embed_documents(Model(), texts, cache, "t", chunk=3)  # chunks 0 and 1 are saved, chunk 2 fails
+    assert not cache.exists() and len(list((tmp_path / "x.partial").glob("*.npy"))) == 2
+    calls.clear()
+    out = embed_documents(Model(), texts, cache, "t", chunk=3)  # resumes: only the last two chunks are embedded
+    assert len(calls) == 2 and calls[0] == texts[6:9]
+    assert out.shape == (10, 2) and out[:, 0].tolist() == list(map(float, range(10)))
+    assert not (tmp_path / "x.partial").exists()

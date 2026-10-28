@@ -46,5 +46,6 @@ def test_new_configs_use_the_task_instruction_and_spike_configs_stay_pinned():
     assert load_config(ROOT / "configs/champion.yaml").dense.query_instruction == "model-default"
     import pytest
 
+    assert resolve_instruction("fiqa", "task").startswith("Given a financial question")
     with pytest.raises(KeyError):
-        resolve_instruction("fiqa", "task")  # not verified against MTEB yet
+        resolve_instruction("brightx", "task")  # a dataset without a verified instruction stops instead of guessing
