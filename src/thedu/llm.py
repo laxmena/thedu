@@ -19,6 +19,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from threading import Lock
 from typing import Any
+from collections.abc import Callable
 
 from thedu.config import LLMConfig
 from thedu.judge import call_cost
@@ -40,6 +41,7 @@ class Result:
     latency_ms: float | None = None
     cached: bool = False
     failed: bool = False
+    estimated: bool = False  # tokens and cost counted offline, not billed by the provider
 
 
 @dataclass
@@ -51,9 +53,18 @@ class Usage:
     tokens_out: int = 0
     cost_usd: float = 0.0
     llm_ms: float = 0.0
-    uncosted_calls: int = 0  # calls with no recorded tokens (spike cache): cost unknown
+    uncosted_calls: int = 0  # calls with no tokens, recorded or estimated: cost unknown
+    estimated_calls: int = 0  # calls whose tokens and cost are offline estimates (spike cache)
     untimed_calls: int = 0
     failed_calls: int = 0
+
+    @classmethod
+    def combine(cls, usages: list[Usage]) -> Usage:
+        out = cls()
+        for u in usages:
+            for f in out.__dataclass_fields__:
+                setattr(out, f, getattr(out, f) + getattr(u, f))
+        return out
 
     def add(self, r: Result) -> None:
         self.calls += 1
@@ -61,6 +72,7 @@ class Usage:
         if r.cost_usd is None:
             self.uncosted_calls += 1
         else:
+            self.estimated_calls += r.estimated
             self.tokens_in += r.tokens_in or 0
             self.tokens_out += r.tokens_out or 0
             self.cost_usd += r.cost_usd
@@ -79,6 +91,7 @@ class Gateway:
     offline: bool = False  # a cache miss is an error (used by tests)
     budget_usd: float | None = None
     client: Any = None  # injectable for tests
+    estimator: Callable[[str, str], tuple[int, int]] | None = None  # prices spike-cache hits (see tokens.py)
     _cache: dict[str, dict] = field(default_factory=dict, init=False)
     _legacy: dict[str, str] = field(default_factory=dict, init=False)
     _lock: Lock = field(default_factory=Lock, init=False)
@@ -119,7 +132,8 @@ class Gateway:
                 e = self._cache[key]
                 return Result(e["text"], e["tokens_in"], e["tokens_out"], e["cost_usd"], e["latency_ms"], cached=True)
             if legacy_key is not None and attempt == 0 and (lk := f"{c.model}::{legacy_key}") in self._legacy:
-                return Result(self._legacy[lk], cached=True)
+                text = self._legacy[lk]
+                return self._price_legacy(prompt, text)
         if self.offline:
             raise GatewayError("cache miss while offline: the cached rewrites do not cover this call")
         self._ensure_ready()
@@ -130,6 +144,17 @@ class Gateway:
         return self._request(key, prompt)
 
     # ---------- internals ----------
+
+    def _price_legacy(self, prompt: str, text: str) -> Result:
+        if self.estimator is None:
+            return Result(text, cached=True)
+        try:
+            tin, tout = self.estimator(prompt, text)
+        except Exception as e:  # noqa: BLE001 - no tokenizer available: leave the call uncosted, say so
+            log.warning("could not estimate tokens (%s: %s); cost stays unknown", type(e).__name__, str(e)[:80])
+            return Result(text, cached=True)
+        cost = call_cost(tin, tout, self.rate.input_per_mtok_usd, self.rate.output_per_mtok_usd)
+        return Result(text, tin, tout, cost, None, cached=True, estimated=True)
 
     def _ensure_ready(self) -> None:
         with self._lock:

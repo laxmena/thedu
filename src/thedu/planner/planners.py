@@ -55,11 +55,18 @@ class GroundedPlanner:
         n = self.cfg.snippet_words
         return " ".join(words[:n]) + (" ..." if len(words) > n else "")
 
-    def plan(self, question: str, hits: list[Hit] | None = None) -> Plan:
-        if hits is None:
-            raise ValueError("the grounded planner needs the first search's results")
+    def _prompt(self, question: str, hits: list[Hit]) -> tuple[str, str]:
         shown = [d for d, _ in hits[: self.cfg.feedback_k]]
         snippets = "\n".join(f"[{i + 1}] {self._snippet(self.docs[d])}" for i, d in enumerate(shown))
         # The spike's key for round 1 (kept so its cached rewrites are reused).
         legacy = f"a3::{self.dataset}::x{self.cfg.query_repeat}::r1::{'|'.join(shown)}::{question}"
-        return _plan_from_terms(question, self.cfg, self.gateway, self.template.format(snippets=snippets, q=question), legacy)
+        return self.template.format(snippets=snippets, q=question), legacy
+
+    def prompt_for(self, question: str, hits: list[Hit]) -> str:
+        return self._prompt(question, hits)[0]
+
+    def plan(self, question: str, hits: list[Hit] | None = None) -> Plan:
+        if hits is None:
+            raise ValueError("the grounded planner needs the first search's results")
+        prompt, legacy = self._prompt(question, hits)
+        return _plan_from_terms(question, self.cfg, self.gateway, prompt, legacy)

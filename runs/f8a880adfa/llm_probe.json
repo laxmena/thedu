@@ -1,0 +1,5 @@
+{
+  "median_ms": 1228.9291045162827,
+  "n_calls": 30,
+  "why": "cached rewrites carry no latency; this is the median of fresh calls to the same model"
+}

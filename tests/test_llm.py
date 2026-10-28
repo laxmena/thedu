@@ -71,3 +71,24 @@ def test_spike_cache_is_read_by_legacy_key(tmp_path):
     g = gw(tmp_path, legacy_path=legacy, offline=True)
     r = g.call("any prompt", legacy_key="the question")
     assert r.text == "old terms" and r.cached and r.cost_usd is None
+
+
+def test_spike_cache_hits_are_priced_with_an_offline_estimate(tmp_path):
+    legacy = tmp_path / "rewrites.json"
+    legacy.write_text(json.dumps({"qwen/qwen3-14b::q": "old terms"}))
+    g = gw(tmp_path, legacy_path=legacy, offline=True, estimator=lambda prompt, text: (1000, 20))
+    r = g.call("p", legacy_key="q")
+    assert r.estimated and (r.tokens_in, r.tokens_out) == (1000, 20)
+    assert r.cost_usd == pytest.approx((1000 * 1.0 + 20 * 2.0) / 1e6)
+    from thedu.llm import Usage
+
+    u = Usage()
+    u.add(r)
+    assert u.estimated_calls == 1 and u.uncosted_calls == 0 and u.cost_usd == r.cost_usd
+
+
+def test_token_estimate_counts_the_chat_template_and_the_answer():
+    from thedu.tokens import estimate_tokens
+
+    tin, tout = estimate_tokens("hi", "hello world")
+    assert tin == 8 + 1 and tout == 2 + 1  # 8 template tokens + "hi"; "hello world" + end-of-turn

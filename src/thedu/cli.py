@@ -53,20 +53,35 @@ def dev(
 
     cfg = load_config(config)
     try:
-        run, m = run_dev(cfg, offline=offline, restart=restart)
+        run, m = run_dev(cfg, offline=offline, restart=restart, probe=not offline)
     except (GatewayError, VersionMismatch, RunRefused) as e:
         typer.echo(f"\n{e}", err=True)
         raise typer.Exit(1)
     typer.echo(f"\n{cfg.dataset}: {m['n_questions']} dev questions   run {run.path.name}")
-    typer.echo(f"{'setup':<6}{'nDCG@10':>9}  {'95% range':<18}{'Recall@100':>11}{'$/search':>10}{'latency':>9}")
+    typer.echo(f"{'setup':<6}{'nDCG@10':>9}  {'95% range':<18}{'Recall@100':>11}{'LLM $/search':>14}{'latency par/seq':>17}")
+    soft = False
     for s, v in m["setups"].items():
         nd, rc = v["ndcg10"], v["recall100"]
-        cost = "n/a" if v["cost_per_search_usd"] is None else f"{v['cost_per_search_usd']:.5f}"
-        lat = "n/a" if v["latency_relative_to_A0"] is None else f"{v['latency_relative_to_A0']:.1f}x"
-        typer.echo(f"{s:<6}{nd['mean']:>9.4f}  [{nd['lo']:.4f}, {nd['hi']:.4f}]{rc['mean']:>11.4f}{cost:>10}{lat:>9}")
-    typer.echo("\nPaired nDCG@10 difference vs A0 (same questions):")
-    for s, p in m["paired_vs_A0"].items():
-        typer.echo(f"  {s}: {p['ndcg10_diff']:+.4f}  [{p['lo']:+.4f}, {p['hi']:+.4f}]  wins {p['wins']}, losses {p['losses']}")
+        c = v["llm_cost_per_search_usd"]
+        cost = "n/a" if c is None else f"{'~' if v['llm_cost_is_estimate'] else ''}{c:.5f}"
+        lat = v["latency_relative_to_A0"]
+        lat = "n/a" if lat is None else f"{lat['parallel']:.0f}x / {lat['sequential']:.0f}x"
+        flag = "*" if v["recall100_is_soft"] else " "
+        soft = soft or v["recall100_is_soft"]
+        typer.echo(f"{s:<6}{nd['mean']:>9.4f}  [{nd['lo']:.4f}, {nd['hi']:.4f}]{rc['mean']:>10.4f}{flag}{cost:>14}{lat:>17}")
+    if soft:
+        typer.echo("* soft: many questions match fewer than 100 documents, so the rest of this BM25 top 100 is arbitrary filler.")
+    if any(v["llm_cost_is_estimate"] for v in m["setups"].values()):
+        typer.echo("~ estimated offline from cached rewrites (hidden thinking tokens not counted).")
+    typer.echo("\nPaired nDCG@10 difference (second minus first, same questions, 95% range):")
+    for name, p in m["paired"].items():
+        typer.echo(f"  {name}: {p['ndcg10_diff']:+.4f}  [{p['lo']:+.4f}, {p['hi']:+.4f}]  wins {p['wins']}, losses {p['losses']}")
+    for name, e in m["extras"].items():
+        if isinstance(e, dict):
+            typer.echo(f"  {name}: {e['rescued']} of {e['a4_misses']} A4 misses rescued; "
+                       f"{e['pushed_down']} of {e['a4_correct_at_1']} A4 correct-at-#1 pushed down")
+        else:
+            typer.echo(f"  {name}: {e:.4f}")
     typer.echo(f"\nSaved to {run.path}.")
 
 

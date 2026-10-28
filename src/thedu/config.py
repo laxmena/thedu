@@ -12,7 +12,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from thedu.prompts import load_prompt
 
-Setup = Literal["A0", "A2", "A3", "A4"]
+Setup = Literal["A0", "A2", "A3", "A4", "H0", "A5"]  # H0 = RRF(A0, A4); A5 = RRF(A3, A4)
 
 
 # The instruction MTEB gives Qwen3-Embedding for each dataset's queries (sources in tests/expected.yaml).
@@ -73,6 +73,11 @@ class PlannerConfig(_Frozen):
     max_fallback_rate: float = 0.05  # above this the run refuses to report
 
 
+class RankerConfig(_Frozen):
+    rrf_k: int = Field(60, ge=1)  # the standard value; tuned later, not in M3
+    depth: int = Field(100, ge=1)  # top results of each list that are fused, and kept
+
+
 class RunConfig(_Frozen):
     dataset: Literal["scifact", "nfcorpus", "fiqa"]
     split: Literal["dev", "test"] = "dev"  # `thedu dev` refuses "test"; only `thedu parity` runs it
@@ -84,6 +89,7 @@ class RunConfig(_Frozen):
     dense: DenseConfig = DenseConfig()
     llm: LLMConfig = LLMConfig()
     planner: PlannerConfig = PlannerConfig()
+    ranker: RankerConfig = RankerConfig()
     pricing: str = "configs/pricing.yaml"
 
     def prompt_texts(self) -> dict[str, str]:

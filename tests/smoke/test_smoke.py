@@ -14,8 +14,8 @@ def test_spike_a4_reproduces_on_all_809_dev_questions():
 
 
 def test_twenty_questions_end_to_end():
-    cfg = load_config(ROOT / "configs/champion.yaml").model_copy(update={"n": 20})
+    cfg = load_config(ROOT / "configs/champion.yaml").model_copy(update={"n": 20, "setups": ["A0", "A4", "A3", "H0", "A5"]})
     _, m = run_dev(cfg, offline=True)
-    assert m["n_questions"] == 20 and set(m["setups"]) == {"A0", "A4", "A3"}
+    assert m["n_questions"] == 20 and set(m["setups"]) == {"A0", "A4", "A3", "H0", "A5"}
     for s in m["setups"].values():
         assert 0 < s["ndcg10"]["mean"] <= 1 and 0 < s["recall100"]["mean"] <= 1

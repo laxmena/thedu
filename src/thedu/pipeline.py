@@ -1,10 +1,13 @@
-"""Run one config on dev questions: retrieve, plan, rank, judge, and save as it goes."""
+"""Run one config on its questions: retrieve, plan, rank, judge, and save as it goes."""
 
 from __future__ import annotations
 
+import json
 import logging
+import statistics
 import time
 from concurrent.futures import ThreadPoolExecutor
+from dataclasses import dataclass
 from pathlib import Path
 
 import yaml
@@ -13,26 +16,45 @@ from thedu import data
 from thedu.config import RunConfig, resolve_instruction
 from thedu.judge import question_scores
 from thedu.llm import Gateway, Usage
-from thedu.paths import ROOT, SPIKE_DIR, runs_dir
+from thedu.paths import CONFIGS_DIR, ROOT, SPIKE_DIR, runs_dir
 from thedu.planner import BlindPlanner, GroundedPlanner
 from thedu.pricing import load_pricing
-from thedu.ranker import rank
+from thedu.ranker import RrfRanker, drop_zero_scores
 from thedu.registry import RunDir
 from thedu.report import summarize
 from thedu.retrievers import Bm25Retriever, DenseRetriever
+from thedu.tokens import estimate_tokens
 
 log = logging.getLogger(__name__)
 
-ORDER = ["A0", "A4", "A2", "A3"]
+ORDER = ["A0", "A4", "A2", "A3", "H0", "A5"]
+# What each setup is built from. H0 and A5 fuse two components with the ranker.
+DEPS = {"A0": ("A0",), "A4": ("A4",), "A2": ("A2",), "A3": ("A3",), "H0": ("A0", "A4"), "A5": ("A3", "A4")}
+BM25_BASED = {"A0", "A2", "A3"}  # lists whose zero-score filler is dropped before fusion
+PROBE_QUESTIONS = 30
+PROBE_ATTEMPT = 9  # a salt that skips both caches, so the probe measures real calls
 
 
 class RunRefused(RuntimeError):
     """The run finished but its numbers cannot be trusted (too many fallbacks)."""
 
 
-def make_gateway(cfg: RunConfig, offline: bool = False) -> tuple[Gateway, dict[str, float]]:
-    from thedu.paths import CONFIGS_DIR
+@dataclass
+class Component:
+    hits: list[tuple[str, float]]
+    usage: Usage
+    fallback: bool
+    retrieval_ms: float
+    queries: list[str]
 
+
+def fuse(ranker: RrfRanker, named_lists: dict[str, list[tuple[str, float]]], question: str) -> list[tuple[str, float]]:
+    """Fuse component lists. BM25-based lists lose their zero-score filler first; embedding lists are kept whole."""
+    lists = [drop_zero_scores(h) if name in BM25_BASED else h for name, h in named_lists.items()]
+    return ranker.rank(lists, question)
+
+
+def make_gateway(cfg: RunConfig, offline: bool = False) -> tuple[Gateway, dict[str, float]]:
     pricing = load_pricing(cfg.pricing)
     rate = pricing.rate(cfg.llm.model)
     budget = yaml.safe_load((CONFIGS_DIR / "budget.yaml").read_text())["total_usd"]
@@ -40,20 +62,27 @@ def make_gateway(cfg: RunConfig, offline: bool = False) -> tuple[Gateway, dict[s
         cfg.llm, rate, cache_path=ROOT / "runs" / "cache" / "llm.jsonl",
         legacy_path=SPIKE_DIR / "rewrites.json" if cfg.planner.use_spike_cache else None,
         offline=offline, budget_usd=budget,
+        estimator=estimate_tokens if cfg.planner.use_spike_cache else None,  # spike-cache calls have no token split
     )
     return gw, {"input": rate.input_per_mtok_usd, "output": rate.output_per_mtok_usd}
 
 
-def run_dev(cfg: RunConfig, offline: bool = False, restart: bool = False, root: Path | None = None) -> tuple[RunDir, dict]:
+def run_dev(cfg: RunConfig, offline: bool = False, restart: bool = False, root: Path | None = None,
+            probe: bool = False) -> tuple[RunDir, dict]:
     if cfg.split != "dev":
         raise PermissionError("`thedu dev` runs dev questions only. Test runs belong to `thedu parity` and `thedu test-eval`.")
     docs, queries, qrels = data.load(cfg.dataset, cfg.split)
-    return execute(cfg, docs, queries, qrels, offline, restart, root)
+    return execute(cfg, docs, queries, qrels, offline, restart, root, probe=probe)
 
 
 def execute(cfg: RunConfig, docs: dict[str, str], queries: dict[str, str], qrels: dict[str, dict[str, int]],
-            offline: bool = False, restart: bool = False, root: Path | None = None, kind: str = "dev") -> tuple[RunDir, dict]:
-    """Run a config's setups on the given questions and save the run. Callers decide which split's answers to pass."""
+            offline: bool = False, restart: bool = False, root: Path | None = None, kind: str = "dev",
+            probe: bool = False) -> tuple[RunDir, dict]:
+    """Run a config's setups on the given questions and save the run. Callers decide which split's answers to pass.
+
+    probe: if some LLM calls have no recorded latency (the spike cache), time a few fresh calls so the
+    latency of setups that include the rewrite can still be reported relative to A0.
+    """
     qids = data.select_qids(queries, cfg.n, cfg.seed)
     doc_ids, texts = list(docs), list(docs.values())
     setups = [s for s in ORDER if s in cfg.setups]
@@ -67,57 +96,80 @@ def execute(cfg: RunConfig, docs: dict[str, str], queries: dict[str, str], qrels
 
     bm25 = Bm25Retriever(doc_ids, texts, cfg.bm25.k1, cfg.bm25.b)
     dense_hits: dict[str, tuple[list, float]] = {}
-    if "A4" in setups and any("A4" in s for s in todo.values()):
+    need_dense = [q for q, ss in todo.items() if any("A4" in DEPS[s] for s in ss)]
+    if need_dense:
         dense = DenseRetriever.from_model(
             cfg.dataset, doc_ids, texts, cfg.dense.model, cfg.dense.max_seq_length,
             resolve_instruction(cfg.dataset, cfg.dense.query_instruction))
-        need = [q for q, s in todo.items() if "A4" in s]
         t0 = time.perf_counter()
-        found = dense.search_many([queries[q] for q in need], cfg.k)
-        per_q_ms = (time.perf_counter() - t0) * 1000 / len(need)
-        dense_hits = {q: (h, per_q_ms) for q, h in zip(need, found)}
+        found = dense.search_many([queries[q] for q in need_dense], cfg.k)
+        per_q_ms = (time.perf_counter() - t0) * 1000 / len(need_dense)
+        dense_hits = {q: (h, per_q_ms) for q, h in zip(need_dense, found)}
     blind = BlindPlanner(gateway, cfg.planner) if "A2" in setups else None
-    grounded = GroundedPlanner(gateway, cfg.planner, docs, cfg.dataset) if "A3" in setups else None
+    grounded = GroundedPlanner(gateway, cfg.planner, docs, cfg.dataset) if {"A3", "A5"} & set(setups) else None
+    ranker = RrfRanker(cfg.ranker.rrf_k, cfg.ranker.depth)
 
     def timed_search(text: str):
         t0 = time.perf_counter()
         hits = bm25.search(text, cfg.k)
         return hits, (time.perf_counter() - t0) * 1000
 
-    def do_question(qid: str) -> None:
+    def build(name: str, qid: str) -> Component:
         q = queries[qid]
-        base = None
+        if name == "A0":
+            hits, ms = timed_search(q)
+            return Component(hits, Usage(), False, ms, [q])
+        if name == "A4":
+            hits, ms = dense_hits[qid]
+            return Component(hits, Usage(), False, ms, [q])
+        ms = 0.0
+        if name == "A2":
+            plan = blind.plan(q)
+        else:  # A3
+            first, ms = timed_search(q)
+            plan = grounded.plan(q, first)
+        lists = []
+        for text in plan.queries:
+            h, t = timed_search(text)
+            lists.append(h)
+            ms += t
+        return Component(ranker.rank(lists, q), plan.usage, plan.fallback, ms, plan.queries)
+
+    def do_question(qid: str) -> None:
+        built: dict[str, Component] = {}
+
+        def comp(name: str) -> Component:
+            if name not in built:
+                built[name] = build(name, qid)
+            return built[name]
+
         for s in todo[qid]:
-            usage, fallback, ms, searched = Usage(), False, 0.0, [q]
-            if s == "A0":
-                hits, ms = timed_search(q)
-            elif s == "A4":
-                hits, ms = dense_hits[qid]
+            parts = [comp(d) for d in DEPS[s]]
+            rank_ms = 0.0
+            if len(parts) == 1:
+                hits = parts[0].hits
             else:
-                if s == "A2":
-                    plan = blind.plan(q)
-                else:
-                    first, ms = timed_search(q)
-                    plan = grounded.plan(q, first)
-                usage, fallback, searched = plan.usage, plan.fallback, plan.queries
-                lists = []
-                for text in plan.queries:
-                    h, t = timed_search(text)
-                    lists.append(h)
-                    ms += t
-                hits = rank(lists, q)
-            sc = question_scores(hits, qrels[qid])
+                t0 = time.perf_counter()
+                hits = fuse(ranker, {d: c.hits for d, c in zip(DEPS[s], parts)}, queries[qid])
+                rank_ms = (time.perf_counter() - t0) * 1000
+            usage = Usage.combine([c.usage for c in parts])
             run.append(s, qid, hits, {
-                **sc, "llm_calls": usage.calls, "tokens_in": usage.tokens_in, "tokens_out": usage.tokens_out,
+                **question_scores(hits, qrels[qid]),
+                "llm_calls": usage.calls, "tokens_in": usage.tokens_in, "tokens_out": usage.tokens_out,
                 "cost_usd": usage.cost_usd, "uncosted_calls": usage.uncosted_calls,
-                "untimed_calls": usage.untimed_calls, "llm_ms": usage.llm_ms, "retrieval_ms": ms,
-                "fallback": fallback, "queries": searched,
+                "estimated_calls": usage.estimated_calls, "untimed_calls": usage.untimed_calls,
+                "parts": {d: {"retrieval_ms": c.retrieval_ms, "llm_ms": c.usage.llm_ms, "untimed": c.usage.untimed_calls}
+                          for d, c in zip(DEPS[s], parts)},
+                "rank_ms": rank_ms,
+                "fallback": any(c.fallback for c in parts),
+                "queries": next((c.queries for d, c in zip(DEPS[s], parts) if d in ("A2", "A3")), [queries[qid]]),
             })
 
     try:
         with ThreadPoolExecutor(max_workers=cfg.llm.workers) as pool:
             list(pool.map(do_question, todo))  # re-raises the first error
-        metrics = summarize(run.rows, setups, qids)
+        probe_ms = _llm_probe(run, gateway, grounded, bm25, queries, qids, cfg.k) if probe and not offline else _saved_probe(run)
+        metrics = summarize(run.rows, setups, qids, cfg.dataset, probe_ms)
         worst = max((metrics["setups"][s]["fallbacks"] for s in setups), default=0) / max(len(qids), 1)
         if worst > cfg.planner.max_fallback_rate:
             run.finish(metrics, status="refused")
@@ -130,3 +182,31 @@ def execute(cfg: RunConfig, docs: dict[str, str], queries: dict[str, str], qrels
         return run, metrics
     finally:
         run.close()
+
+
+def _saved_probe(run: RunDir) -> float | None:
+    f = run.path / "llm_probe.json"
+    return json.loads(f.read_text())["median_ms"] if f.exists() else None
+
+
+def _llm_probe(run: RunDir, gateway: Gateway, grounded: GroundedPlanner | None, bm25: Bm25Retriever,
+               queries: dict[str, str], qids: list[str], k: int) -> float | None:
+    """Median latency of a few fresh rewrite calls, used where cached calls have no recorded latency."""
+    untimed = any(r["untimed_calls"] for r in run.rows.values())
+    if not untimed or grounded is None:
+        return _saved_probe(run)
+    if (saved := _saved_probe(run)) is not None:
+        return saved
+    times = []
+    for qid in qids[:PROBE_QUESTIONS]:
+        prompt = grounded.prompt_for(queries[qid], bm25.search(queries[qid], k))
+        r = gateway.call(prompt, attempt=PROBE_ATTEMPT)
+        if not r.failed and r.latency_ms is not None:
+            times.append(r.latency_ms)
+    if not times:
+        return None
+    median = statistics.median(times)
+    (run.path / "llm_probe.json").write_text(json.dumps(
+        {"median_ms": median, "n_calls": len(times),
+         "why": "cached rewrites carry no latency; this is the median of fresh calls to the same model"}, indent=2))
+    return median

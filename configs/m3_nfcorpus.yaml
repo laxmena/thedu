@@ -1,0 +1,11 @@
+# M3 measurement on nfcorpus dev: what does the grounded rewrite add on top of embeddings?
+# H0 = RRF(A0, A4), the hybrid to beat. A5 = RRF(A3, A4). Not tuned: RRF k=60, equal weights.
+# Rewrites come from the spike's cache (use_spike_cache), so A3 is exactly the spike's A3.
+dataset: nfcorpus
+split: dev
+setups: [A0, A3, A4, H0, A5]
+bm25: {k1: 0.9, b: 0.4}
+dense: {model: Qwen/Qwen3-Embedding-0.6B, max_seq_length: 512}   # query_instruction defaults to the MTEB task instruction
+llm: {model: qwen/qwen3-14b, temperature: 0.0, seed: 7, max_tokens: 300}
+planner: {grounded_prompt: grounded_v1, query_repeat: 3, feedback_k: 5, use_spike_cache: true}
+ranker: {rrf_k: 60, depth: 100}
