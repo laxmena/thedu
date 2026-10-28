@@ -323,3 +323,37 @@ def analyze_diagnose(run: str = typer.Option(..., help="A run with A0, A3 and A4
                    f"{v['ndcg10']:>9.4f}{c['mean']:>10.4f} [{c['lo']:.3f},{c['hi']:.3f}]{v['perfect_rerank_ndcg10_excluding_zero_score']:>12.4f}")
     for s, p in r["paired_ceiling_vs_a4"].items():
         typer.echo(f"  perfect rerank of {s} minus A4 (actual): {p['diff']:+.4f} [{p['lo']:+.4f}, {p['hi']:+.4f}]")
+
+
+sweep_app = typer.Typer(no_args_is_help=True, help="Keyword-index sweep, RM3, embedding-filtered feedback (dev only, no LLM calls).")
+app.add_typer(sweep_app, name="sweep")
+
+
+def _sweep(name: str, dataset: str | None, fn_name: str) -> None:
+    import thedu.sweeps as sw
+
+    _logging()
+    for d in ([dataset] if dataset else sw.DATASETS):
+        typer.echo(f"{name} on {d}: saved {getattr(sw, fn_name)(d)}")
+    typer.echo(f"\nKeep rule: paired nDCG@10 range above zero (lower bound > 0) on at least two of three datasets.")
+    for label, e in sw.keep_verdicts(name).items():
+        per = "  ".join(f"{d[:4]} {p['diff']:+.4f}[{p['lo']:+.4f},{p['hi']:+.4f}]" for d, p in e["datasets"].items())
+        typer.echo(f"  {'KEEP' if e['kept'] else 'drop'}  {label:<28}{per}")
+
+
+@sweep_app.command("index")
+def sweep_index(dataset: str = typer.Option(None, help="One dataset; default all three.")) -> None:
+    """The keyword-index sweep, one change at a time against the current A0."""
+    _sweep("index", dataset, "index_sweep")
+
+
+@sweep_app.command("rm3")
+def sweep_rm3(dataset: str = typer.Option(None)) -> None:
+    """RM3 pseudo-relevance feedback (no model), vs A0, A3 and A4."""
+    _sweep("rm3", dataset, "rm3_sweep")
+
+
+@sweep_app.command("efb")
+def sweep_efb(dataset: str = typer.Option(None)) -> None:
+    """Embedding-filtered feedback (an embedding model at query time only, as a term filter)."""
+    _sweep("efb", dataset, "efb_sweep")
