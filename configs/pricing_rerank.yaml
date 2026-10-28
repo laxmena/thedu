@@ -1,0 +1,13 @@
+# Reference hosted price for reranking, US dollars per million tokens. Local rerank runs are priced at this rate;
+# nothing is free. Not read by code yet (configs/pricing.yaml covers the rewrite LLM).
+fetched: "2026-10-28"
+source: "https://docs.voyageai.com/docs/pricing (rerank-2.5: $0.05 per 1M tokens; the page shows 'Updated 29 days ago', no absolute date)"
+model: voyage rerank-2.5
+price_per_mtok_usd: 0.05
+tokens_billed: "(query tokens x number of documents) + sum of tokens in all documents (formula from docs.voyageai.com/docs/reranker, defined there as total_tokens)"
+note: >
+  Voyage's 200M free tokens are ignored: the reference rate is the list price.
+  Cross-check, secondary sources only (not a vendor page I could read): Cohere Rerank 3.5 about $2.00 per 1,000 searches
+  (one search = a query with up to 100 documents, chunks of 500 tokens count as documents). Cohere's own pricing page
+  fetched 2026-10-28 listed no per-search price. Local runs count tokens with the bge-reranker tokenizer, an approximation
+  of Voyage's tokenizer.

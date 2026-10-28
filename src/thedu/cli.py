@@ -293,3 +293,30 @@ def analyze_router(run: str = typer.Option(..., help="The M3-style run id with A
         typer.echo(f"  router vs {k}: {p['diff']:+.4f} [{p['lo']:+.4f}, {p['hi']:+.4f}] wins {p['wins']}, losses {p['losses']}")
     typer.echo(f"\n{'SUCCESS' if r['success'] else 'NOT MET'}: router minus A4, lower bound {r['paired']['A4']['lo']:+.4f} "
                f"(needs > {r['criterion']['paired_vs_free_lower_bound_above']})")
+
+
+@analyze_app.command("diagnose")
+def analyze_diagnose(run: str = typer.Option(..., help="A run with A0, A3 and A4 (the M3 setups)."),
+                     dataset: str = typer.Option(...)) -> None:
+    """Where the relevant documents sit in the top 100, and the perfect-reranker ceiling. No LLM calls."""
+    import json
+
+    from thedu import data
+    from thedu.analysis.diagnosis import diagnose, read_trec
+    from thedu.analysis.steps import OUT
+    from thedu.paths import ROOT
+
+    _, queries, qrels = data.load(dataset, "dev")
+    qids = sorted(queries)
+    rankings = {s: read_trec(ROOT / "runs" / run / f"{s}.trec") for s in ("A0", "A3", "A4")}
+    r = diagnose(rankings, qrels, qids)
+    OUT.mkdir(parents=True, exist_ok=True)
+    (OUT / f"diagnosis-{dataset}.json").write_text(json.dumps({"run": run, "dataset": dataset, **r}, indent=2))
+    typer.echo(f"{dataset} dev, {r['n_questions']} questions (run {run}). Best-placed relevant document:")
+    typer.echo(f"  {'setup':<6}{'top 10':>8}{'11-100':>8}{'missing':>9}{'nDCG@10':>9}{'perfect rerank':>22}{'excl. zero-score':>18}")
+    for s, v in r["setups"].items():
+        c = v["perfect_rerank_ndcg10"]
+        typer.echo(f"  {s:<6}{v['share']['top10']:>8.1%}{v['share']['ranks11-100']:>8.1%}{v['share']['missing']:>9.1%}"
+                   f"{v['ndcg10']:>9.4f}{c['mean']:>10.4f} [{c['lo']:.3f},{c['hi']:.3f}]{v['perfect_rerank_ndcg10_excluding_zero_score']:>12.4f}")
+    for s, p in r["paired_ceiling_vs_a4"].items():
+        typer.echo(f"  perfect rerank of {s} minus A4 (actual): {p['diff']:+.4f} [{p['lo']:+.4f}, {p['hi']:+.4f}]")

@@ -103,3 +103,17 @@ def test_router_config_is_frozen_and_says_what_was_pre_registered():
     r = load_frozen_rules("configs/router.yaml")
     assert (r["feature"], r["op"], r["threshold"], r["free"], r["paid"]) == ("mean_idf_norm", ">=", 0.448, "A4", "A5")
     assert r["criterion"]["paired_vs_free_lower_bound_above"] == 0.0
+
+
+def test_diagnosis_placement_and_perfect_rerank():
+    from thedu.analysis.diagnosis import diagnose, perfect_rerank, placement
+
+    rels = {"r1": 1, "r2": 2}
+    ranked = [f"x{i}" for i in range(12)] + ["r1"]
+    assert placement(ranked, rels) == "ranks11-100"
+    assert placement(["r2"] + ranked, rels) == "top10" and placement(["x"], rels) == "missing"
+    assert perfect_rerank(["a", "r1", "r2"], rels) == ["r2", "r1", "a"]
+    runs = {"A0": {"q": [("a", 1.0), ("r1", 0.5), ("r2", 0.0)]}, "A4": {"q": [("r2", 1.0), ("r1", 0.9)]}}
+    out = diagnose(runs, {"q": rels}, ["q"])
+    assert out["setups"]["A4"]["ndcg10"] == pytest.approx(1.0) and out["setups"]["A0"]["perfect_rerank_ndcg10"]["mean"] == pytest.approx(1.0)
+    assert out["setups"]["A0"]["perfect_rerank_ndcg10_excluding_zero_score"] < 1.0  # r2 sat in zero-score filler

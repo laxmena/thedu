@@ -298,3 +298,27 @@ Why it matters: Every post number can now come from one provider, and the choice
 Evidence: runs/eed781f01f, runs/e9b3631de6, runs/analysis/router-frozen-nfcorpus.json, configs/m3d_*_pinned.yaml
 Next: Use the pinned runs for the post.
 Post: yes, one line
+
+## 2026-10-28 · decision · The goal is an embedding-free pipeline that matches or beats A4; "strict" rules
+Who: human
+What: (1) The project goal changes: build a pipeline without embeddings that matches or beats A4. Embeddings are the benchmark, not a component; H0 and A5 stay only as context. (2) "Strict" rules: a keyword index only, with no model used at index time (no document expansion). All intelligence is at query time: query rewriting and reranking are allowed. Document expansion (doc2query) goes to future work.
+Why it matters: It makes the question sharp and the comparison fair: any gain has to come from what happens after the question arrives, and the index stays the same plain BM25 index everywhere.
+Evidence: none yet; decided after the M3/M3c results (runs 890ad993c9, eed781f01f, e9b3631de6)
+Next: Phase A diagnosis from existing runs (where the relevant documents sit, perfect-reranker ceiling), then the M5 design is re-cast around embedding-free arms (A0, A3, A0+reranker, A3+reranker) against A4.
+Post: yes, this is the post's framing
+
+## 2026-10-28 · finding · Phase A: a perfect reranker over BM25's top 100 would beat A4 on all three datasets, but FiQA's candidate pool is the limit
+Who: agent
+What: Dev, pinned-provider runs (SciFact eed781f01f 809 q, NFCorpus e9b3631de6 324 q, FiQA 890ad993c9 500 q). Share of questions whose best relevant document is in the top 10 / at ranks 11-100 / not in the top 100: SciFact A0 83.2/9.9/6.9%, A3 84.1/10.3/5.7%, A4 85.3/10.3/4.4%. NFCorpus A0 65.4/10.5/24.1%, A3 67.6/14.2/18.2%, A4 72.5/14.8/12.7%. FiQA A0 48.0/21.8/30.2%, A3 46.2/23.2/30.6%, A4 69.4/18.2/12.4%. nDCG@10 if the top 100 were ordered perfectly by the answer key (A0 / A3 / A4): SciFact 0.928 / 0.942 / 0.954 (actual A4 0.737); NFCorpus 0.522 / 0.626 / 0.661 (actual A4 0.337); FiQA 0.554 / 0.565 / 0.793 (actual A4 0.429). Perfect-rerank A0 minus actual A4: SciFact +0.191 (range 0.167 to 0.214), NFCorpus +0.185 (0.155 to 0.214), FiQA +0.125 (0.094 to 0.158); for A3: +0.205, +0.289, +0.136. To tie A4, a reranker over A0's candidates must capture about 18% (SciFact), 22% (NFCorpus) and 58% (FiQA) of the gap between A0's actual score and its ceiling (arithmetic from the figures above). The rewrite helps the candidate pool on NFCorpus (missing 24.1 to 18.2%) and a little on SciFact (6.9 to 5.7%), not on FiQA (30.2 to 30.6%). No relevant document sits in BM25's zero-score filler on NFCorpus, so excluding filler changes no ceiling.
+Why it matters: On SciFact and NFCorpus the headroom is large and the share needed to catch A4 is small, so a reranker is a fair bet. On FiQA, 30% of questions have no relevant document in BM25's top 100, and a perfect reranker would still reach only 0.554, so a reranker must be very good (58% of the headroom) and the candidate pool is the real limit. These are ceilings, not predictions: no reranker is perfect, and the ceiling uses the answer key.
+Evidence: runs/analysis/diagnosis-{scifact,nfcorpus,fiqa}.json; `thedu analyze diagnose`; src/thedu/analysis/diagnosis.py (new code path; earlier results untouched)
+Next: Time the cross-encoder on keyword candidates (top 50 of A0 and A3), then re-cast M5. A candidate pool larger than 50 (top 100) is worth considering for FiQA.
+Post: yes
+
+## 2026-10-28 · decision · Reference price for reranking: Voyage rerank-2.5, $0.05 per million tokens
+Who: agent
+What: `configs/pricing_rerank.yaml` records the reference hosted rerank rate: Voyage rerank-2.5 at $0.05 per 1M tokens, billed on (query tokens x documents) + total document tokens. Source: https://docs.voyageai.com/docs/pricing, read 2026-10-28 (the page shows "Updated 29 days ago", no absolute date). The 200M free tokens are ignored. Cohere's own pricing page, read the same day, listed no per-search price for Rerank 3.5; about $2.00 per 1,000 searches comes from secondary sources only, kept as a cross-check.
+Why it matters: A local reranker is never free in any reported number (AGENTS.md); this fixes the rate before any reranked result exists.
+Evidence: configs/pricing_rerank.yaml
+Next: Token counts will use the bge-reranker tokenizer, an approximation of Voyage's. Re-check the price before the post.
+Post: no
