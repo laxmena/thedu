@@ -9,9 +9,10 @@ from thedu.judge import bootstrap_interval, cost_per_search, paired_difference, 
 # (base, other): "other vs base" is other minus base, question by question.
 PAIRS = [("H0", "A5"), ("A4", "A5"), ("A4", "H0"), ("A3", "A5"),
          ("A4", "A3R"), ("A4", "A0R"), ("A3", "A3R"), ("A0R", "A3R"), ("A4", "A4R"),
-         ("A0R", "A0L"), ("A3R", "A3L"), ("A4", "A3L"), ("A4", "A0L"), ("A4R", "A3L"), ("A4R", "A0L"), ("A3", "A3L")]
+         ("A0R", "A0L"), ("A3R", "A3L"), ("A4", "A3L"), ("A4", "A0L"), ("A4R", "A3L"), ("A4R", "A0L"), ("A3", "A3L"),
+         ("A4L", "A3L"), ("A4L", "A0L"), ("A4", "A4L"), ("A4R", "A4L")]
 PRIMARY = {"A3R vs A4", "A3L vs A3R"}  # pre-registered (JOURNAL.md, 2026-10-28); every other comparison involving a reranker is secondary
-USES_EMBEDDINGS = {"A4", "H0", "A5", "A4R"}  # embedding search has no reference price yet
+USES_EMBEDDINGS = {"A4", "H0", "A5", "A4R", "A4L"}  # embedding search has no reference price yet
 UNFUSED_BM25 = {"A0", "A2", "A3"}  # their top 100 can hold zero-score filler; fused lists have it removed
 
 

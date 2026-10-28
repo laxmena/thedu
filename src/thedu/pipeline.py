@@ -29,12 +29,12 @@ from thedu.tokens import estimate_tokens
 
 log = logging.getLogger(__name__)
 
-ORDER = ["A0", "A4", "A2", "A3", "H0", "A5", "A0R", "A3R", "A4R", "A0L", "A3L"]
+ORDER = ["A0", "A4", "A2", "A3", "H0", "A5", "A0R", "A3R", "A4R", "A0L", "A3L", "A4L"]
 # What each setup is built from. H0 and A5 fuse two components with the ranker.
 DEPS = {"A0": ("A0",), "A4": ("A4",), "A2": ("A2",), "A3": ("A3",), "H0": ("A0", "A4"), "A5": ("A3", "A4"),
-        "A0R": ("A0",), "A3R": ("A3",), "A4R": ("A4",), "A0L": ("A0",), "A3L": ("A3",)}
+        "A0R": ("A0",), "A3R": ("A3",), "A4R": ("A4",), "A0L": ("A0",), "A3L": ("A3",), "A4L": ("A4",)}
 RERANKED = {"A0R", "A3R", "A4R"}  # one component, its top reordered by the cross-encoder
-LISTWISE = {"A0L", "A3L"}  # one component, its top reordered by an LLM
+LISTWISE = {"A0L", "A3L", "A4L"}  # one component, its top reordered by an LLM
 BM25_BASED = {"A0", "A2", "A3"}  # lists whose zero-score filler is dropped before fusion
 PROBE_QUESTIONS = 30
 PROBE_ATTEMPT = 9  # a salt that skips both caches, so the probe measures real calls
@@ -131,7 +131,7 @@ def execute(cfg: RunConfig, docs: dict[str, str], queries: dict[str, str], qrels
     listwise = None
     if any(x in LISTWISE for x in setups):
         if cfg.listwise is None:
-            raise ValueError("the A0L and A3L setups need a `listwise:` section in the config")
+            raise ValueError("the xL setups need a `listwise:` section in the config")
         lgw, _ = make_gateway(cfg, offline, cfg.listwise.llm)
         listwise = ListwiseReranker(docs, lgw, cfg.rerank.depth, cfg.listwise.words, cfg.listwise.prompt)
 

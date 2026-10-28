@@ -418,3 +418,11 @@ Why it matters: The cost question the human asked about (can reasoning be switch
 Evidence: docs/llm_rerank.md; configs/llm_rerank_{scifact,nfcorpus,fiqa}.yaml; tests/test_listwise.py; runs/cache/llm.jsonl (the smoke call)
 Next: Run the three sample configs after A4+R finishes; `thedu analyze llm-rerank` for the primary test.
 Post: maybe
+
+## 2026-10-28 · decision · Add A4L to the LLM reranker sample run; secondary tests A3L vs A4L and A0L vs A4L
+Who: human + Claude
+What: The 100-question sample runs also reorder A4's top 50 with the same LLM reranker (A4L), about 300 more calls, about $1.3. Pre-registered as secondary, alongside the unchanged primary A3L vs A3R: A3L minus A4L and A0L minus A4L, paired nDCG@10, with "match" (lower bound above -0.01) and "beat" (above 0) and the wide-range rule. The report adds cost per search and time per search for A0L, A3L, A4L next to A0R, A3R, A4R; embedding search is unpriced for every A4 arm. The cross-encoder runs shared the machine with other jobs, so a clean re-time of the cross-encoder on the same samples is run on an idle machine after the LLM runs.
+Why it matters: A fair "same judge on both sides" comparison for the LLM, as A4+R is for the cross-encoder.
+Evidence: docs/llm_rerank.md (addition), configs/llm_rerank_*.yaml (setups now include A4L)
+Next: Run after A4+R finishes.
+Post: maybe

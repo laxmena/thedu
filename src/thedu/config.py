@@ -12,7 +12,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from thedu.prompts import load_prompt
 
-Setup = Literal["A0", "A2", "A3", "A4", "H0", "A5", "A0R", "A3R", "A4R", "A0L", "A3L"]
+Setup = Literal["A0", "A2", "A3", "A4", "H0", "A5", "A0R", "A3R", "A4R", "A0L", "A3L", "A4L"]
 # H0 = RRF(A0, A4); A5 = RRF(A3, A4); xR = the top of x reordered by a cross-encoder; xL = by an LLM (listwise)
 
 

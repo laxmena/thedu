@@ -53,3 +53,13 @@ better judge capture more of the headroom that the zero-shot bge cross-encoder l
 
 A gateway option for `reasoning`, a listwise reranker behind the ranker contract (it only reorders its candidates), tests
 (parsing, omitted and repeated numbers, reorder-only), configs for the three datasets, and a `thedu` command for the sample run.
+
+## Addition (2026-10-28): A4L, same judge on both sides
+
+The sample run also reorders A4's top 50 with the same LLM reranker (A4L), so "same judge on both sides" exists for the LLM
+as it does for the cross-encoder (A4+R). **Secondary tests (pre-registered, labelled secondary):** A3+L minus A4+L and A0+L
+minus A4+L, paired nDCG@10 on the 100-question samples, with the "match" (lower bound above -0.01) and "beat" (above 0) labels
+and the wide-range rule. The primary test is unchanged (A3+L minus A3+R). About 300 more calls, about $1.3.
+Reported next to the cross-encoder numbers: cost per search (rewrite + rerank at reference rates; embedding search is unpriced
+for every A4 arm) and time per search. The cross-encoder runs shared the machine with other jobs, so their in-run times are
+inflated; a clean re-time of the cross-encoder on the same samples is run on an idle machine after the LLM runs finish.
