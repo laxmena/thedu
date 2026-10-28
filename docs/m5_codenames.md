@@ -1,8 +1,7 @@
-# M5 design: the made-up names test (v3: reranker and character n-gram arms, primary test named)
+# M5 design: the made-up names test (v4: A4+R benchmark, entity split)
 
 Status: committed before any swapped-corpus run, which is what pre-registers the expectation below. The entity list
-(`configs/m5_entities.csv`) is a draft for your review; it is frozen with `thedu freeze --add` after you OK it, and nothing
-runs before that. Rules: see the 2026-10-28 journal decision (embeddings are the
+(`configs/m5_entities.csv`) was approved as is and frozen with `thedu freeze --add` (2026-10-28). M5 runs after the A4+R runs finish. Rules: see the 2026-10-28 journal decision (embeddings are the
 benchmark, not a component; keyword index only, all intelligence at query time).
 
 ## Question
@@ -19,8 +18,12 @@ embedding advantage over embedding-free pipelines shrink, and do those pipelines
 | A0+R | A0 top 50, reranked by bge-reranker-v2-m3 (zero-shot, not tuned) | embedding-free |
 | A3+R | A3 top 50, reranked by the same model | embedding-free |
 | A0C | BM25 over words plus character 3 to 5-grams inside words ("chars-plus" in the index sweep), no stemming for the grams | embedding-free, extra arm |
-| A4 | Qwen3-Embedding-0.6B | benchmark; every arm above is compared with it |
+| A4 | Qwen3-Embedding-0.6B | benchmark |
+| A4+R | A4 top 50, reranked by the same cross-encoder | benchmark: a reranker is a standard RAG stage |
 | H0, A5, frozen router | as before | context only, not tested |
+
+Every embedding-free arm is compared with both benchmarks. A0 and A3 are compared with A4; the reranked arms A0+R and A3+R are
+also compared with A4+R (same reranker on both sides).
 
 A0C is there because a codename is an unknown word: character pieces can still match a codename that is spelled the same in
 question and documents, and in the index sweep it was the only variant that helped anywhere (NFCorpus, +0.029; it lost on
@@ -73,20 +76,31 @@ budget guard stays on.
 
 All differences are paired on the affected questions, 95% bootstrap range. "Gap" means arm minus A4.
 
-**Primary test.** At the 100% level, does any embedding-free arm (A0, A3, A0+R, A3+R, A0C) match or beat A4? "Match" =
-the lower bound of the gap is above -0.01; "beat" = the lower bound is above 0. It is asked once per condition (A and B)
-and the verdict is reported for each; the expectation is supported if it holds in both. Five arms per condition are five
-comparisons with no correction, so a single marginal pass is weak evidence and the post says so. Because only 92 questions are
-affected, a range half-width of 0.04 to 0.06 is likely; a failure to match is read as "A4 is better" only when the upper
-bound of the gap is below 0, otherwise it is reported as inconclusive.
+**Primary tests.** All at the 100% level, asked once per condition (A and B), verdict reported for each; the expectation is
+supported only if it holds in both. "Match" = the lower bound of the gap (arm minus benchmark) is above -0.01; "beat" = the
+lower bound is above 0.
+
+- **P1:** does any embedding-free arm (A0, A3, A0+R, A3+R, A0C) match or beat A4?
+- **P2:** does A0+R match or beat A4+R?
+- **P3:** does A3+R match or beat A4+R?
+
+Seven comparisons per condition with no correction, so a single marginal pass is weak evidence and the post says so. Only 92
+questions are affected, so a range half-width of 0.04 to 0.06 is likely: a miss counts as "the benchmark is better" only
+when the upper bound of the gap is below 0; otherwise it is reported as inconclusive.
 
 **Expectation.** Embeddings lose their advantage as names become codenames, and rewriting, reranking and character
-n-grams help the keyword side more than they help A4: the primary test passes in at least one condition.
+n-grams help the keyword side more than they help A4: at least one of P1, P2 or P3 passes in condition A **and** in condition B (the expectation holds only if it passes in both).
 
 **Secondary tests** (reported, labelled secondary, none of them decides the verdict):
 
 - **S1:** A4 nDCG@10 falls, 100% level minus 0% level: upper bound below 0, in A and in B.
 - **S2:** the gap of each embedding-free arm rises, 100% minus 0%: lower bound above 0, in A and in B. Fifteen tests with no correction.
+- **S3 (entity split, pre-registered):** P1 to P3 repeated on two groups of affected questions: questions whose entities are
+  all **organisations and products** (types company, agency, exchange, fund, index, account, website, product, person, other:
+  37 entities) and questions whose entities are all **places and currencies** (country, region, place, city, currency: 17
+  entities). Questions with both kinds are reported separately and in neither group. Countries carry many of the 92 questions,
+  and internal-name scenarios are closer to organisations and products. Group sizes are reported first; small groups give
+  inconclusive ranges.
 - The lowest swap level at which each arm first matches A4; each arm's cost per search against A4's; intermediate levels.
 
 Mechanism, stated now so surprises are visible (not criteria):
@@ -113,11 +127,10 @@ level byte-identical to the original; same seed gives the same swap; no codename
 audit counts correctly; check list refuses to freeze with blank codenames or descriptions containing a name; reranker only
 reorders its candidates (same set, same length, order changes only).
 
-## Open points for you
+## Settled points
 
-1. Review the entity check list when it exists. Nothing runs until you OK it.
-2. Condition B swaps the question and the docs for the same entities; entities not swapped keep their real name in both.
-   Say so if you want the question swapped independently.
-3. The primary test is asked in both conditions (A and B) rather than naming one; say so if you want a single one.
-4. Cost to run: rerank arms about 14 minutes per level and condition (92 questions x 2 arms), seven runs, plus about an hour of
-   re-embedding; rewrites are cheap.
+- Both conditions are kept; the expectation holds only if it passes in both (approved 2026-10-28).
+- Condition B swaps the question and the docs for the same entities; entities not swapped keep their real name in both.
+- The entity list is approved and frozen; the 26 generic terms stay `keep=n`.
+- Cost to run: the rerank arms (A0+R, A3+R, A4+R) take about 20 minutes per level and condition (92 questions), seven runs,
+  plus about an hour of re-embedding; rewrites are cheap.

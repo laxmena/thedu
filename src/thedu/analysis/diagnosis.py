@@ -85,3 +85,21 @@ def depth_table(rankings: dict[str, Ranking], qrels: dict[str, dict[str, int]], 
             row[f"ceiling_top{k}"] = float(np.mean(vals))
         out[s] = row
     return out
+
+
+def recall_at(rankings: dict[str, Ranking], qrels: dict[str, dict[str, int]], qids: list[str], k: int = 50) -> dict:
+    """Recall@k of each setup's list (score-zero filler cannot hold a relevant document, so it is left as is)."""
+    from thedu.judge import recall_at_k
+
+    out = {}
+    for s, run in rankings.items():
+        vals = np.array([recall_at_k([d for d, _ in run.get(q, [])], qrels[q], k) for q in qids])
+        iv = bootstrap_interval(vals)
+        out[s] = {"mean": iv.mean, "lo": iv.lo, "hi": iv.hi, "values": vals}
+    for s in out:
+        if s != "A4":
+            p = paired_difference(out[s]["values"], out["A4"]["values"])
+            out[s]["a4_minus_this"] = {"diff": p.mean, "lo": p.lo, "hi": p.hi}
+    for v in out.values():
+        del v["values"]
+    return out

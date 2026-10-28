@@ -392,3 +392,47 @@ def m5_entities() -> None:
     from thedu.m5.entities import build
 
     typer.echo(f"wrote {build()}")
+
+
+@analyze_app.command("recall50")
+def analyze_recall50(run: str = typer.Option(..., help="A run with A0, A3 and A4."), dataset: str = typer.Option(...)) -> None:
+    """Recall@50 of A0, A3 and A4, with A4's paired difference. No runs."""
+    import json
+
+    from thedu import data
+    from thedu.analysis.diagnosis import read_trec, recall_at
+    from thedu.analysis.steps import OUT
+    from thedu.paths import ROOT
+
+    _, queries, qrels = data.load(dataset, "dev")
+    qids = sorted(queries)
+    r = recall_at({s: read_trec(ROOT / "runs" / run / f"{s}.trec") for s in ("A0", "A3", "A4")}, qrels, qids, 50)
+    OUT.mkdir(parents=True, exist_ok=True)
+    (OUT / f"recall50-{dataset}.json").write_text(json.dumps({"run": run, "dataset": dataset, "n_questions": len(qids), **r}, indent=2))
+    typer.echo(f"{dataset} dev, {len(qids)} questions (run {run}): Recall@50")
+    for s, v in r.items():
+        extra = "" if "a4_minus_this" not in v else f"   A4 minus {s}: {v['a4_minus_this']['diff']:+.4f} [{v['a4_minus_this']['lo']:+.4f}, {v['a4_minus_this']['hi']:+.4f}]"
+        typer.echo(f"  {s}: {v['mean']:.4f} [{v['lo']:.4f}, {v['hi']:.4f}]{extra}")
+
+
+@analyze_app.command("paired")
+def analyze_paired(a: str = typer.Option(..., help="RUN:SETUP, the base, e.g. 00fb868eaa:A4R"),
+                   b: str = typer.Option(..., help="RUN:SETUP, compared with the base"),
+                   label: str = typer.Option("", help="A name for the saved file.")) -> None:
+    """Paired nDCG@10 of b minus a over the same questions, from two finished runs. Retrieves nothing."""
+    import json
+
+    from thedu.analysis.steps import OUT, load_rows
+    from thedu.judge import paired_difference
+
+    (ra, sa), (rb, sb) = a.split(":"), b.split(":")
+    xa, xb = load_rows(ra)[sa], load_rows(rb)[sb]
+    qids = sorted(set(xa) & set(xb))
+    if len(qids) != len(xa) or len(qids) != len(xb):
+        raise typer.BadParameter(f"the runs cover different questions ({len(xa)} vs {len(xb)}, shared {len(qids)})")
+    p = paired_difference([xa[q]["ndcg10"] for q in qids], [xb[q]["ndcg10"] for q in qids])
+    res = {"base": a, "other": b, "n": len(qids), "diff": p.mean, "lo": p.lo, "hi": p.hi, "wins": p.wins, "losses": p.losses}
+    if label:
+        OUT.mkdir(parents=True, exist_ok=True)
+        (OUT / f"paired-{label}.json").write_text(json.dumps(res, indent=2))
+    typer.echo(f"{b} minus {a}, {len(qids)} questions: {p.mean:+.4f} [{p.lo:+.4f}, {p.hi:+.4f}] wins {p.wins}, losses {p.losses}")

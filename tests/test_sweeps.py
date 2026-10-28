@@ -68,3 +68,12 @@ def test_m5_codenames_and_candidate_cleanup():
     out = merge([{"phrase": "The UK", "dev_questions": 3, "docs": 10}, {"phrase": "UK", "dev_questions": 4, "docs": 7},
                  {"phrase": "Don't", "dev_questions": 9, "docs": 9}])
     assert [g["phrase"] for g in out] == ["UK"] and out[0]["dev_questions"] == 4
+
+
+def test_recall_at_50_counts_the_top_50_only():
+    from thedu.analysis.diagnosis import recall_at
+
+    run = {"A4": {"q": [(f"x{i}", 1.0) for i in range(49)] + [("r1", 1.0), ("r2", 1.0)]},
+           "A0": {"q": [("r1", 1.0)] + [(f"x{i}", 1.0) for i in range(60)]}}
+    out = recall_at(run, {"q": {"r1": 1, "r2": 1}}, ["q"], 50)
+    assert out["A4"]["mean"] == 0.5 and out["A0"]["mean"] == 0.5  # A4's r2 is at rank 51

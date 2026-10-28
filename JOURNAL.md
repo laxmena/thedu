@@ -386,3 +386,19 @@ Why it matters: Phase A and the depth check say judge quality, not candidate dep
 Evidence: runs/analysis/depth-*.json; configs/rerank_a4_*.yaml
 Next: Human picks the model and budget for (1); say when to start (2).
 Post: maybe
+
+## 2026-10-28 · decision · M5 design v4 approved; entity list frozen
+Who: human + Claude
+What: `docs/m5_codenames.md` v4: A4+R added as an arm and benchmark; primary tests P1 (any embedding-free arm vs A4), P2 (A0+R vs A4+R), P3 (A3+R vs A4+R), all at 100% swapped, asked in condition A and in condition B, expectation supported only if it passes in both; "match" = lower bound of the gap above -0.01, "beat" = above 0; a miss counts as "the benchmark is better" only if the upper bound is below 0, otherwise inconclusive. Secondary S3, pre-registered: P1 to P3 repeated on questions whose entities are all organisations and products (types company, agency, exchange, fund, index, account, website, product, person, other: 37 entities) versus all places and currencies (country, region, place, city, currency: 17); mixed questions reported separately. `configs/m5_entities.csv` (54 keep=y, 26 keep=n generic terms kept as keep=n) approved as is and frozen with `thedu freeze --add` (checksum appended to tests/frozen.sha256). M5 runs after the A4+R runs finish.
+Why it matters: The expectation, the benchmarks and the entity split are fixed before any swapped-corpus number exists.
+Evidence: docs/m5_codenames.md, configs/m5_entities.csv, tests/frozen.sha256
+Next: A4+R runs (next entry), then build the swap and run M5.
+Post: yes
+
+## 2026-10-28 · decision · Pre-registration: A4+R is the primary benchmark; A0+R and A3+R are tested against it
+Who: human + Claude
+What: A4+R (A4's top 50 reordered by bge-reranker-v2-m3, same settings as A0+R and A3+R, ranks 51-100 kept below) is run on SciFact, NFCorpus and FiQA dev (configs/rerank_a4_*.yaml, setups A4 and A4R). **Primary tests, per dataset (three each), paired nDCG@10 over all dev questions:** A0+R vs A4+R and A3+R vs A4+R, with A0+R and A3+R taken from runs 8dbc179fa6 (NFCorpus), d8fe5f9aff (SciFact), 00fb868eaa (FiQA). "Beat" = the 95% range of (keyword arm minus A4+R) lies above zero; "match" = its lower bound is above -0.01; the wide-range rule applies (a miss is "A4+R is better" only if the upper bound is below 0). **Expectation (mine, written before any A4+R number):** A4+R is at least level with A0+R and A3+R on every dataset because A4's candidate lists are better (Recall@50, computed from existing lists: SciFact A0 0.894, A3 0.914, A4 0.932; NFCorpus 0.200, 0.261, 0.271; FiQA 0.456, 0.446, 0.692); the keyword arms beat A4+R on no dataset and match it at most on SciFact (where A0+R already equalled A4 without a reranker) and possibly NFCorpus. Secondary: A4+R vs A4 (does a reranker lift embeddings, as it lifted BM25). The earlier primary test (A3+R vs A4, not met on any dataset) stands as reported. Run order NFCorpus, SciFact, FiQA, under caffeinate, with a completion notice; about 2.4 hours.
+Why it matters: A reranker is a standard RAG stage, so the fair benchmark for a reranked keyword pipeline is a reranked embedding pipeline.
+Evidence: configs/rerank_a4_*.yaml; runs/analysis/recall50-{scifact,nfcorpus,fiqa}.json (`thedu analyze recall50`)
+Next: Report when the three runs finish; `thedu analyze paired` for the primary tests.
+Post: yes
