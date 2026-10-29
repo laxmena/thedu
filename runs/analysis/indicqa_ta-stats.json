@@ -1,0 +1,78 @@
+{
+ "source": "mteb/IndicQARetrieval@51e8b328988795d658f6f34acd34044e9346e2ee",
+ "counts": {
+  "passages": 253,
+  "questions": 1803,
+  "judgments": 1804
+ },
+ "expected": {
+  "passages": 253,
+  "questions": 1803,
+  "judgments": 1804
+ },
+ "counts_match_expected": true,
+ "questions_per_passage": {
+  "min": 2,
+  "median": 7,
+  "mean": 7.1,
+  "max": 10,
+  "passages_with_no_question": 0
+ },
+ "passage_chars": {
+  "min": 769,
+  "median": 1854,
+  "mean": 2288.3,
+  "max": 6940
+ },
+ "question_chars": {
+  "min": 19,
+  "median": 50,
+  "mean": 54.1,
+  "max": 196
+ },
+ "questions_with_missing_passage": [],
+ "judgments_with_unknown_question": [],
+ "questions_without_judgment": [],
+ "questions_with_several_passages": [
+  "c457553e6cad15a8c82e739db5f1bc0dc233b92528672057de409102d73bd479"
+ ],
+ "joiners_passages": {
+  "zwj_chars": 2,
+  "zwnj_chars": 5,
+  "texts_with_joiner": 4,
+  "texts_changed_by_nfc": 0
+ },
+ "joiners_questions": {
+  "zwj_chars": 0,
+  "zwnj_chars": 0,
+  "texts_with_joiner": 0,
+  "texts_changed_by_nfc": 0
+ },
+ "passage_tokens_bge_reranker": {
+  "min": 213,
+  "median": 520,
+  "mean": 642.7,
+  "max": 1937,
+  "share_over_512": 0.5257,
+  "n_over_512": 133
+ },
+ "passage_tokens_qwen3_embedding": {
+  "min": 851,
+  "median": 2029,
+  "mean": 2507.8,
+  "max": 7603,
+  "share_over_512": 1.0,
+  "n_over_512": 253
+ },
+ "split": {
+  "seed": 7,
+  "passages": {
+   "dev": 126,
+   "test": 127
+  },
+  "questions": {
+   "dev": 885,
+   "test": 917
+  }
+ }
+}

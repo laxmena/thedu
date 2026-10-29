@@ -112,7 +112,7 @@ def execute(cfg: RunConfig, docs: dict[str, str], queries: dict[str, str], qrels
     todo = {q: s for q, s in todo.items() if s}
     log.info("run %s: %d questions, %d to do", run_hash, len(qids), len(todo))
 
-    bm25 = Bm25Retriever(doc_ids, texts, cfg.bm25.k1, cfg.bm25.b)
+    bm25 = Bm25Retriever(doc_ids, texts, cfg.bm25.k1, cfg.bm25.b, cfg.bm25.language)
     dense_hits: dict[str, tuple[list, float]] = {}
     need_dense = [q for q, ss in todo.items() if any("A4" in DEPS[s] for s in ss)]
     if need_dense:

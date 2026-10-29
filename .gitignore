@@ -4,7 +4,7 @@
 !.env.example
 
 # downloaded datasets (re-downloaded on first run)
-data/
+/data/
 
 # large, regenerable model outputs
 *.npy

@@ -11,6 +11,8 @@ PUBLISHED = {
     "scifact": (5183, 809, 300),
     "nfcorpus": (3633, 324, 323),
     "fiqa": (57638, 500, 648),
+    # our split by passage (configs/indicqa_ta_split.json); the pool has 1,803 questions and one straddles the split
+    "indicqa_ta": (253, 885, 917),
 }
 
 

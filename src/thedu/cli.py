@@ -111,6 +111,55 @@ def embed(dataset: str) -> None:
     typer.echo(f"{dataset}: {len(docs)} documents embedded and cached.")
 
 
+@app.command(name="data-fetch")
+def data_fetch(dataset: str) -> None:
+    """Download IndicQA Tamil at the pinned revision (run as `uv run --with pyarrow thedu data-fetch indicqa_ta`)."""
+    from thedu.data import indicqa
+
+    if dataset != indicqa.NAME:
+        typer.echo(f"only {indicqa.NAME} is fetched this way; the BEIR sets download themselves", err=True)
+        raise typer.Exit(1)
+    indicqa.fetch()
+    typer.echo(f"{dataset}: written to data/{dataset}/ from {indicqa.REPO}@{indicqa.REVISION}")
+
+
+@app.command(name="data-split")
+def data_split() -> None:
+    """Write configs/indicqa_ta_split.json once (seed 7, by passage). Freeze it afterwards with `thedu freeze --add`."""
+    from thedu.data import indicqa
+
+    try:
+        doc = indicqa.write_split()
+    except FileExistsError as e:
+        typer.echo(str(e), err=True)
+        raise typer.Exit(1)
+    typer.echo(f"passages {doc['passages']}, questions {doc['questions']}")
+
+
+@app.command(name="data-stats")
+def data_stats() -> None:
+    """Counts and lengths of IndicQA Tamil (whole pool, no run) to runs/analysis/indicqa_ta-stats.json."""
+    import json
+
+    from thedu.data import indicqa
+    from thedu.paths import runs_dir
+
+    def counter(model: str):
+        def count(texts: list[str]) -> list[int]:
+            from transformers import AutoTokenizer
+
+            tok = AutoTokenizer.from_pretrained(model)
+            return [len(tok(t, add_special_tokens=False)["input_ids"]) for t in texts]
+        return count
+
+    # the reranker's tokenizer (the one the task asks for) and the embedding model's, which is what A4's 512 limit counts
+    out = indicqa.stats({"bge_reranker": counter("BAAI/bge-reranker-v2-m3"), "qwen3_embedding": counter("Qwen/Qwen3-Embedding-0.6B")})
+    path = runs_dir() / "analysis" / "indicqa_ta-stats.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(out, indent=1, ensure_ascii=False) + "\n")
+    typer.echo(json.dumps(out, indent=1, ensure_ascii=False))
+
+
 @app.command()
 def parity(restart: bool = typer.Option(False, help="Set an existing parity run aside and start again.")) -> None:
     """Frozen baselines (A0, A4) vs published scores on test; passes within the tolerance in tests/expected.yaml."""

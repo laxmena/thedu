@@ -426,3 +426,27 @@ Why it matters: A fair "same judge on both sides" comparison for the LLM, as A4+
 Evidence: docs/llm_rerank.md (addition), configs/llm_rerank_*.yaml (setups now include A4L)
 Next: Run after A4+R finishes.
 Post: maybe
+
+## 2026-10-28 · decision · Tamil dataset added (IndicQARetrieval, ta), split by passage
+Who: human (approval), agent (setup)
+What: Added `indicqa_ta` from mteb/IndicQARetrieval at revision 51e8b328 (the one MTEB evaluates), CC0: 253 passages, 1,803 questions, 1,804 judgments, as expected. Split by passage, seed 7: 126 passages and 885 questions to dev, 127 passages and 917 questions to test; the corpus stays whole in both. One question has relevant passages on both sides and is in neither split. Frozen with `thedu freeze --add`: configs/indicqa_ta_split.json and the derived data/qrels/indicqa_ta/{dev,test}.tsv. Tamil keyword settings: PyStemmer Tamil, k1 0.9, b 0.4, no stopwords, an Indic-aware token pattern (the default one cuts Tamil words at every vowel sign). A4 instruction: "Retrieve text based on user query." (MTEB's retrieval-task default; IndicQARetrieval has no prompt of its own). No published Qwen3-Embedding-0.6B or BM25 score for Tamil IndicQARetrieval was found, so nothing was added to tests/expected.yaml and there is no external parity check.
+Why it matters: A new language tests whether the rewrite-plus-rerank pipeline carries beyond English. Two things to know before the first run: at the 512-token limit A4 sees about a quarter of a median passage (every passage is over 512 Qwen tokens, median 2,029), and the Tamil stemmer both over- and under-strips (the empty-string stems are 0.28% of tokens).
+Evidence: docs/tamil.md (pre-registration, written before any number), runs/analysis/indicqa_ta-stats.json. No run was made.
+Next: your review of the stemmer output, stats and pre-registration; then wire the Tamil rewrite prompt and configs, and run dev.
+Post: yes
+
+## 2026-10-28 · learning · src/thedu/data/ was never in git
+Who: agent
+What: `.gitignore` had `data/`, which also matched the package `src/thedu/data/` (the loader and the guarded test-answers door), so those files were never committed. Changed the rule to `/data/` (the downloaded datasets folder only) and added the package.
+Why it matters: A fresh clone could not import `thedu.data`; reproducibility needs the loader in the repo.
+Evidence: `git ls-files src/thedu/data` was empty before this commit.
+Next: none.
+Post: no
+
+## 2026-10-28 · decision · Tamil parked until the English runs and M5 are done
+Who: human
+What: The Tamil setup (loader, stats, frozen split, tests, draft docs/tamil.md) is committed as it is and parked. No Tamil run until the English runs (LLM listwise sample) and M5 are finished. docs/tamil.md is a draft, not a final pre-registration; the open decision is the max length for the embedding model and the reranker: 8,192 as primary or 512 (at 512 Qwen3 sees about a quarter of a median passage).
+Why it matters: The pre-registration must not be treated as final while the length question is open.
+Evidence: docs/tamil.md, runs/analysis/indicqa_ta-stats.json.
+Next: English runs, then M5, then settle the length and finalise the Tamil pre-registration.
+Post: no

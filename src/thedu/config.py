@@ -22,6 +22,9 @@ TASK_INSTRUCTIONS = {
     "scifact": "Given a scientific claim, retrieve documents that support or refute the claim",
     "nfcorpus": "Given a question, retrieve relevant documents that best answer the question",
     "fiqa": "Given a financial question, retrieve user replies that best answer the question",
+    # IndicQARetrieval sets no prompt of its own; MTEB falls back to AbsTaskRetrieval.abstask_prompt
+    # (mteb main, mteb/abstasks/retrieval.py line 97, read 2026-10-28).
+    "indicqa_ta": "Retrieve text based on user query.",
 }
 
 
@@ -43,6 +46,7 @@ class _Frozen(BaseModel):
 class Bm25Config(_Frozen):
     k1: float = 0.9
     b: float = 0.4
+    language: Literal["english", "tamil"] = "english"  # stemmer, stopwords and token pattern; left out of the hash if english
 
 
 class DenseConfig(_Frozen):
@@ -104,7 +108,7 @@ class ListwiseConfig(_Frozen):
 
 
 class RunConfig(_Frozen):
-    dataset: Literal["scifact", "nfcorpus", "fiqa"]
+    dataset: Literal["scifact", "nfcorpus", "fiqa", "indicqa_ta"]
     split: Literal["dev", "test"] = "dev"  # `thedu dev` refuses "test"; only `thedu parity` runs it
     n: int | None = None  # None = every dev question
     seed: int = 7  # question sampling
@@ -136,6 +140,8 @@ class RunConfig(_Frozen):
     def hash(self, rates: dict[str, float] | None = None) -> str:
         llm_ex = {"workers", "cache_file"} | ({"reasoning"} if self.llm.reasoning is None else set())
         exclude: dict = {"llm": llm_ex, "pricing": True}
+        if self.bm25.language == "english":
+            exclude["bm25"] = {"language"}  # keeps the hashes of runs made before Tamil existed
         if not self.uses_rerank():
             exclude["rerank"] = True  # keeps the hashes of runs made before reranking existed
         if self.listwise is None:

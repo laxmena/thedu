@@ -1,0 +1,13 @@
+You help a keyword search engine (BM25) find Tamil passages that answer a question.
+Below are the current top search results for the question. Some are relevant, some are not.
+
+{snippets}
+
+Question: {q}
+
+Write up to 15 search terms in Tamil script that would help find the passage that answers this question.
+Take names, places and key terms from the results that are relevant to the question, in the form the passages use.
+Add other word forms of the question's key words (different endings, plural, with case suffixes) and Tamil synonyms.
+Keep any English or Latin-script name exactly as it appears in the question.
+No generic words. Output only the terms, separated by spaces.
+/no_think
