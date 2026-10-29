@@ -1,0 +1,284 @@
+{
+  "n_questions": 100,
+  "dataset": "nfcorpus",
+  "llm_latency_probe_ms": null,
+  "setups": {
+    "A0": {
+      "ndcg10": {
+        "mean": 0.28350465966027305,
+        "lo": 0.22930954761031871,
+        "hi": 0.3392498600830466
+      },
+      "recall100": {
+        "mean": 0.21318320706991808,
+        "lo": 0.1625492425267985,
+        "hi": 0.2674802260143722
+      },
+      "recall100_is_soft": true,
+      "llm_calls": 0,
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "llm_cost_per_search_usd": 0.0,
+      "llm_cost_is_estimate": false,
+      "rerank_cost_per_search_usd": null,
+      "cost_per_search_usd": 0.0,
+      "uncosted_calls": 0,
+      "estimated_calls": 0,
+      "fallbacks": 0,
+      "latency_relative_to_A0": {
+        "parallel": 1.0,
+        "sequential": 1.0
+      }
+    },
+    "A4": {
+      "ndcg10": {
+        "mean": 0.31571716964518315,
+        "lo": 0.25522442104791265,
+        "hi": 0.37629241475753283
+      },
+      "recall100": {
+        "mean": 0.30638362114267703,
+        "lo": 0.25035998620051064,
+        "hi": 0.3665673113192526
+      },
+      "recall100_is_soft": false,
+      "llm_calls": 0,
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "llm_cost_per_search_usd": 0.0,
+      "llm_cost_is_estimate": false,
+      "rerank_cost_per_search_usd": null,
+      "cost_per_search_usd": null,
+      "uncosted_calls": 0,
+      "estimated_calls": 0,
+      "fallbacks": 0,
+      "latency_relative_to_A0": {
+        "parallel": 19.041438550235352,
+        "sequential": 19.041438550235352
+      }
+    },
+    "A3": {
+      "ndcg10": {
+        "mean": 0.33546482114081533,
+        "lo": 0.27565894248425854,
+        "hi": 0.39467906331726327
+      },
+      "recall100": {
+        "mean": 0.3072556112267481,
+        "lo": 0.2482360229849373,
+        "hi": 0.36624269888485167
+      },
+      "recall100_is_soft": true,
+      "llm_calls": 100,
+      "tokens_in": 58353,
+      "tokens_out": 5844,
+      "llm_cost_per_search_usd": 8.40492e-05,
+      "llm_cost_is_estimate": false,
+      "rerank_cost_per_search_usd": null,
+      "cost_per_search_usd": 8.40492e-05,
+      "uncosted_calls": 0,
+      "estimated_calls": 0,
+      "fallbacks": 0,
+      "latency_relative_to_A0": {
+        "parallel": 2237.6647216918113,
+        "sequential": 2237.6647216918113
+      }
+    },
+    "A0L": {
+      "ndcg10": {
+        "mean": 0.3462989068516606,
+        "lo": 0.2826855804543095,
+        "hi": 0.40993508160191966
+      },
+      "recall100": {
+        "mean": 0.21318320706991808,
+        "lo": 0.1625492425267985,
+        "hi": 0.2674802260143722
+      },
+      "recall100_is_soft": false,
+      "llm_calls": 96,
+      "tokens_in": 543450,
+      "tokens_out": 13594,
+      "llm_cost_per_search_usd": 0.0028533449999999998,
+      "llm_cost_is_estimate": false,
+      "rerank_cost_per_search_usd": null,
+      "cost_per_search_usd": 0.0028533449999999998,
+      "uncosted_calls": 0,
+      "estimated_calls": 0,
+      "fallbacks": 0,
+      "listwise_fallbacks": {
+        "questions_with_fallback": 2,
+        "questions": 100,
+        "ids_missing": 2,
+        "ids_repeated": 1,
+        "ids_invalid": 0,
+        "failed_calls": 0
+      },
+      "latency_relative_to_A0": {
+        "parallel": 9106.811466001756,
+        "sequential": 9106.811466001756
+      }
+    },
+    "A3L": {
+      "ndcg10": {
+        "mean": 0.3740602763364525,
+        "lo": 0.3073949512484003,
+        "hi": 0.4415793149481168
+      },
+      "recall100": {
+        "mean": 0.3072556112267481,
+        "lo": 0.2482360229849373,
+        "hi": 0.36624269888485167
+      },
+      "recall100_is_soft": false,
+      "llm_calls": 200,
+      "tokens_in": 815776,
+      "tokens_out": 24822,
+      "llm_cost_per_search_usd": 0.0040617927,
+      "llm_cost_is_estimate": false,
+      "rerank_cost_per_search_usd": null,
+      "cost_per_search_usd": 0.0040617927,
+      "uncosted_calls": 0,
+      "estimated_calls": 0,
+      "fallbacks": 0,
+      "listwise_fallbacks": {
+        "questions_with_fallback": 6,
+        "questions": 100,
+        "ids_missing": 8,
+        "ids_repeated": 3,
+        "ids_invalid": 0,
+        "failed_calls": 0
+      },
+      "latency_relative_to_A0": {
+        "parallel": 12915.14422190699,
+        "sequential": 12915.14422190699
+      }
+    },
+    "A4L": {
+      "ndcg10": {
+        "mean": 0.39133114767230054,
+        "lo": 0.330296901835788,
+        "hi": 0.4494388388100731
+      },
+      "recall100": {
+        "mean": 0.30638362114267703,
+        "lo": 0.25035998620051064,
+        "hi": 0.3665673113192526
+      },
+      "recall100_is_soft": false,
+      "llm_calls": 100,
+      "tokens_in": 749754,
+      "tokens_out": 19801,
+      "llm_cost_per_search_usd": 0.003967923,
+      "llm_cost_is_estimate": false,
+      "rerank_cost_per_search_usd": null,
+      "cost_per_search_usd": null,
+      "uncosted_calls": 0,
+      "estimated_calls": 0,
+      "fallbacks": 0,
+      "listwise_fallbacks": {
+        "questions_with_fallback": 3,
+        "questions": 100,
+        "ids_missing": 4,
+        "ids_repeated": 42,
+        "ids_invalid": 0,
+        "failed_calls": 0
+      },
+      "latency_relative_to_A0": {
+        "parallel": 11543.693834708929,
+        "sequential": 11543.693834708929
+      }
+    }
+  },
+  "paired": {
+    "A4 vs A0": {
+      "ndcg10_diff": 0.032212509984910105,
+      "lo": -0.011549985961334445,
+      "hi": 0.07421670472604569,
+      "wins": 44,
+      "losses": 28
+    },
+    "A3 vs A0": {
+      "ndcg10_diff": 0.05196016148054222,
+      "lo": 0.023234752848759692,
+      "hi": 0.08211297222097654,
+      "wins": 45,
+      "losses": 24
+    },
+    "A0L vs A0": {
+      "ndcg10_diff": 0.06279424719138757,
+      "lo": 0.028133750210131717,
+      "hi": 0.09890952952753247,
+      "wins": 43,
+      "losses": 18,
+      "role": "secondary"
+    },
+    "A3L vs A0": {
+      "ndcg10_diff": 0.09055561667617945,
+      "lo": 0.04573146353460952,
+      "hi": 0.13722384730124462,
+      "wins": 45,
+      "losses": 23,
+      "role": "secondary"
+    },
+    "A4L vs A0": {
+      "ndcg10_diff": 0.1078264880120275,
+      "lo": 0.06160546787915418,
+      "hi": 0.15580143870746588,
+      "wins": 53,
+      "losses": 22,
+      "role": "secondary"
+    },
+    "A3L vs A4": {
+      "ndcg10_diff": 0.058343106691269346,
+      "lo": 0.01608690301990662,
+      "hi": 0.10281867694502787,
+      "wins": 39,
+      "losses": 32,
+      "role": "secondary"
+    },
+    "A0L vs A4": {
+      "ndcg10_diff": 0.030581737206477458,
+      "lo": -0.009057978864403201,
+      "hi": 0.07057886314924278,
+      "wins": 41,
+      "losses": 28,
+      "role": "secondary"
+    },
+    "A3L vs A3": {
+      "ndcg10_diff": 0.03859545519563722,
+      "lo": 0.006618894677823475,
+      "hi": 0.07256362233815483,
+      "wins": 44,
+      "losses": 23,
+      "role": "secondary"
+    },
+    "A3L vs A4L": {
+      "ndcg10_diff": -0.017270871335848054,
+      "lo": -0.055584046725600765,
+      "hi": 0.020823847781664247,
+      "wins": 31,
+      "losses": 42,
+      "role": "secondary"
+    },
+    "A0L vs A4L": {
+      "ndcg10_diff": -0.04503224082063994,
+      "lo": -0.08720749235287864,
+      "hi": -0.006524961127970842,
+      "wins": 29,
+      "losses": 38,
+      "role": "secondary"
+    },
+    "A4L vs A4": {
+      "ndcg10_diff": 0.0756139780271174,
+      "lo": 0.04309028891354639,
+      "hi": 0.10865239888793597,
+      "wins": 53,
+      "losses": 18,
+      "role": "secondary"
+    }
+  },
+  "extras": {
+    "ceiling_best_of_A3_A4": 0.40101927144583177
+  }
+}
