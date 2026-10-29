@@ -448,6 +448,29 @@ def m5_entities() -> None:
     typer.echo(f"wrote {build()}")
 
 
+@m5_app.command("preview")
+def m5_preview() -> None:
+    """Show the swap on 5 questions (both conditions, with a document excerpt), the counts and the residual audit."""
+    from thedu.m5.preview import preview
+
+    r = preview()
+    typer.echo(f"{r['entities']} entities; {r['affected_questions']} of {r['dev_questions']} dev questions contain at least one; split {r['entity_split']}")
+    for lv, v in r["levels"].items():
+        a = v["audit"]
+        typer.echo(f"level {lv}%: {v['entities']} entities, {v['documents_changed']} documents changed, {v['glossary_documents']} glossary docs, "
+                   f"{v['affected_questions_changed']} affected questions changed; residual {a['loose_after']} of {a['loose_before']} ({a['share_left']:.1%})")
+    typer.echo(f"commonest leftovers at 100%: {r['levels'][100]['audit']['leftover']}")
+    for i, p in enumerate(r["pairs"], 1):
+        typer.echo(f"\n--- pair {i} (question {p['qid']}; entities: {', '.join(p['entities'])})")
+        typer.echo(f"original: {p['original']}\nA (codename): {p['condition_A']}\nB (description): {p['condition_B']}")
+        if p["document_excerpt"]:
+            typer.echo(f"relevant doc, original: ...{p['document_excerpt']['original']}...\nrelevant doc, swapped:  ...{p['document_excerpt']['swapped']}...")
+        else:
+            typer.echo("relevant doc: no entity mention in it")
+        for g in p["glossary"]:
+            typer.echo(f"glossary: {g}")
+
+
 @analyze_app.command("recall50")
 def analyze_recall50(run: str = typer.Option(..., help="A run with A0, A3 and A4."), dataset: str = typer.Option(...)) -> None:
     """Recall@50 of A0, A3 and A4, with A4's paired difference. No runs."""
@@ -548,3 +571,45 @@ def analyze_llm_rerank(dataset: str = typer.Option(...), sample_run: str = typer
     for n, v in out["cost_and_latency"].items():
         cost = (v["llm_cost_per_search_usd"] or 0) + (v["rerank_cost_per_search_usd"] or 0)
         typer.echo(f"    {n}: ${cost:.5f}   {v['mean_ms_in_run'] / 1000:.2f} s")
+
+
+@analyze_app.command("retime")
+def analyze_retime(dataset: str = typer.Option(...), sample_run: str = typer.Option(..., help="The 100-question run with A0, A3, A4.")) -> None:
+    """Clean cross-encoder timing: rerank the sample questions' saved top-50 lists, one at a time, nothing else running.
+
+    Uses the candidate lists of A0, A3 and A4 from the sample run. Run it on an idle machine; the per-search time is
+    quoted only relative to the other setups (AGENTS.md), never as an absolute laptop timing.
+    """
+    import json
+    import os
+    import statistics
+    import time
+
+    from thedu import data
+    from thedu.analysis.diagnosis import read_trec
+    from thedu.analysis.steps import OUT
+    from thedu.config import RerankConfig
+    from thedu.paths import ROOT
+    from thedu.ranker.rerank import CrossEncoderReranker
+
+    docs, queries, _ = data.load(dataset, "dev")
+    cfg = RerankConfig()
+    rr = CrossEncoderReranker(docs, cfg.model, cfg.depth, cfg.max_length)
+    lists = {n: read_trec(ROOT / "runs" / sample_run / f"{n}.trec") for n in ("A0", "A3", "A4")}
+    qids = sorted(lists["A0"])
+    first = lists["A0"][qids[0]]
+    rr.rerank(first, queries[qids[0]])  # warm-up: model load and device start, not timed
+    out: dict = {"dataset": dataset, "sample_run": sample_run, "n": len(qids), "model": cfg.model, "depth": cfg.depth,
+                 "load_average_at_start": os.getloadavg(), "setups": {}}
+    for n, lst in lists.items():
+        ms, pairs = [], []
+        for q in qids:
+            t0 = time.perf_counter()
+            _, _ = rr.rerank(lst[q], queries[q])
+            ms.append((time.perf_counter() - t0) * 1000)
+            pairs.append(len([h for h in lst[q] if h[1] > 0][: cfg.depth]))
+        out["setups"][n + "R"] = {"mean_ms": statistics.fmean(ms), "median_ms": statistics.median(ms), "mean_pairs": statistics.fmean(pairs),
+                                  "pairs_per_s": sum(pairs) / (sum(ms) / 1000)}
+        typer.echo(f"{dataset} {n}R: mean {statistics.fmean(ms) / 1000:.2f} s per search ({statistics.fmean(pairs):.1f} pairs), {sum(pairs) / (sum(ms) / 1000):.1f} pairs/s")
+    OUT.mkdir(parents=True, exist_ok=True)
+    (OUT / f"retime-{dataset}.json").write_text(json.dumps(out, indent=2))

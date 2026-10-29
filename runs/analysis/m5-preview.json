@@ -1,0 +1,171 @@
+{
+  "entities": 54,
+  "dev_questions": 500,
+  "affected_questions": 90,
+  "levels": {
+    "25": {
+      "entities": 14,
+      "documents_changed": 3434,
+      "glossary_documents": 14,
+      "affected_questions_changed": 22,
+      "audit": {
+        "level": 25,
+        "loose_before": 7434,
+        "loose_after": 698,
+        "share_left": 0.09389292440139897,
+        "leftover": {
+          "Indian": 456,
+          "Roth IRAs": 45,
+          "Indians": 30,
+          "indian": 25,
+          "Traditional IRAs": 22,
+          "TFSAs": 19,
+          "chinas": 16,
+          "Indiana": 16,
+          "traditional IRAs": 13,
+          "Indianapolis": 8,
+          "FTSE": 7,
+          "aapl": 6
+        }
+      }
+    },
+    "50": {
+      "entities": 27,
+      "documents_changed": 10074,
+      "glossary_documents": 27,
+      "affected_questions_changed": 60,
+      "audit": {
+        "level": 50,
+        "loose_before": 23677,
+        "loose_after": 2430,
+        "share_left": 0.1026312455125227,
+        "leftover": {
+          "American": 1276,
+          "Indian": 456,
+          "Australian": 173,
+          "american": 139,
+          "Roth IRAs": 45,
+          "Europeans": 35,
+          "Indians": 30,
+          "indian": 25,
+          "Traditional IRAs": 22,
+          "TFSAs": 19,
+          "chinas": 16,
+          "Indiana": 16
+        }
+      }
+    },
+    "100": {
+      "entities": 54,
+      "documents_changed": 12585,
+      "glossary_documents": 54,
+      "affected_questions_changed": 90,
+      "audit": {
+        "level": 100,
+        "loose_before": 31967,
+        "loose_after": 2452,
+        "share_left": 0.07670410110426377,
+        "leftover": {
+          "American": 1276,
+          "Indian": 456,
+          "Australian": 173,
+          "american": 139,
+          "Europeans": 35,
+          "Indians": 30,
+          "indian": 25,
+          "TFSAs": 19,
+          "Pakistani": 18,
+          "fdic": 16,
+          "chinas": 16,
+          "Indiana": 16
+        }
+      }
+    }
+  },
+  "pairs": [
+    {
+      "qid": "5050",
+      "entities": [
+        "Roth Individual Retirement Account"
+      ],
+      "original": "Rollover 401k into Roth IRA?",
+      "condition_A": "Rollover 401k into Kevodran?",
+      "condition_B": "Rollover 401k into a tax-advantaged retirement savings account?",
+      "document_excerpt": {
+        "original": "not just put the $5.5K directly toward the down payment? For #2, dollars converted from a traditional 401K or IRA to a Roth are considered income, and will be taxed at your marginal rate. So if your marginal tax rate is 25",
+        "swapped": "not just put the $5.5K directly toward the down payment? For #2, dollars converted from a traditional 401K or ROKUGUR to a Roth are considered income, and will be taxed at your marginal rate. So if your marginal tax rate is 25"
+      },
+      "glossary": [
+        "Kevodran: a tax-advantaged retirement savings account"
+      ]
+    },
+    {
+      "qid": "2910",
+      "entities": [
+        "United States"
+      ],
+      "original": "File Taxes: US Expat, now married to foreign national",
+      "condition_A": "File Taxes: KODATRAR Expat, now married to foreign national",
+      "condition_B": "File Taxes: a federal republic consisting of fifty states and a federal district Expat, now married to foreign national",
+      "document_excerpt": {
+        "original": "Per the IRS instructions on filing as Head of Household as a Citizen Living Abroad, if you choose to file only your own t",
+        "swapped": "Per the VUPEZUR instructions on filing as Head of Household as a Citizen Living Abroad, if you choose to file only your own t"
+      },
+      "glossary": [
+        "Kodatrar: a federal republic consisting of fifty states and a federal district"
+      ]
+    },
+    {
+      "qid": "5996",
+      "entities": [
+        "Pakistan"
+      ],
+      "original": "How do I choose between buying a car or buying a plot of land in Pakistan?",
+      "condition_A": "How do I choose between buying a car or buying a plot of land in Drununax?",
+      "condition_B": "How do I choose between buying a car or buying a plot of land in a country in South Asia?",
+      "document_excerpt": null,
+      "glossary": [
+        "Drununax: a country in South Asia"
+      ]
+    },
+    {
+      "qid": "9156",
+      "entities": [
+        "Individual Retirement Account",
+        "Roth Individual Retirement Account"
+      ],
+      "original": "Started new job. Rollover previous employer 401k to new 401k, IRA or Roth IRA?",
+      "condition_A": "Started new job. Rollover previous employer 401k to new 401k, ROKUGUR or Kevodran?",
+      "condition_B": "Started new job. Rollover previous employer 401k to new 401k, a retirement savings account with tax advantages or a tax-advantaged retirement savings account?",
+      "document_excerpt": {
+        "original": "You can't roll it over to a Roth IRA without tax penalties. The best thing to do is roll it to an IRA that isn't tied to work at all. Second be",
+        "swapped": "You can't roll it over to a Kevodran without tax penalties. The best thing to do is roll it to an ROKUGUR that isn't tied to work at all. Second be"
+      },
+      "glossary": [
+        "Rokugur: a retirement savings account with tax advantages",
+        "Kevodran: a tax-advantaged retirement savings account"
+      ]
+    },
+    {
+      "qid": "1658",
+      "entities": [
+        "Securities and Exchange Commission"
+      ],
+      "original": "Do any publically available documents from IR or SEC include all patents the company holds?",
+      "condition_A": "Do any publically available documents from IR or BRASUZIS include all patents the company holds?",
+      "condition_B": "Do any publically available documents from IR or an American government agency that regulates the securities industry include all patents the company holds?",
+      "document_excerpt": {
+        "original": "\"SEC filings do not contain this information, generally. You can find intangible assets on balance sheets, but not",
+        "swapped": "\"BRASUZIS filings do not contain this information, generally. You can find intangible assets on balance sheets, but not"
+      },
+      "glossary": [
+        "Brasuzis: an American government agency that regulates the securities industry"
+      ]
+    }
+  ],
+  "entity_split": {
+    "orgs_products": 45,
+    "places_currencies": 42,
+    "both": 3
+  }
+}

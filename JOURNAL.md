@@ -474,3 +474,19 @@ Why it matters: A stronger judge does not lift the embedding-free pipeline to th
 Evidence: runs/c6febe7c3c (SciFact), runs/adff359bad (NFCorpus), runs/fbb1e439e7 (FiQA); `thedu analyze llm-rerank` output; configs/llm_rerank_*.yaml.
 Next: clean cross-encoder re-time on idle hardware; M5 (made-up names) is next.
 Post: yes
+
+## 2026-10-28 · observation · The LLM reranker saw 100 words per passage, the cross-encoder saw the whole passage
+Who: human (raised), agent (recorded)
+What: In the listwise sample runs each candidate was cut to about 100 words for the LLM judge, while the cross-encoder scored the passage up to its 512-token limit. So the losses of A3L against A3R on FiQA (-0.0646) and SciFact (-0.0317, inconclusive) may come from truncation rather than from the judge. The NFCorpus gain (+0.0439) came despite the cut. This qualifies the listwise finding above (it is not corrected: the numbers stand, the explanation is open).
+Why it matters: "a stronger judge does not help" is only safe if the judge saw as much text as the cross-encoder did.
+Evidence: runs/c6febe7c3c, runs/adff359bad, runs/fbb1e439e7 (configs/llm_rerank_*.yaml, `words: 100`).
+Next: a 300-word FiQA check goes in the backlog (docs/backlog.md), not run now.
+Post: yes
+
+## 2026-10-28 · finding · M5 swap built; the residual audit fails the 2% rule (names survive as demonyms)
+Who: agent
+What: src/thedu/m5/swap.py builds the swap from the frozen list (54 entities): longest alias first, whole word, case-preserving, acronyms (US, UK, IRA) only in capitals so "us" stays a pronoun, nested levels 0/25/50/100 from one seeded shuffle, glossary documents, conditions A and B; `thedu m5 preview` shows it. With this matching rule 90 of 500 dev questions are affected (the check list said 92: it counted the pronoun "us" and similar lowercase hits) and 12,585 documents change at 100% (the list said 14,647). Residual audit (original name still present, counted with a looser pattern that also catches word endings): 9.4% at 25%, 10.3% at 50%, 7.7% at 100% of 31,967 occurrences; the design allows 2%. The leftovers are demonyms and plurals: American 1,276, Indian 456, Australian 173, american 139, Europeans 35, Indians 30, Pakistani 18, TFSAs 19, fdic 16. Not touched: the alias list is frozen, so adding aliases is a human decision.
+Why it matters: A model that sees "American" or "Indian" still knows the country, so the 100% level would not be a clean test of unknown names until the aliases are extended.
+Evidence: runs/analysis/m5-preview.json, tests/test_m5_swap.py (11 tests).
+Next: your review of the preview and the alias extension; no M5 run until then.
+Post: no
