@@ -1,0 +1,66 @@
+{
+  "n_questions": 500,
+  "dataset": "fiqa",
+  "llm_latency_probe_ms": null,
+  "setups": {
+    "A4": {
+      "ndcg10": {
+        "mean": 0.4291084492619722,
+        "lo": 0.39511888853119626,
+        "hi": 0.4611070246872509
+      },
+      "recall100": {
+        "mean": 0.7630798812298812,
+        "lo": 0.7329822915972916,
+        "hi": 0.793627070984571
+      },
+      "recall100_is_soft": false,
+      "llm_calls": 0,
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "llm_cost_per_search_usd": 0.0,
+      "llm_cost_is_estimate": false,
+      "rerank_cost_per_search_usd": null,
+      "cost_per_search_usd": null,
+      "uncosted_calls": 0,
+      "estimated_calls": 0,
+      "fallbacks": 0,
+      "latency_relative_to_A0": null
+    },
+    "A4R": {
+      "ndcg10": {
+        "mean": 0.467076731555646,
+        "lo": 0.43338119620914173,
+        "hi": 0.5008343549195233
+      },
+      "recall100": {
+        "mean": 0.7630798812298812,
+        "lo": 0.7329822915972916,
+        "hi": 0.793627070984571
+      },
+      "recall100_is_soft": false,
+      "llm_calls": 0,
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "llm_cost_per_search_usd": 0.0,
+      "llm_cost_is_estimate": false,
+      "rerank_cost_per_search_usd": 0.0005243327,
+      "cost_per_search_usd": null,
+      "uncosted_calls": 0,
+      "estimated_calls": 0,
+      "fallbacks": 0,
+      "latency_relative_to_A0": null
+    }
+  },
+  "paired": {
+    "A4R vs A4": {
+      "ndcg10_diff": 0.03796828229367379,
+      "lo": 0.01650717728950309,
+      "hi": 0.060502480204652716,
+      "wins": 170,
+      "losses": 120,
+      "role": "secondary"
+    }
+  },
+  "extras": {}
+}

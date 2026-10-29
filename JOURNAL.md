@@ -450,3 +450,19 @@ Why it matters: The pre-registration must not be treated as final while the leng
 Evidence: docs/tamil.md, runs/analysis/indicqa_ta-stats.json.
 Next: English runs, then M5, then settle the length and finalise the Tamil pre-registration.
 Post: no
+
+## 2026-10-28 · finding · A4+R benchmark: neither A0+R nor A3+R matches A4+R on any dataset
+Who: agent
+What: Pre-registered primary tests, paired nDCG@10, difference = embedding-free reranked arm minus A4+R, 95% range ("match" = lower bound above -0.01, "beat" = above 0; a miss counts as "A4+R is better" only if the upper bound is below 0). NFCorpus (324 q): A0R -0.0211 [-0.0312, -0.0110] A4+R better; A3R -0.0105 [-0.0213, +0.0002] inconclusive, not a match. SciFact (809 q): A0R -0.0097 [-0.0193, +0.0005] and A3R -0.0097 [-0.0200, +0.0010], both inconclusive, not a match (lower bounds just under -0.01). FiQA (500 q): A0R -0.0778 [-0.0967, -0.0599] and A3R -0.0899 [-0.1109, -0.0704], A4+R better. So no match on any dataset; two verdicts are "A4+R better", four are inconclusive-not-matching. nDCG@10 means: NFCorpus A4 0.3369, A4R 0.3345, A0R 0.3134, A3R 0.3240; SciFact A4 0.7368, A4R 0.7485, A0R 0.7388, A3R 0.7387; FiQA A4 0.4291, A4R 0.4671, A0R 0.3893, A3R 0.3772. Secondary, A4R minus A4: NFCorpus -0.0024 [-0.0197, +0.0155], SciFact +0.0116 [-0.0062, +0.0293], FiQA +0.0380 [+0.0165, +0.0605]. The reranker helps A4 only on FiQA, where the candidates are the problem for BM25. On SciFact A0R scores above A4 (0.7388 vs 0.7368) but below A4R, because the reranker lifts A4 too.
+Why it matters: Against the stronger benchmark the gap closes to about one point on SciFact and to one point on NFCorpus for A3R, but does not close; on FiQA it is 8 to 9 points. Rewriting adds nothing over plain BM25 once the reranker is in (A3R equals A0R on SciFact, is 0.01 above on NFCorpus, below on FiQA).
+Evidence: runs/3598a84a25 (NFCorpus A4+R), runs/6972fad3ba (SciFact), runs/4432badf81 (FiQA); reranker runs 8dbc179fa6, d8fe5f9aff, 00fb868eaa; runs/analysis/paired-*. Caveat: the NFCorpus A4+R run was made on an earlier code version than the other two (additions outside the cross-encoder path). Recall@50 for A0/A3/A4 is in runs/analysis/recall50-*.json.
+Next: LLM listwise sample runs (A0L/A3L/A4L, about 900 calls, projected $3.9, cap $25), then M5. Tamil setup is waiting for review.
+Post: yes
+
+## 2026-10-28 · finding · Once the reranker is in, the rewrite adds nothing: on English the cheaper embedding-free pipeline is A0+R
+Who: agent
+What: Paired nDCG@10, A3+R minus A0+R: NFCorpus +0.0106 [+0.0017, +0.0189] (324 q), SciFact -0.0000 [-0.0068, +0.0063] (809 q), FiQA -0.0121 [-0.0254, +0.0004] (500 q). Within about one point on all three; the only range that excludes zero is NFCorpus, in A3+R's favour at a gain of about one point. A0+R needs no rewrite call, so it is cheaper per search than A3+R at the same quality. Against the benchmark neither matches A4+R (see the finding above).
+Why it matters: The LLM rewrite earns its keep over plain BM25, but a cross-encoder on the top 50 captures the same gain; for English the embedding-free pipeline to carry forward is A0+R.
+Evidence: runs/analysis/paired-a3r-vs-a0r-{nfcorpus,scifact,fiqa}.json; runs 8dbc179fa6, d8fe5f9aff, 00fb868eaa.
+Next: the listwise LLM reranker sample runs test whether a stronger judge changes this.
+Post: yes
