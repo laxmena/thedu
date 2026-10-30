@@ -459,7 +459,9 @@ def m5_preview() -> None:
         a = v["audit"]
         typer.echo(f"level {lv}%: {v['entities']} entities, {v['documents_changed']} documents changed, {v['glossary_documents']} glossary docs, "
                    f"{v['affected_questions_changed']} affected questions changed; residual {a['loose_after']} of {a['loose_before']} ({a['share_left']:.1%})")
-    typer.echo(f"commonest leftovers at 100%: {r['levels'][100]['audit']['leftover']}")
+    typer.echo(f"relevant-passage split of the affected questions: {r['relevant_passage_split']}")
+    typer.echo(f"leftovers at 100% (top 20): {r['levels'][100]['audit']['leftover']}")
+    typer.echo(f"not-the-entity words set apart at 25/50/100%: " + ", ".join(str(r['levels'][lv]['audit']['excluded_not_the_entity']) for lv in (25, 50, 100)))
     for i, p in enumerate(r["pairs"], 1):
         typer.echo(f"\n--- pair {i} (question {p['qid']}; entities: {', '.join(p['entities'])})")
         typer.echo(f"original: {p['original']}\nA (codename): {p['condition_A']}\nB (description): {p['condition_B']}")
@@ -469,6 +471,21 @@ def m5_preview() -> None:
             typer.echo("relevant doc: no entity mention in it")
         for g in p["glossary"]:
             typer.echo(f"glossary: {g}")
+
+
+@m5_app.command("samples")
+def m5_samples(entity: list[str] = typer.Option(..., "--entity", help="An entity name from the list (repeatable)."),
+               n: int = typer.Option(10, "-n")) -> None:
+    """In-context matches of an entity, before and after the swap (condition A), to check for common-word false matches."""
+    from thedu.m5.preview import samples
+
+    for name, rows in samples(entity, n).items():
+        typer.echo(f"\n=== {name}")
+        for r in rows:
+            if r.get("not_an_entity"):
+                typer.echo(f"not in the entity list, left alone; the word occurs {r['occurrences_in_dev_corpus_and_questions']} times")
+            else:
+                typer.echo(f"[{r['matched']}] ...{r['before']}...\n      -> ...{r['after']}...")
 
 
 @analyze_app.command("recall50")

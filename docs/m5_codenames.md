@@ -134,3 +134,42 @@ reorders its candidates (same set, same length, order changes only).
 - The entity list is approved and frozen; the 26 generic terms stay `keep=n`.
 - Cost to run: the rerank arms (A0+R, A3+R, A4+R) take about 20 minutes per level and condition (92 questions), seven runs,
   plus about an hour of re-embedding; rewrites are cheap.
+
+## Amendment 2026-10-28 (before any M5 run): demonyms, plurals, one more secondary split
+
+The residual audit of the first swap build failed the 2% rule: 9.4%, 10.3% and 7.7% of name occurrences were left at the 25, 50 and
+100% levels, nearly all demonyms and plurals (American 1,276, Indian 456, Australian 173, Europeans, Pakistani, TFSAs). The frozen
+list `configs/m5_entities.csv` is not edited. The amendment is a second file, **`configs/m5_aliases_2026-10-28.csv`**, frozen with
+`thedu freeze --add`, and it wins where it names the same word.
+
+- **Demonyms** map to a derived form of the codename, never the bare codename: American to `<codename>ian`, Americans to
+  `<codename>ians`, Indian to `<codename>ian` (Chinese, Canadian, British, Brit, Australian, European, Pakistani, Singaporean
+  the same way; New Yorker to `<codename>er`). **Plurals** map to codename + `s` (IRAs, Roth IRAs, ISAs, RRSPs, TFSAs, SIPPs,
+  BMWs, USDs, Chinas, ...). The frozen list had mapped `Americans`, `European`, `IRAs` and `RRSPs` to the bare codename; the
+  amendment replaces those. The rows are listed in the file (45 forms, one exact-case rule).
+- **Boundaries:** whole words only. Indiana is not India, and Americas, Americana and `nyse.com` URLs are not touched where the
+  word does not match whole. `US` and the other acronyms still match only in capitals (`us` stays a pronoun). `Trading Places`
+  matches only as written (the lower-case phrase is ordinary English). Acronym case is kept as it was: an acronym becomes an
+  upper-case codename (`IRA` to `ROKUGUR`), a plural becomes `Rokugurs`.
+- **Condition B is not smoothed:** a demonym or plural in a question is replaced by the entity's description as it stands.
+- **Britain** is an alias of the United Kingdom (bare codename, like the other aliases; added on review). **English** (the language) is left unswapped.
+- **Left alone on purpose:** `FTSE100`,
+  `AAPL130119` and `PAKISTAN92` stay because a digit touches the name; lower-case `fdic`, `nyse`, `aapl` stay (acronym case).
+  The audit counts these as leftovers.
+- **Result:** with the amendment, 94 of 500 dev questions contain an entity (it was 90 under the first build; demonyms add
+  questions). With Britain added the audit leaves 0.45% (35 of 7,798, 25% level), 0.23% (57 of 24,056, 50%) and 0.30% (101 of 33,158, 100%) of occurrences, under the 2% rule; words that start with a name but are another
+  thing (Indiana, the Americas) are counted apart (`NOT_THE_ENTITY` in `swap.py`).
+
+**S4 (secondary, pre-registered now, before any M5 run).** Split the 94 affected questions by whether a **relevant passage
+contains a swapped entity** (under the full alias set) or not: **72 questions have an entity in a relevant passage, 22 do not**
+(of all 500 dev questions, 256 have one). The same tests as P1 to P3 on each group, reported with the group sizes first; the
+group of 22 is small and its ranges will be wide. Reason: where a relevant passage names the entity, the swap changes both
+sides and decides whether exact overlap survives (condition A) or breaks (condition B); where it does not, the swap only removes
+the entity from the question, and no exact-match term between question and passage is lost. Expectation: A4's fall and the closing
+gap to A4 are concentrated in the 72 and small in the 22. Secondary, none of it decides the verdict.
+
+**Known residue (accepted on review, 2026-10-29).** Top 20 leftovers at the 100% level: fdic 16, PAKISTAN 8, Indianapolis 8,
+nyse 8, FTSE 7, aapl 6, britains 4, AmericanExpress 3, tfsa 3, americancentury 3, rrsp 3, AAPL 2, americansecurityproject 2,
+americanaffairsjournal 2, indianapolis 2, indianartvilla 2, canadataxplan 2, AmericanAir 2, russell 1, Pakistanee 1. They are
+lower-case acronyms, names glued to digits or letters (PAKISTAN92, FTSE100, AmericanExpress) and other words that start with a
+name (Indianapolis). Documents changed at 100%: 13,510.

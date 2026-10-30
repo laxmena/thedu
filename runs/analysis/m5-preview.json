@@ -1,171 +1,194 @@
 {
   "entities": 54,
   "dev_questions": 500,
-  "affected_questions": 90,
+  "affected_questions": 94,
   "levels": {
     "25": {
       "entities": 14,
-      "documents_changed": 3434,
+      "documents_changed": 3752,
       "glossary_documents": 14,
       "affected_questions_changed": 22,
       "audit": {
         "level": 25,
-        "loose_before": 7434,
-        "loose_after": 698,
-        "share_left": 0.09389292440139897,
+        "loose_before": 7798,
+        "loose_after": 35,
+        "share_left": 0.004488330341113106,
         "leftover": {
-          "Indian": 456,
-          "Roth IRAs": 45,
-          "Indians": 30,
-          "indian": 25,
-          "Traditional IRAs": 22,
-          "TFSAs": 19,
-          "chinas": 16,
-          "Indiana": 16,
-          "traditional IRAs": 13,
           "Indianapolis": 8,
           "FTSE": 7,
-          "aapl": 6
-        }
+          "aapl": 6,
+          "tfsa": 3,
+          "AAPL": 2,
+          "indianapolis": 2,
+          "indianartvilla": 2,
+          "indiarealtime": 1,
+          "Indiabulls": 1,
+          "ftse": 1,
+          "trading places": 1,
+          "Ftse": 1
+        },
+        "excluded_not_the_entity": 22
       }
     },
     "50": {
       "entities": 27,
-      "documents_changed": 10074,
+      "documents_changed": 10941,
       "glossary_documents": 27,
       "affected_questions_changed": 60,
       "audit": {
         "level": 50,
-        "loose_before": 23677,
-        "loose_after": 2430,
-        "share_left": 0.1026312455125227,
+        "loose_before": 24056,
+        "loose_after": 57,
+        "share_left": 0.0023694712337878282,
         "leftover": {
-          "American": 1276,
-          "Indian": 456,
-          "Australian": 173,
-          "american": 139,
-          "Roth IRAs": 45,
-          "Europeans": 35,
-          "Indians": 30,
-          "indian": 25,
-          "Traditional IRAs": 22,
-          "TFSAs": 19,
-          "chinas": 16,
-          "Indiana": 16
-        }
+          "Indianapolis": 8,
+          "FTSE": 7,
+          "aapl": 6,
+          "AmericanExpress": 3,
+          "tfsa": 3,
+          "americancentury": 3,
+          "AAPL": 2,
+          "americansecurityproject": 2,
+          "americanaffairsjournal": 2,
+          "indianapolis": 2,
+          "indianartvilla": 2,
+          "AmericanAir": 2,
+          "russell": 1,
+          "americal": 1,
+          "indiarealtime": 1,
+          "Americanized": 1,
+          "American": 1,
+          "Indiabulls": 1,
+          "ftse": 1,
+          "United Statesian": 1
+        },
+        "excluded_not_the_entity": 62
       }
     },
     "100": {
       "entities": 54,
-      "documents_changed": 12585,
+      "documents_changed": 13510,
       "glossary_documents": 54,
-      "affected_questions_changed": 90,
+      "affected_questions_changed": 94,
       "audit": {
         "level": 100,
-        "loose_before": 31967,
-        "loose_after": 2452,
-        "share_left": 0.07670410110426377,
+        "loose_before": 33158,
+        "loose_after": 101,
+        "share_left": 0.003046022076120393,
         "leftover": {
-          "American": 1276,
-          "Indian": 456,
-          "Australian": 173,
-          "american": 139,
-          "Europeans": 35,
-          "Indians": 30,
-          "indian": 25,
-          "TFSAs": 19,
-          "Pakistani": 18,
           "fdic": 16,
-          "chinas": 16,
-          "Indiana": 16
-        }
+          "PAKISTAN": 8,
+          "Indianapolis": 8,
+          "nyse": 8,
+          "FTSE": 7,
+          "aapl": 6,
+          "britains": 4,
+          "AmericanExpress": 3,
+          "tfsa": 3,
+          "americancentury": 3,
+          "rrsp": 3,
+          "AAPL": 2,
+          "americansecurityproject": 2,
+          "americanaffairsjournal": 2,
+          "indianapolis": 2,
+          "indianartvilla": 2,
+          "canadataxplan": 2,
+          "AmericanAir": 2,
+          "russell": 1,
+          "Pakistanee": 1
+        },
+        "excluded_not_the_entity": 76
       }
     }
   },
   "pairs": [
     {
-      "qid": "5050",
-      "entities": [
-        "Roth Individual Retirement Account"
-      ],
-      "original": "Rollover 401k into Roth IRA?",
-      "condition_A": "Rollover 401k into Kevodran?",
-      "condition_B": "Rollover 401k into a tax-advantaged retirement savings account?",
-      "document_excerpt": {
-        "original": "not just put the $5.5K directly toward the down payment? For #2, dollars converted from a traditional 401K or IRA to a Roth are considered income, and will be taxed at your marginal rate. So if your marginal tax rate is 25",
-        "swapped": "not just put the $5.5K directly toward the down payment? For #2, dollars converted from a traditional 401K or ROKUGUR to a Roth are considered income, and will be taxed at your marginal rate. So if your marginal tax rate is 25"
-      },
-      "glossary": [
-        "Kevodran: a tax-advantaged retirement savings account"
-      ]
-    },
-    {
-      "qid": "2910",
+      "qid": "4966",
       "entities": [
         "United States"
       ],
-      "original": "File Taxes: US Expat, now married to foreign national",
-      "condition_A": "File Taxes: KODATRAR Expat, now married to foreign national",
-      "condition_B": "File Taxes: a federal republic consisting of fifty states and a federal district Expat, now married to foreign national",
+      "original": "In today's low interest environment, is it generally more economical to buy or lease a new car in the US?",
+      "condition_A": "In today's low interest environment, is it generally more economical to buy or lease a new car in the KODATRAR?",
+      "condition_B": "In today's low interest environment, is it generally more economical to buy or lease a new car in the a federal republic consisting of fifty states and a federal district?",
       "document_excerpt": {
-        "original": "Per the IRS instructions on filing as Head of Household as a Citizen Living Abroad, if you choose to file only your own t",
-        "swapped": "Per the VUPEZUR instructions on filing as Head of Household as a Citizen Living Abroad, if you choose to file only your own t"
+        "original": "uy a brand new car every 2 or 3 years, and does not drive a lot of miles. Note: in the case of a company car, Canadian taxes let you deduct the entire lease payment (which clearly has some principal in it) if you lease, while if",
+        "swapped": "uy a brand new car every 2 or 3 years, and does not drive a lot of miles. Note: in the case of a company car, Sudabunian taxes let you deduct the entire lease payment (which clearly has some principal in it) if you lease, while if"
       },
       "glossary": [
         "Kodatrar: a federal republic consisting of fifty states and a federal district"
       ]
     },
     {
-      "qid": "5996",
+      "qid": "2782",
       "entities": [
-        "Pakistan"
-      ],
-      "original": "How do I choose between buying a car or buying a plot of land in Pakistan?",
-      "condition_A": "How do I choose between buying a car or buying a plot of land in Drununax?",
-      "condition_B": "How do I choose between buying a car or buying a plot of land in a country in South Asia?",
-      "document_excerpt": null,
-      "glossary": [
-        "Drununax: a country in South Asia"
-      ]
-    },
-    {
-      "qid": "9156",
-      "entities": [
-        "Individual Retirement Account",
         "Roth Individual Retirement Account"
       ],
-      "original": "Started new job. Rollover previous employer 401k to new 401k, IRA or Roth IRA?",
-      "condition_A": "Started new job. Rollover previous employer 401k to new 401k, ROKUGUR or Kevodran?",
-      "condition_B": "Started new job. Rollover previous employer 401k to new 401k, a retirement savings account with tax advantages or a tax-advantaged retirement savings account?",
+      "original": "Using a Roth IRA instead of a college savings account",
+      "condition_A": "Using a Kevodran instead of a college savings account",
+      "condition_B": "Using a a tax-advantaged retirement savings account instead of a college savings account",
       "document_excerpt": {
-        "original": "You can't roll it over to a Roth IRA without tax penalties. The best thing to do is roll it to an IRA that isn't tied to work at all. Second be",
-        "swapped": "You can't roll it over to a Kevodran without tax penalties. The best thing to do is roll it to an ROKUGUR that isn't tied to work at all. Second be"
+        "original": "\"One problem with this plan is that the individual must have earned income to contribute to a Roth IRA. If you have an infant, unless she is the new Gerber baby or something like that, there is probably no legiti",
+        "swapped": "\"One problem with this plan is that the individual must have earned income to contribute to a Kevodran. If you have an infant, unless she is the new Gerber baby or something like that, there is probably no legiti"
       },
       "glossary": [
-        "Rokugur: a retirement savings account with tax advantages",
         "Kevodran: a tax-advantaged retirement savings account"
       ]
     },
     {
-      "qid": "1658",
+      "qid": "5522",
       "entities": [
-        "Securities and Exchange Commission"
+        "United Kingdom"
       ],
-      "original": "Do any publically available documents from IR or SEC include all patents the company holds?",
-      "condition_A": "Do any publically available documents from IR or BRASUZIS include all patents the company holds?",
-      "condition_B": "Do any publically available documents from IR or an American government agency that regulates the securities industry include all patents the company holds?",
+      "original": "In the UK, could low-income pensioners (or those near a low-income retirement) find a student loan useful for boosting their finances?",
+      "condition_A": "In the TRODUGEL, could low-income pensioners (or those near a low-income retirement) find a student loan useful for boosting their finances?",
+      "condition_B": "In the a sovereign island country off the northwestern coast of its continent, could low-income pensioners (or those near a low-income retirement) find a student loan useful for boosting their finances?",
       "document_excerpt": {
-        "original": "\"SEC filings do not contain this information, generally. You can find intangible assets on balance sheets, but not",
-        "swapped": "\"BRASUZIS filings do not contain this information, generally. You can find intangible assets on balance sheets, but not"
+        "original": "aybe that's the intention of the rule! (Although I might not think that was so true if I was actually on the UK's state pension of £6K a year and desperate. However, I was originally thinking more in terms of comparing t",
+        "swapped": "aybe that's the intention of the rule! (Although I might not think that was so true if I was actually on the TRODUGEL's state pension of £6K a year and desperate. However, I was originally thinking more in terms of comparing t"
       },
       "glossary": [
-        "Brasuzis: an American government agency that regulates the securities industry"
+        "Trodugel: a sovereign island country off the northwestern coast of its continent"
+      ]
+    },
+    {
+      "qid": "806",
+      "entities": [
+        "Joel Greenblatt"
+      ],
+      "original": "Trying to understand Return on Capital (Joel Greenblatt's Magic Formula version)",
+      "condition_A": "Trying to understand Return on Capital (Favomin's Magic Formula version)",
+      "condition_B": "Trying to understand Return on Capital (American investor, author, and professor known for his Magic Formula investing strategy's Magic Formula version)",
+      "document_excerpt": null,
+      "glossary": [
+        "Favomin: American investor, author, and professor known for his Magic Formula investing strategy"
+      ]
+    },
+    {
+      "qid": "1568",
+      "entities": [
+        "China"
+      ],
+      "original": "If a company in China says it accepts Visa, does it accept all Visas?",
+      "condition_A": "If a company in Nafipan says it accepts Visa, does it accept all Visas?",
+      "condition_B": "If a company in a country in East Asia says it accepts Visa, does it accept all Visas?",
+      "document_excerpt": {
+        "original": "gos) have a rule that a merchant must accept any credit card with their logo. Visa rules for merchants in the US say it explicitly: Accept all types of valid Visa cards. Although Visa card acceptance rules may vary based",
+        "swapped": "gos) have a rule that a merchant must accept any credit card with their logo. Visa rules for merchants in the KODATRAR say it explicitly: Accept all types of valid Visa cards. Although Visa card acceptance rules may vary based"
+      },
+      "glossary": [
+        "Nafipan: a country in East Asia"
       ]
     }
   ],
   "entity_split": {
     "orgs_products": 45,
-    "places_currencies": 42,
+    "places_currencies": 46,
     "both": 3
+  },
+  "relevant_passage_split": {
+    "affected_questions": 94,
+    "relevant_passage_has_entity": 72,
+    "relevant_passage_has_none": 22,
+    "all_dev_questions_passage_has_entity": 256
   }
 }

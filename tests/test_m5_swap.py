@@ -96,3 +96,52 @@ def test_audit_counts_leftover_derived_forms():
     a = swap.audit(TOY, 100, {"d": "Tesla is American. Tesla again."}, {})
     assert (a["loose_before"], a["loose_after"]) == (3, 1)  # "American" is not swapped: a demonym leaks the name
     assert a["leftover"] == {"American": 1}
+
+
+def test_demonym_maps_to_a_derived_form_and_never_the_bare_codename():
+    ents = swap.load_entities()
+    india = next(e for e in ents if e.name == "India")
+    sw = Swapper([india])
+    c = india.codename
+    assert sw.apply("An Indian and two Indians in India") == f"An {c}ian and two {c}ians in {c}"
+    assert all(suffix for e in ents for _, suffix in e.forms)
+
+
+def test_word_boundaries_indiana_is_not_india():
+    ents = swap.load_entities()
+    sw = Swapper([next(e for e in ents if e.name == "India")])
+    assert sw.apply("Indiana, indiatimes.com and Indiana University") == "Indiana, indiatimes.com and Indiana University"
+
+
+def test_plurals_map_to_codename_plus_s(entities=None):
+    ents = swap.load_entities()
+    ira = next(e for e in ents if e.name == "Individual Retirement Account")
+    sw = Swapper([ira])
+    assert sw.apply("two IRAs, one IRA") == f"two {ira.codename}s, one {ira.codename.upper()}"  # acronym case kept as it was
+
+
+def test_amendment_overrides_the_frozen_bare_mapping():
+    ents = swap.load_entities()
+    us = next(e for e in ents if e.name == "United States")
+    assert "Americans" not in us.aliases and ("Americans", "ians") in us.forms
+
+
+def test_a_bare_codename_form_is_refused(tmp_path):
+    bad = tmp_path / "a.csv"
+    bad.write_text("entity,alias,suffix,kind\nIndia,Indian,,demonym\n")
+    with pytest.raises(ValueError):
+        swap.load_entities(amendment=bad)
+
+
+def test_exact_case_alias_leaves_the_ordinary_phrase_alone():
+    ents = swap.load_entities()
+    tp = next(e for e in ents if e.name == "Trading Places")
+    sw = Swapper([tp])
+    assert sw.apply("the movie Trading Places, or just trading places with someone") == \
+        f"the movie {tp.codename}, or just trading places with someone"
+
+
+def test_britain_is_an_alias_of_the_uk_and_english_is_not_swapped():
+    uk = next(e for e in swap.load_entities() if e.name == "United Kingdom")
+    sw = Swapper([uk])
+    assert sw.apply("In Britain they speak English") == f"In {uk.codename} they speak English"

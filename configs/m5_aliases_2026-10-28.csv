@@ -1,0 +1,48 @@
+entity,alias,suffix,kind
+United States,American,ian,demonym
+United States,Americans,ians,demonym
+United Kingdom,British,ian,demonym
+United Kingdom,Brit,ian,demonym
+United Kingdom,Brits,ians,demonym
+India,Indian,ian,demonym
+India,Indians,ians,demonym
+Canada,Canadian,ian,demonym
+Canada,Canadians,ians,demonym
+Australia,Australian,ian,demonym
+Australia,Australians,ians,demonym
+China,Chinese,ian,demonym
+Europe,European,ian,demonym
+Europe,Europeans,ians,demonym
+Pakistan,Pakistani,ian,demonym
+Pakistan,Pakistanis,ians,demonym
+Singapore,Singaporean,ian,demonym
+Singapore,Singaporeans,ians,demonym
+New York,New Yorker,er,demonym
+New York,New Yorkers,ers,demonym
+Individual Retirement Account,IRAs,s,plural
+Individual Retirement Account,Individual Retirement Accounts,s,plural
+Roth Individual Retirement Account,Roth IRAs,s,plural
+Traditional Individual Retirement Account,Traditional IRAs,s,plural
+Individual Savings Account,ISAs,s,plural
+Lifetime Individual Savings Account,Lifetime ISAs,s,plural
+Registered Retirement Savings Plan,RRSPs,s,plural
+Registered Retirement Savings Plan,Registered Retirement Savings Plans,s,plural
+Tax-Free Savings Account,TFSAs,s,plural
+Self-Invested Personal Pension,SIPPs,s,plural
+BMW,BMWs,s,plural
+United States Dollar,USDs,s,plural
+United States Dollar,United States Dollars,s,plural
+Canadian Dollar,Canadian Dollars,s,plural
+British Pound,British Pounds,s,plural
+SPDR S&P 500 ETF Trust,SPYs,s,plural
+United Kingdom,UKs,s,plural
+China,Chinas,s,plural
+Canada,Canadas,s,plural
+India,Indias,s,plural
+Australia,Australias,s,plural
+Europe,Europes,s,plural
+Ontario,Ontarios,s,plural
+Vanguard Group,Vanguards,s,plural
+Federal Reserve System,Federal Reserves,s,plural
+Trading Places,Trading Places,,exact_case
+United Kingdom,Britain,,alias
