@@ -660,3 +660,51 @@ def analyze_retime(dataset: str = typer.Option(...), sample_run: str = typer.Opt
         typer.echo(f"{dataset} {n}R: mean {statistics.fmean(ms) / 1000:.2f} s per search ({statistics.fmean(pairs):.1f} pairs), {sum(pairs) / (sum(ms) / 1000):.1f} pairs/s")
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / f"retime-{dataset}.json").write_text(json.dumps(out, indent=2))
+
+
+@analyze_app.command("retime-interleaved")
+def analyze_retime_interleaved(dataset: str = typer.Option(...), sample_run: str = typer.Option(..., help="The 100-question run with A0, A3, A4."),
+                               passes: int = typer.Option(2, help="Passes over the same sample, each with its own load reading.")) -> None:
+    """Cross-encoder timing with the setups interleaved: for each question A0R, A3R and A4R are timed back to back
+    (the order rotates by question), so every setup meets the same machine load. Reports ratios to A0R only
+    (AGENTS.md: relative latency, never absolute), with the load average at the start and end of each pass."""
+    import json
+    import os
+    import statistics
+    import time
+
+    from thedu import data
+    from thedu.analysis.diagnosis import read_trec
+    from thedu.analysis.steps import OUT
+    from thedu.config import RerankConfig
+    from thedu.paths import ROOT
+    from thedu.ranker.rerank import CrossEncoderReranker
+
+    docs, queries, _ = data.load(dataset, "dev")
+    cfg = RerankConfig()
+    rr = CrossEncoderReranker(docs, cfg.model, cfg.depth, cfg.max_length)
+    names = ("A0", "A3", "A4")
+    lists = {n: read_trec(ROOT / "runs" / sample_run / f"{n}.trec") for n in names}
+    qids = sorted(lists["A0"])
+    rr.rerank(lists["A0"][qids[0]], queries[qids[0]])  # warm-up, not timed
+    out: dict = {"dataset": dataset, "sample_run": sample_run, "n": len(qids), "method": "interleaved per question, order rotated",
+                 "passes": []}
+    for p in range(passes):
+        load0 = os.getloadavg()
+        ms: dict[str, list[float]] = {n: [] for n in names}
+        for i, q in enumerate(qids):
+            for n in names[i % 3:] + names[: i % 3]:
+                t0 = time.perf_counter()
+                rr.rerank(lists[n][q], queries[q])
+                ms[n].append((time.perf_counter() - t0) * 1000)
+        mean = {n: statistics.fmean(v) for n, v in ms.items()}
+        out["passes"].append({"load_start": load0, "load_end": os.getloadavg(),
+                              "ratio_A3R_to_A0R": mean["A3"] / mean["A0"], "ratio_A4R_to_A0R": mean["A4"] / mean["A0"]})
+        typer.echo(f"{dataset} pass {p + 1}: A3R/A0R {mean['A3'] / mean['A0']:.3f}  A4R/A0R {mean['A4'] / mean['A0']:.3f}  load {load0[0]:.2f} -> {os.getloadavg()[0]:.2f}")
+    r = out["passes"]
+    out["agreement"] = {k: abs(r[0][k] - r[1][k]) / r[0][k] for k in ("ratio_A3R_to_A0R", "ratio_A4R_to_A0R")} if len(r) >= 2 else None
+    out["quotable"] = bool(out["agreement"] and all(v <= 0.10 for v in out["agreement"].values()))
+    OUT.mkdir(parents=True, exist_ok=True)
+    (OUT / f"retime-interleaved-{dataset}.json").write_text(json.dumps(out, indent=2))
+    if out["agreement"]:
+        typer.echo(f"{dataset}: difference between passes {out['agreement']}  quotable (within 10%): {out['quotable']}")
