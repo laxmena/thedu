@@ -514,3 +514,19 @@ Why it matters: The idea that codenames erase the embedding advantage holds only
 Evidence: runs 57077edbf2 (level 0), f779f9f255 / 5fc0735baf (25 A/B), 859729e0ac / d6927c3574 (50 A/B), df212811f3 / 66c31f9702 (100 A/B); runs/analysis/m5-results.json.
 Next: the interleaved cross-encoder re-time (ratios only, load recorded) now that M5 has finished; M5 write-up for the post.
 Post: yes
+
+## 2026-10-30 · finding · M5 headline: no embedding-free arm matches A4+R in either condition (P2 and P3); the P1 pass in A is reranked against unreranked
+Who: human (framing), agent (recorded)
+What: The pre-registered expectation was not supported against A4+R in either condition. The headline is P2 and P3 at 100%: A0R minus A4R is -0.0134 [-0.0529, +0.0282] in A and -0.0814 [-0.1213, -0.0416] in B; A3R minus A4R is -0.0235 [-0.0731, +0.0258] in A and -0.1020 [-0.1519, -0.0574] in B. In A these are inconclusive, in B A4+R is better. The P1 pass in condition A (A0R and A3R beat A4) compares a reranked arm with an unreranked one, and is to be reported as that: it shows what a reranker adds, not that keywords match embeddings.
+Why it matters: Same-stage comparison (reranked against reranked) is the fair one; P1 alone would overstate the result.
+Evidence: runs/analysis/m5-results.json; the finding of 2026-10-30 above.
+Next: the post reports P2 and P3 first.
+Post: yes
+
+## 2026-10-30 · observation · Unknown codename in the question seems to hurt A4 even when the passage never has it (not tested)
+Who: human (observation), agent (recorded)
+What: In the S4 group of 22 questions whose relevant passage contains no entity, the reranked embedding-free arms beat unreranked A4 in condition A (A0R +0.206, A3R +0.198) although the passage never had the name. A hypothesis, not tested: an unknown codename in the question poisons the query embedding. Possible test: drop the codename from the question for A4 only and see whether A4 recovers. Added to docs/backlog.md.
+Why it matters: If true, part of A4's fall is a query-side artefact, not lost knowledge of the entity.
+Evidence: runs/analysis/m5-results.json (S4_A).
+Next: backlog, nothing run.
+Post: no
