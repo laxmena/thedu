@@ -50,6 +50,16 @@ def embed_documents(model, texts: list[str], cache: Path, label: str, chunk: int
     return vecs
 
 
+def query_encoder(model, query_instruction: str | None) -> Callable[[list[str]], np.ndarray]:
+    def encode(queries: list[str]) -> np.ndarray:
+        if query_instruction is None:
+            return model.encode(queries, prompt_name="query", normalize_embeddings=True)
+        prefix = f"Instruct: {query_instruction}\nQuery:"  # the template MTEB uses for Qwen3-Embedding
+        return model.encode([prefix + q for q in queries], normalize_embeddings=True)
+
+    return encode
+
+
 class DenseRetriever:
     def __init__(self, doc_ids: list[str], doc_vecs: np.ndarray, encode_queries: Callable[[list[str]], np.ndarray]):
         if len(doc_ids) != len(doc_vecs):
@@ -82,10 +92,4 @@ class DenseRetriever:
             shutil.copy(legacy, cache)
         vecs = np.load(cache) if cache.exists() else embed_documents(model, texts, cache, dataset)
 
-        def encode(queries: list[str]) -> np.ndarray:
-            if query_instruction is None:
-                return model.encode(queries, prompt_name="query", normalize_embeddings=True)
-            prefix = f"Instruct: {query_instruction}\nQuery:"  # the template MTEB uses for Qwen3-Embedding
-            return model.encode([prefix + q for q in queries], normalize_embeddings=True)
-
-        return cls(doc_ids, vecs, encode)
+        return cls(doc_ids, vecs, query_encoder(model, query_instruction))

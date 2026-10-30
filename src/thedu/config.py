@@ -12,8 +12,8 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from thedu.prompts import load_prompt
 
-Setup = Literal["A0", "A2", "A3", "A4", "H0", "A5", "A0R", "A3R", "A4R", "A0L", "A3L", "A4L"]
-# H0 = RRF(A0, A4); A5 = RRF(A3, A4); xR = the top of x reordered by a cross-encoder; xL = by an LLM (listwise)
+Setup = Literal["A0", "A2", "A3", "A4", "H0", "A5", "A0R", "A3R", "A4R", "A0L", "A3L", "A4L", "A0C"]
+# A0C = BM25 over words plus character 3 to 5-grams (M5 only); H0 = RRF(A0, A4); A5 = RRF(A3, A4); xR = the top of x reordered by a cross-encoder; xL = by an LLM (listwise)
 
 
 # The instruction MTEB gives Qwen3-Embedding for each dataset's queries. SciFact and NFCorpus: sources in
@@ -107,6 +107,13 @@ class ListwiseConfig(_Frozen):
     prompt: Literal["listwise_v1"] = "listwise_v1"
 
 
+class M5Config(_Frozen):
+    """The made-up names test (docs/m5_codenames.md): which swap level and condition the run's corpus and questions have."""
+
+    level: Literal[0, 25, 50, 100]
+    condition: Literal["A", "B"]
+
+
 class RunConfig(_Frozen):
     dataset: Literal["scifact", "nfcorpus", "fiqa", "indicqa_ta"]
     split: Literal["dev", "test"] = "dev"  # `thedu dev` refuses "test"; only `thedu parity` runs it
@@ -121,6 +128,7 @@ class RunConfig(_Frozen):
     ranker: RankerConfig = RankerConfig()
     rerank: RerankConfig = RerankConfig()  # candidate depth (and the cross-encoder for xR); left out of the hash if unused
     listwise: ListwiseConfig | None = None  # required by the xL setups
+    m5: M5Config | None = None  # set by `thedu m5 run`; left out of the hash when unused
     pricing: str = "configs/pricing.yaml"
 
     def prompt_texts(self) -> dict[str, str]:
@@ -144,6 +152,8 @@ class RunConfig(_Frozen):
             exclude["bm25"] = {"language"}  # keeps the hashes of runs made before Tamil existed
         if not self.uses_rerank():
             exclude["rerank"] = True  # keeps the hashes of runs made before reranking existed
+        if self.m5 is None:
+            exclude["m5"] = True
         if self.listwise is None:
             exclude["listwise"] = True
         else:

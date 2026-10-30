@@ -448,6 +448,36 @@ def m5_entities() -> None:
     typer.echo(f"wrote {build()}")
 
 
+@m5_app.command("run")
+def m5_run(level: int = typer.Option(..., help="0, 25, 50 or 100"), condition: str = typer.Option("A", help="A or B (level 0: A only)"),
+           restart: bool = typer.Option(False)) -> None:
+    """One swap level and condition of the made-up names test; saves runs/<hash>/."""
+    _logging()
+    from thedu.m5.runner import run_level
+
+    run, metrics = run_level(level, condition, restart)
+    typer.echo(f"level {level} condition {condition}: run {run.path.name}")
+    for s, v in metrics["setups"].items():
+        typer.echo(f"  {s:<5} nDCG@10 {v['ndcg10']['mean']:.4f}")
+
+
+@m5_app.command("analyze")
+def m5_analyze() -> None:
+    """The pre-registered M5 tests (P1 to P3, S1 to S4) from the finished runs; writes runs/analysis/m5-results.json."""
+    from thedu.m5.analysis import analyze
+
+    r = analyze()
+    typer.echo(f"{r['n_questions']} questions; runs {r['runs']}")
+    for k, v in r["ndcg10"].items():
+        typer.echo(f"  {k:<6} " + "  ".join(f"{a} {x:.4f}" for a, x in v.items()))
+    for cond, v in r["primary"].items():
+        typer.echo(f"condition {cond} at 100%:")
+        for name, t in v["tests"].items():
+            typer.echo(f"  {name:<12} {t['diff']:+.4f} [{t['lo']:+.4f}, {t['hi']:+.4f}]  {t['verdict']}")
+        typer.echo(f"  P1 {v['P1_any_free_arm_matches_or_beats_A4']}  P2 {v['P2_A0R_vs_A4R']}  P3 {v['P3_A3R_vs_A4R']}")
+    typer.echo(f"expectation holds (any of P1-P3 in both conditions): {r['expectation_holds']}")
+
+
 @m5_app.command("preview")
 def m5_preview() -> None:
     """Show the swap on 5 questions (both conditions, with a document excerpt), the counts and the residual audit."""

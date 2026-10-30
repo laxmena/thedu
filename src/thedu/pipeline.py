@@ -29,13 +29,13 @@ from thedu.tokens import estimate_tokens
 
 log = logging.getLogger(__name__)
 
-ORDER = ["A0", "A4", "A2", "A3", "H0", "A5", "A0R", "A3R", "A4R", "A0L", "A3L", "A4L"]
+ORDER = ["A0", "A0C", "A4", "A2", "A3", "H0", "A5", "A0R", "A3R", "A4R", "A0L", "A3L", "A4L"]
 # What each setup is built from. H0 and A5 fuse two components with the ranker.
-DEPS = {"A0": ("A0",), "A4": ("A4",), "A2": ("A2",), "A3": ("A3",), "H0": ("A0", "A4"), "A5": ("A3", "A4"),
+DEPS = {"A0": ("A0",), "A0C": ("A0C",), "A4": ("A4",), "A2": ("A2",), "A3": ("A3",), "H0": ("A0", "A4"), "A5": ("A3", "A4"),
         "A0R": ("A0",), "A3R": ("A3",), "A4R": ("A4",), "A0L": ("A0",), "A3L": ("A3",), "A4L": ("A4",)}
 RERANKED = {"A0R", "A3R", "A4R"}  # one component, its top reordered by the cross-encoder
 LISTWISE = {"A0L", "A3L", "A4L"}  # one component, its top reordered by an LLM
-BM25_BASED = {"A0", "A2", "A3"}  # lists whose zero-score filler is dropped before fusion
+BM25_BASED = {"A0", "A0C", "A2", "A3"}  # lists whose zero-score filler is dropped before fusion
 PROBE_QUESTIONS = 30
 PROBE_ATTEMPT = 9  # a salt that skips both caches, so the probe measures real calls
 
@@ -95,7 +95,7 @@ def run_dev(cfg: RunConfig, offline: bool = False, restart: bool = False, root: 
 
 def execute(cfg: RunConfig, docs: dict[str, str], queries: dict[str, str], qrels: dict[str, dict[str, int]],
             offline: bool = False, restart: bool = False, root: Path | None = None, kind: str = "dev",
-            probe: bool = False) -> tuple[RunDir, dict]:
+            probe: bool = False, dense: DenseRetriever | None = None) -> tuple[RunDir, dict]:
     """Run a config's setups on the given questions and save the run. Callers decide which split's answers to pass.
 
     probe: if some LLM calls have no recorded latency (the spike cache), time a few fresh calls so the
@@ -116,13 +116,18 @@ def execute(cfg: RunConfig, docs: dict[str, str], queries: dict[str, str], qrels
     dense_hits: dict[str, tuple[list, float]] = {}
     need_dense = [q for q, ss in todo.items() if any("A4" in DEPS[s] for s in ss)]
     if need_dense:
-        dense = DenseRetriever.from_model(
+        dense = dense or DenseRetriever.from_model(
             cfg.dataset, doc_ids, texts, cfg.dense.model, cfg.dense.max_seq_length,
             resolve_instruction(cfg.dataset, cfg.dense.query_instruction))
         t0 = time.perf_counter()
         found = dense.search_many([queries[q] for q in need_dense], cfg.k)
         per_q_ms = (time.perf_counter() - t0) * 1000 / len(need_dense)
         dense_hits = {q: (h, per_q_ms) for q, h in zip(need_dense, found)}
+    chars = None
+    if "A0C" in setups:  # words plus character 3 to 5-grams; built here so it is rebuilt on every swapped corpus
+        from thedu.retrievers.variants import KeywordIndex, Variant
+
+        chars = KeywordIndex(doc_ids, texts, Variant(chars="plus", k1=cfg.bm25.k1, b=cfg.bm25.b))
     blind = BlindPlanner(gateway, cfg.planner) if "A2" in setups else None
     grounded = GroundedPlanner(gateway, cfg.planner, docs, cfg.dataset) if {"A3", "A5", "A3R"} & set(setups) else None
     ranker = RrfRanker(cfg.ranker.rrf_k, cfg.ranker.depth)
@@ -145,6 +150,10 @@ def execute(cfg: RunConfig, docs: dict[str, str], queries: dict[str, str], qrels
         if name == "A0":
             hits, ms = timed_search(q)
             return Component(hits, Usage(), False, ms, [q])
+        if name == "A0C":
+            t0 = time.perf_counter()
+            hits = chars.search(q, cfg.k)
+            return Component(hits, Usage(), False, (time.perf_counter() - t0) * 1000, [q])
         if name == "A4":
             hits, ms = dense_hits[qid]
             return Component(hits, Usage(), False, ms, [q])
