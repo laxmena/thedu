@@ -48,7 +48,10 @@ def dense_for(cfg: RunConfig, original: dict[str, str], swapped: dict[str, str],
     model.max_seq_length = cfg.dense.max_seq_length
     cache = runs_dir() / "embeddings" / f"m5-fiqa-L{level}-changed.npy"
     t0 = time.perf_counter()
-    new = np.load(cache) if cache.exists() else embed_documents(model, [swapped[ids[i]] for i in changed], cache, f"m5 L{level}")
+    if not changed:  # level 0: the original corpus, nothing to embed
+        new = np.zeros((0, base.shape[1]), dtype=base.dtype)
+    else:
+        new = np.load(cache) if cache.exists() else embed_documents(model, [swapped[ids[i]] for i in changed], cache, f"m5 L{level}")
     log.info("m5 level %d: %d of %d documents embedded in %.0f s", level, len(changed), len(ids), time.perf_counter() - t0)
     vecs = np.concatenate([base, np.zeros((len(ids) - len(base), base.shape[1]), dtype=base.dtype)])
     vecs[changed] = new
