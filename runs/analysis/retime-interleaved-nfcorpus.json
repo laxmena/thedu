@@ -1,0 +1,41 @@
+{
+  "dataset": "nfcorpus",
+  "sample_run": "adff359bad",
+  "n": 100,
+  "method": "interleaved per question, order rotated",
+  "passes": [
+    {
+      "load_start": [
+        2.3720703125,
+        2.41455078125,
+        2.47119140625
+      ],
+      "load_end": [
+        2.1083984375,
+        2.19970703125,
+        2.263671875
+      ],
+      "ratio_A3R_to_A0R": 1.4082397449896107,
+      "ratio_A4R_to_A0R": 1.299587632752225
+    },
+    {
+      "load_start": [
+        2.1083984375,
+        2.19970703125,
+        2.263671875
+      ],
+      "load_end": [
+        2.05126953125,
+        2.1748046875,
+        2.23681640625
+      ],
+      "ratio_A3R_to_A0R": 1.4084238511414668,
+      "ratio_A4R_to_A0R": 1.2992131410075993
+    }
+  ],
+  "agreement": {
+    "ratio_A3R_to_A0R": 0.00013073494943683343,
+    "ratio_A4R_to_A0R": 0.00028816197937548516
+  },
+  "quotable": true
+}

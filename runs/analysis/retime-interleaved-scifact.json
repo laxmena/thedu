@@ -1,0 +1,41 @@
+{
+  "dataset": "scifact",
+  "sample_run": "c6febe7c3c",
+  "n": 100,
+  "method": "interleaved per question, order rotated",
+  "passes": [
+    {
+      "load_start": [
+        16.57421875,
+        8.60888671875,
+        5.22802734375
+      ],
+      "load_end": [
+        2.16015625,
+        2.30126953125,
+        2.744140625
+      ],
+      "ratio_A3R_to_A0R": 0.9980622110550058,
+      "ratio_A4R_to_A0R": 0.9448814689431202
+    },
+    {
+      "load_start": [
+        2.16015625,
+        2.30126953125,
+        2.744140625
+      ],
+      "load_end": [
+        2.26611328125,
+        2.3955078125,
+        2.46533203125
+      ],
+      "ratio_A3R_to_A0R": 0.9984797557182281,
+      "ratio_A4R_to_A0R": 0.946912201450806
+    }
+  ],
+  "agreement": {
+    "ratio_A3R_to_A0R": 0.00041835534758994134,
+    "ratio_A4R_to_A0R": 0.002149192861150358
+  },
+  "quotable": true
+}

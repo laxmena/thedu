@@ -530,3 +530,11 @@ Why it matters: If true, part of A4's fall is a query-side artefact, not lost kn
 Evidence: runs/analysis/m5-results.json (S4_A).
 Next: backlog, nothing run.
 Post: no
+
+## 2026-10-30 · finding · Cross-encoder latency, interleaved method: ratios agree between two passes and are quotable
+Who: agent
+What: A0R, A3R and A4R were timed back to back for each of the 100 sample questions per dataset (order rotated by question), two passes over the same sample, load average recorded. Ratios to A0R (time per search of the cross-encoder step only, not the rewrite call): SciFact A3R 0.998, A4R 0.946; NFCorpus A3R 1.408, A4R 1.300; FiQA A3R 1.066, A4R 0.723. The two passes differ by at most 0.2% on every ratio (rule: within 10%), so the ratios are quotable. Load average at the start of the passes was 2.1 to 2.7 (SciFact pass 1 began at 16.6 and fell to 2.2 within the pass; interleaving puts every setup under the same load, and the ratios still agreed). Why the ratios differ from 1: the cost follows the number of candidate pairs and their length. On NFCorpus A0 returns fewer than 50 candidates with a non-zero score (about 36), so A0R is cheaper; on FiQA the A4 candidates are shorter documents. They agree with the first, noisy method (FiQA 0.725, NFCorpus 1.30). Absolute times are not reported (AGENTS.md).
+Why it matters: The latency comparison between the cross-encoder arms can go in the post as ratios; the LLM listwise arms' times (6 to 10 s per search in the sample runs, measured under parallel calls) are a different measurement and are not compared with these.
+Evidence: runs/analysis/retime-interleaved-{scifact,nfcorpus,fiqa}.json.
+Next: none.
+Post: yes
