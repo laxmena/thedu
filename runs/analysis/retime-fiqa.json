@@ -1,0 +1,33 @@
+{
+  "dataset": "fiqa",
+  "sample_run": "fbb1e439e7",
+  "n": 100,
+  "model": "BAAI/bge-reranker-v2-m3",
+  "depth": 50,
+  "load_average_at_start": [
+    3.77197265625,
+    3.58642578125,
+    3.6015625
+  ],
+  "setups": {
+    "A0R": {
+      "mean_ms": 5023.519217541325,
+      "median_ms": 5029.949708492495,
+      "mean_pairs": 50.0,
+      "pairs_per_s": 9.953181790448419
+    },
+    "A3R": {
+      "mean_ms": 5356.626565021579,
+      "median_ms": 5522.910854459042,
+      "mean_pairs": 50.0,
+      "pairs_per_s": 9.334232915637003
+    },
+    "A4R": {
+      "mean_ms": 3637.493492945796,
+      "median_ms": 3620.1448749925476,
+      "mean_pairs": 50.0,
+      "pairs_per_s": 13.745729056825855
+    }
+  },
+  "status": "NOISY, not for quoting: load average 3.6 to 4.0 at start, other jobs running (first method: setups timed one after another)"
+}

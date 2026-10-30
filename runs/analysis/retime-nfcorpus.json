@@ -1,0 +1,33 @@
+{
+  "dataset": "nfcorpus",
+  "sample_run": "adff359bad",
+  "n": 100,
+  "model": "BAAI/bge-reranker-v2-m3",
+  "depth": 50,
+  "load_average_at_start": [
+    3.6337890625,
+    3.8603515625,
+    4.001953125
+  ],
+  "setups": {
+    "A0R": {
+      "mean_ms": 4160.456988757942,
+      "median_ms": 5545.340667013079,
+      "mean_pairs": 36.12,
+      "pairs_per_s": 8.681738592082699
+    },
+    "A3R": {
+      "mean_ms": 5861.440752836061,
+      "median_ms": 5892.343749466818,
+      "mean_pairs": 50.0,
+      "pairs_per_s": 8.530325922992137
+    },
+    "A4R": {
+      "mean_ms": 5408.376376709784,
+      "median_ms": 5445.74437502888,
+      "mean_pairs": 50.0,
+      "pairs_per_s": 9.24491871817874
+    }
+  },
+  "status": "NOISY, not for quoting: load average 3.6 to 4.0 at start, other jobs running (first method: setups timed one after another)"
+}

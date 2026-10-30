@@ -498,3 +498,11 @@ Why it matters: A name leaking as a demonym would let any model recognise the co
 Evidence: runs/analysis/m5-preview.json, tests/test_m5_swap.py (17 tests), docs/m5_codenames.md (amendment section).
 Next: your review of the preview, audit and samples; no M5 run until then.
 Post: no
+
+## 2026-10-29 · observation · Cross-encoder re-time, first method: too noisy to quote
+Who: agent
+What: `thedu analyze retime` timed A0R, A3R and A4R one setup after another on the 100-question samples. The load average at the start was 3.6 to 4.0 on all three datasets (my own audit jobs and another application were running), so the figures are labelled noisy and are not to be quoted. Pairs per second varied from 8.3 to 13.7 between datasets, which fits a shared machine. The saved files carry the label.
+Why it matters: Latency may only be reported relative between setups (AGENTS.md), and a drifting load makes even ratios between setups run at different moments unreliable.
+Evidence: runs/analysis/retime-{scifact,nfcorpus,fiqa}.json.
+Next: change the method to A0R, A3R and A4R interleaved question by question on the same sample, report ratios between setups only, with the load average recorded; run it after M5 with nothing else of mine running.
+Post: no

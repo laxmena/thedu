@@ -1,0 +1,33 @@
+{
+  "dataset": "scifact",
+  "sample_run": "c6febe7c3c",
+  "n": 100,
+  "model": "BAAI/bge-reranker-v2-m3",
+  "depth": 50,
+  "load_average_at_start": [
+    3.8701171875,
+    4.001953125,
+    3.8955078125
+  ],
+  "setups": {
+    "A0R": {
+      "mean_ms": 6026.563163804822,
+      "median_ms": 5975.144521013135,
+      "mean_pairs": 50.0,
+      "pairs_per_s": 8.296602664068471
+    },
+    "A3R": {
+      "mean_ms": 5977.816837162827,
+      "median_ms": 5967.324291501427,
+      "mean_pairs": 50.0,
+      "pairs_per_s": 8.364257614780122
+    },
+    "A4R": {
+      "mean_ms": 5587.0265770884,
+      "median_ms": 5516.886854486074,
+      "mean_pairs": 50.0,
+      "pairs_per_s": 8.94930412628479
+    }
+  },
+  "status": "NOISY, not for quoting: load average 3.6 to 4.0 at start, other jobs running (first method: setups timed one after another)"
+}
