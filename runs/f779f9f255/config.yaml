@@ -1,0 +1,55 @@
+dataset: fiqa
+split: dev
+n: null
+seed: 7
+k: 100
+setups:
+- A0
+- A3
+- A0C
+- A4
+- A0R
+- A3R
+- A4R
+bm25:
+  k1: 0.9
+  b: 0.4
+  language: english
+dense:
+  model: Qwen/Qwen3-Embedding-0.6B
+  max_seq_length: 512
+  query_instruction: task
+llm:
+  model: qwen/qwen3-14b
+  base_url: https://openrouter.ai/api/v1
+  key_env: OPENROUTER_API_KEY
+  temperature: 0.0
+  seed: 7
+  max_tokens: 300
+  workers: 16
+  cache_file: runs/cache/llm.jsonl
+  provider:
+    order:
+    - DeepInfra
+    allow_fallbacks: false
+  reasoning: null
+planner:
+  blind_prompt: blind_v1
+  grounded_prompt: grounded_v1
+  query_repeat: 3
+  feedback_k: 5
+  snippet_words: 60
+  use_spike_cache: false
+  max_fallback_rate: 0.05
+ranker:
+  rrf_k: 60
+  depth: 100
+rerank:
+  model: BAAI/bge-reranker-v2-m3
+  depth: 50
+  max_length: 512
+listwise: null
+m5:
+  level: 25
+  condition: A
+pricing: configs/pricing.yaml
