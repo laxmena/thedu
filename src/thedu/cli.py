@@ -740,3 +740,19 @@ def analyze_h1_h4() -> None:
     typer.echo("  30 random labels:")
     for x in r["H4"]["spot_check"]:
         typer.echo(f"   [{x['label']}] {x['question'][:140]}")
+
+
+@analyze_app.command("depth-sweep")
+def analyze_depth_sweep() -> None:
+    """H2b (JOURNAL.md 2026-10-30): score A0's top 500 with the cross-encoder once, derive depths 50/100/200/500. Run it alone."""
+    from thedu.analysis.depthsweep import analyze, collect
+
+    r = analyze(collect())
+    typer.echo(f"{r['n']} FiQA dev questions; load average at start {r['load_start']}, at end {r['load_end']}")
+    typer.echo(f"checks: A4R fresh vs run (mean abs nDCG@10 difference) {r['check_A4R_fresh_vs_run_ndcg10_mean_abs_diff']:.4f}; A0R depth 50 vs run {r['check_A0R_depth50_vs_run_ndcg10_mean_abs_diff']:.4f}")
+    b = r["benchmark_A4R_depth50"]
+    typer.echo(f"benchmark A4R depth 50: nDCG@10 {b['ndcg10']:.4f}  Recall@10 {b['recall10']:.4f}  cost ${b['cost_per_search_usd']:.5f}")
+    for d, v in r["depths"].items():
+        t = v["vs_A4R_ndcg10"]
+        typer.echo(f"  A0R depth {d:>3}: nDCG@10 {v['ndcg10']:.4f} R@10 {v['recall10']:.4f}  minus A4R {t['diff']:+.4f} [{t['lo']:+.4f}, {t['hi']:+.4f}] {t['verdict']}"
+                   f"  pairs {v['pairs_per_search']:.0f}  cost x{v['cost_relative_to_A0R_depth50']:.1f}  ${v['cost_per_search_usd']:.5f}  time x{v['relative_time_to_A4R_depth50']:.1f} of A4R@50")
