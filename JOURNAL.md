@@ -553,3 +553,27 @@ Why it matters: These decide whether the A0R to A4R gap is a candidate-finding p
 Evidence: none yet.
 Next: compute all four, show the results with the commit list; nothing else runs.
 Post: yes
+
+## 2026-10-30 · finding · H1 to H4: the gap is both finding and ordering; two of the three expectations are not supported
+Who: agent
+What: Computed as pre-registered (dev only, no LLM calls, existing runs). H1, per dataset, first-stage groups by relevant document in top 50 (a both, b only A4, c only keyword, d neither), counts SciFact 706/51/24/28, NFCorpus 233/35/5/51, FiQA 318/97/11/74. Group (a), A0R minus A4R: SciFact -0.0148 [-0.0212, -0.0086], NFCorpus -0.0130 [-0.0234, -0.0021], FiQA -0.0510 [-0.0657, -0.0359]; all three have the lower bound below -0.01, so the expectation "A0R matches A4R in group (a) on all three" is NOT supported: with the same candidate pool the embedding-ranked list is still reranked better. For A3R against A4R (groups from A3's top 50): SciFact -0.0121 [-0.0174, -0.0070], NFCorpus -0.0057 [-0.0181, +0.0058] (inconclusive), FiQA -0.0421 [-0.0599, -0.0262]. Contributions to the overall A0R gap: SciFact (a) -0.0129, (b) -0.0105, (c) +0.0137; NFCorpus (a) -0.0094, (b) -0.0135, (c) +0.0017; FiQA (a) -0.0325, (b) -0.0543, (c) +0.0090, overall -0.0778, so on FiQA most of the gap (about 70% of the net, group b) comes from questions where only A4 had a relevant document in its top 50: that part of the expectation IS supported. H2: Recall@100/500/1000 (documents with a score of zero not counted; same numbers as ranked): A0 SciFact .926/.958/.976, NFCorpus .227/.299/.335, FiQA .510/.673/.733; A3 SciFact .941/.975/.990, NFCorpus .311/.489/.616, FiQA .525/.694/.764. A3's deep lists reproduce the saved top 100 of the run (checked per question). For group (b), first relevant document in A0's list: FiQA (97 questions) 51 to 100: 18, 101 to 500: 49, 501 to 1,000: 11, not in the top 1,000: 19, so 80% have one within the top 1,000; the expectation "fewer than half" is NOT supported. SciFact (51): 17/17/7/10 (80% within 1,000); NFCorpus (35): 2/6/1/26 (26% within 1,000). H3: the 20 FiQA questions where A0R loses most are in runs/analysis/h3-fiqa-review.md for reading; nothing scored. H4: the frozen word rule labels only 20 of 500 FiQA dev questions as advice/opinion (none of the 30 random labels printed was advice; several that read as advice, such as "is it worth it when...", "is it generally more economical to buy or lease" are labelled factual because the rule needs the exact phrases). A0R minus A4R: advice (20) -0.0470 [-0.1026, +0.0022], factual (480) -0.0790 [-0.0989, -0.0591]. The expectation "the gap is larger in the advice group" is NOT supported, but the group is too small to say anything.
+Why it matters: On the same candidate pool the keyword side still loses 1 to 5 points, so part of the gap is ordering that more candidates cannot fix; and the part that comes from candidate finding on FiQA is mostly depth, not absence: 80% of the group (b) questions have a relevant document within BM25's top 1,000, so a deeper first stage or a better fusion is worth testing.
+Evidence: runs/analysis/h1-h4.json, runs/analysis/h3-fiqa-review.md; src/thedu/analysis/hypotheses.py; pre-registration 2026-10-30 above.
+Next: your reading of H3; no new method runs yet.
+Post: yes
+
+## 2026-10-30 · learning · Correction to the H1 finding: group (a) gap is candidate composition, not ordering
+Who: human (correction), agent (numbers)
+What: Corrects the reading in "H1 to H4: the gap is both finding and ordering" (the "Why it matters" sentence said part of the gap is ordering). The cross-encoder scores each pair independently, so A0R minus A4R in group (a) comes from candidate composition (how many relevant documents are in the top 50, and which non-relevant ones the reranker scores higher), not from the reranker's ordering. The group (a) result means the gap persists even when both lists contain one relevant document. H1's grouping was too coarse to separate those two causes. Added at the human's request: in group (a), Recall@50 over all relevant documents, A0 against A4 (paired, 95% range, A0 minus A4): SciFact (706 questions) .990 against .997, -0.0073 [-0.0123, -0.0029]; NFCorpus (233) .272 against .321, -0.0484 [-0.0650, -0.0324]; FiQA (318) .692 against .859, -0.1667 [-0.1930, -0.1381]. A4's top 50 holds more of the relevant documents than A0's even when both hold at least one, which is the composition effect, largest on FiQA.
+Why it matters: The group (a) gap does not show a reranker ordering weakness on keyword candidates; it shows that A0's top 50 has fewer relevant documents and different distractors. A deeper candidate list is the direct test (H2b).
+Evidence: runs/analysis/h1-group-a-recall50.json, runs/analysis/h1-h4.json.
+Next: H2b, the depth sweep, pre-registered next.
+Post: yes
+
+## 2026-10-30 · finding · H4 is inconclusive
+Who: human (verdict), agent (recorded)
+What: The frozen word rule labelled only 20 of 500 FiQA dev questions as advice/opinion (A0R minus A4R -0.0470 [-0.1026, +0.0022] against -0.0790 [-0.0989, -0.0591] for the 480 factual ones), and none of the 30 random labels was advice. H4 is recorded as inconclusive: the rule is too narrow to test the idea. No new rule is made.
+Why it matters: Whether advice questions behave differently stays open.
+Evidence: runs/analysis/h1-h4.json (H4).
+Next: none.
+Post: no

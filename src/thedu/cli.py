@@ -708,3 +708,35 @@ def analyze_retime_interleaved(dataset: str = typer.Option(...), sample_run: str
     (OUT / f"retime-interleaved-{dataset}.json").write_text(json.dumps(out, indent=2))
     if out["agreement"]:
         typer.echo(f"{dataset}: difference between passes {out['agreement']}  quotable (within 10%): {out['quotable']}")
+
+
+@analyze_app.command("h1-h4")
+def analyze_h1_h4() -> None:
+    """The four pre-registered free analyses (JOURNAL.md 2026-10-30). Dev only; writes runs/analysis/h1-h4.json and h3-fiqa-review.md."""
+    import json  # noqa: F401
+
+    from thedu.analysis.hypotheses import run_all
+
+    r = run_all()
+    typer.echo("H1: A0R minus A4R by first-stage group (a both / b only A4 / c only keyword / d neither)")
+    for ds, h in r["H1"].items():
+        for arm in ("A0R_minus_A4R", "A3R_minus_A4R"):
+            v = h[arm]
+            typer.echo(f"  {ds} {arm}: overall {v['overall']:+.4f}  group (a) matches A4R: {v['group_a_matches']}")
+            for g, x in v["groups"].items():
+                t = x["test"]
+                tt = f"{t['diff']:+.4f} [{t['lo']:+.4f}, {t['hi']:+.4f}] {t['verdict']}" if t else "too few questions"
+                typer.echo(f"     ({g}) n={x['n']:<4} share {x['share']:.2f}  contribution {x['contribution']:+.4f}  {tt}")
+    typer.echo("H2: recall (matched only / as ranked)")
+    for ds, h in r["H2"].items():
+        rc = h["recall"]
+        typer.echo(f"  {ds}: " + "  ".join(f"{s} @100/500/1000 " + "/".join(f"{rc[s][f'matched_only@{k}']:.3f}" for k in (100, 500, 1000)) for s in rc)
+                   + f"   group (b) first relevant in A0: {h['group_b_first_relevant_rank_in_A0']}")
+    typer.echo(f"H3: {r['H3']['file']}")
+    typer.echo("H4:")
+    for g, v in r["H4"]["groups"].items():
+        t = v["test"]
+        typer.echo(f"  {g}: n={v['n']}  A0R minus A4R {t['diff']:+.4f} [{t['lo']:+.4f}, {t['hi']:+.4f}] {t['verdict']}")
+    typer.echo("  30 random labels:")
+    for x in r["H4"]["spot_check"]:
+        typer.echo(f"   [{x['label']}] {x['question'][:140]}")

@@ -1,0 +1,752 @@
+{
+  "H1": {
+    "scifact": {
+      "n_questions": 809,
+      "A0R_minus_A4R": {
+        "overall": -0.009694680648375474,
+        "groups": {
+          "a": {
+            "label": "both have one",
+            "n": 706,
+            "share": 0.8726823238566132,
+            "mean_diff": -0.014773533550727316,
+            "contribution": -0.012892601590622357,
+            "test": {
+              "diff": -0.014773533550727316,
+              "lo": -0.021237205583311144,
+              "hi": -0.008587575947564704,
+              "wins": 18,
+              "losses": 64,
+              "verdict": "benchmark better"
+            }
+          },
+          "b": {
+            "label": "only A4",
+            "n": 51,
+            "share": 0.0630407911001236,
+            "mean_diff": -0.16625939713419027,
+            "contribution": -0.010481123923168977,
+            "test": {
+              "diff": -0.16625939713419027,
+              "lo": -0.2330507127367041,
+              "hi": -0.10073331265655236,
+              "wins": 0,
+              "losses": 20,
+              "verdict": "benchmark better"
+            }
+          },
+          "c": {
+            "label": "only the keyword list",
+            "n": 24,
+            "share": 0.029666254635352288,
+            "mean_diff": 0.4610978040050595,
+            "contribution": 0.013679044865415857,
+            "test": {
+              "diff": 0.4610978040050595,
+              "lo": 0.3258874037181193,
+              "hi": 0.5891684329858103,
+              "wins": 19,
+              "losses": 0,
+              "verdict": "beats"
+            }
+          },
+          "d": {
+            "label": "neither",
+            "n": 28,
+            "share": 0.034610630407911,
+            "mean_diff": 0.0,
+            "contribution": 0.0,
+            "test": {
+              "diff": 0.0,
+              "lo": 0.0,
+              "hi": 0.0,
+              "wins": 0,
+              "losses": 0,
+              "verdict": "matches"
+            }
+          }
+        },
+        "overall_test": {
+          "diff": -0.009694680648375474,
+          "lo": -0.019339341333159746,
+          "hi": 0.0005452095545259268,
+          "wins": 37,
+          "losses": 84,
+          "verdict": "inconclusive"
+        },
+        "group_a_matches": false
+      },
+      "A3R_minus_A4R": {
+        "overall": -0.009741964560897069,
+        "groups": {
+          "a": {
+            "label": "both have one",
+            "n": 714,
+            "share": 0.8825710754017305,
+            "mean_diff": -0.012138459388994216,
+            "contribution": -0.010713053156664858,
+            "test": {
+              "diff": -0.012138459388994216,
+              "lo": -0.017384112159537207,
+              "hi": -0.0070177194571069065,
+              "wins": 16,
+              "losses": 60,
+              "verdict": "benchmark better"
+            }
+          },
+          "b": {
+            "label": "only A4",
+            "n": 43,
+            "share": 0.05315203955500618,
+            "mean_diff": -0.23350002195100777,
+            "contribution": -0.012411002402834777,
+            "test": {
+              "diff": -0.23350002195100777,
+              "lo": -0.3289950473408741,
+              "hi": -0.1464283603871263,
+              "wins": 0,
+              "losses": 19,
+              "verdict": "benchmark better"
+            }
+          },
+          "c": {
+            "label": "only the keyword list",
+            "n": 28,
+            "share": 0.034610630407911,
+            "mean_diff": 0.38664684349533845,
+            "contribution": 0.013382090998602566,
+            "test": {
+              "diff": 0.38664684349533845,
+              "lo": 0.26019176098382796,
+              "hi": 0.5209237205645032,
+              "wins": 18,
+              "losses": 0,
+              "verdict": "beats"
+            }
+          },
+          "d": {
+            "label": "neither",
+            "n": 24,
+            "share": 0.029666254635352288,
+            "mean_diff": 0.0,
+            "contribution": 0.0,
+            "test": {
+              "diff": 0.0,
+              "lo": 0.0,
+              "hi": 0.0,
+              "wins": 0,
+              "losses": 0,
+              "verdict": "matches"
+            }
+          }
+        },
+        "overall_test": {
+          "diff": -0.009741964560897069,
+          "lo": -0.020048907436422195,
+          "hi": 0.0009708718035143617,
+          "wins": 34,
+          "losses": 79,
+          "verdict": "inconclusive"
+        },
+        "group_a_matches": false
+      }
+    },
+    "nfcorpus": {
+      "n_questions": 324,
+      "A0R_minus_A4R": {
+        "overall": -0.021119753646623864,
+        "groups": {
+          "a": {
+            "label": "both have one",
+            "n": 233,
+            "share": 0.7191358024691358,
+            "mean_diff": -0.013012748994903858,
+            "contribution": -0.009357933690779627,
+            "test": {
+              "diff": -0.013012748994903858,
+              "lo": -0.023445911895902057,
+              "hi": -0.00212727776307357,
+              "wins": 62,
+              "losses": 87,
+              "verdict": "benchmark better"
+            }
+          },
+          "b": {
+            "label": "only A4",
+            "n": 35,
+            "share": 0.10802469135802469,
+            "mean_diff": -0.12485173222349505,
+            "contribution": -0.013487069838957798,
+            "test": {
+              "diff": -0.12485173222349505,
+              "lo": -0.17331066566480682,
+              "hi": -0.0799417877138695,
+              "wins": 0,
+              "losses": 19,
+              "verdict": "benchmark better"
+            }
+          },
+          "c": {
+            "label": "only the keyword list",
+            "n": 5,
+            "share": 0.015432098765432098,
+            "mean_diff": 0.11179619242575903,
+            "contribution": 0.0017252498831135652,
+            "test": {
+              "diff": 0.11179619242575903,
+              "lo": 0.023503220951285427,
+              "hi": 0.20933393687399898,
+              "wins": 3,
+              "losses": 0,
+              "verdict": "beats"
+            }
+          },
+          "d": {
+            "label": "neither",
+            "n": 51,
+            "share": 0.1574074074074074,
+            "mean_diff": 0.0,
+            "contribution": 0.0,
+            "test": {
+              "diff": 0.0,
+              "lo": 0.0,
+              "hi": 0.0,
+              "wins": 0,
+              "losses": 0,
+              "verdict": "matches"
+            }
+          }
+        },
+        "overall_test": {
+          "diff": -0.021119753646623864,
+          "lo": -0.031214475274325394,
+          "hi": -0.011031060864173199,
+          "wins": 65,
+          "losses": 106,
+          "verdict": "benchmark better"
+        },
+        "group_a_matches": false
+      },
+      "A3R_minus_A4R": {
+        "overall": -0.010515232819945134,
+        "groups": {
+          "a": {
+            "label": "both have one",
+            "n": 241,
+            "share": 0.7438271604938271,
+            "mean_diff": -0.005704049128999199,
+            "contribution": -0.004242826666940762,
+            "test": {
+              "diff": -0.005704049128999199,
+              "lo": -0.01808287049448456,
+              "hi": 0.005768672528392377,
+              "wins": 72,
+              "losses": 86,
+              "verdict": "inconclusive"
+            }
+          },
+          "b": {
+            "label": "only A4",
+            "n": 27,
+            "share": 0.08333333333333333,
+            "mean_diff": -0.10314390707494717,
+            "contribution": -0.00859532558957893,
+            "test": {
+              "diff": -0.10314390707494717,
+              "lo": -0.15459752133059657,
+              "hi": -0.05573883780546474,
+              "wins": 0,
+              "losses": 13,
+              "verdict": "benchmark better"
+            }
+          },
+          "c": {
+            "label": "only the keyword list",
+            "n": 11,
+            "share": 0.033950617283950615,
+            "mean_diff": 0.06842053613183245,
+            "contribution": 0.0023229194365745583,
+            "test": {
+              "diff": 0.06842053613183245,
+              "lo": 0.02196021617502797,
+              "hi": 0.1261577900130806,
+              "wins": 5,
+              "losses": 0,
+              "verdict": "beats"
+            }
+          },
+          "d": {
+            "label": "neither",
+            "n": 45,
+            "share": 0.1388888888888889,
+            "mean_diff": 0.0,
+            "contribution": 0.0,
+            "test": {
+              "diff": 0.0,
+              "lo": 0.0,
+              "hi": 0.0,
+              "wins": 0,
+              "losses": 0,
+              "verdict": "matches"
+            }
+          }
+        },
+        "overall_test": {
+          "diff": -0.010515232819945134,
+          "lo": -0.0213047717529314,
+          "hi": 0.0001518206167624418,
+          "wins": 77,
+          "losses": 99,
+          "verdict": "inconclusive"
+        },
+        "group_a_matches": false
+      }
+    },
+    "fiqa": {
+      "n_questions": 500,
+      "A0R_minus_A4R": {
+        "overall": -0.07775070447736628,
+        "groups": {
+          "a": {
+            "label": "both have one",
+            "n": 318,
+            "share": 0.636,
+            "mean_diff": -0.05102609004241681,
+            "contribution": -0.03245259326697709,
+            "test": {
+              "diff": -0.05102609004241681,
+              "lo": -0.06570975692735737,
+              "hi": -0.03593076319811952,
+              "wins": 39,
+              "losses": 105,
+              "verdict": "benchmark better"
+            }
+          },
+          "b": {
+            "label": "only A4",
+            "n": 97,
+            "share": 0.194,
+            "mean_diff": -0.28001022987558044,
+            "contribution": -0.054321984595862606,
+            "test": {
+              "diff": -0.28001022987558044,
+              "lo": -0.34010415517283704,
+              "hi": -0.21985724681001662,
+              "wins": 0,
+              "losses": 59,
+              "verdict": "benchmark better"
+            }
+          },
+          "c": {
+            "label": "only the keyword list",
+            "n": 11,
+            "share": 0.022,
+            "mean_diff": 0.4101760629760646,
+            "contribution": 0.00902387338547342,
+            "test": {
+              "diff": 0.4101760629760646,
+              "lo": 0.21880893688516517,
+              "hi": 0.6133037689462884,
+              "wins": 8,
+              "losses": 0,
+              "verdict": "beats"
+            }
+          },
+          "d": {
+            "label": "neither",
+            "n": 74,
+            "share": 0.148,
+            "mean_diff": 0.0,
+            "contribution": 0.0,
+            "test": {
+              "diff": 0.0,
+              "lo": 0.0,
+              "hi": 0.0,
+              "wins": 0,
+              "losses": 0,
+              "verdict": "matches"
+            }
+          }
+        },
+        "overall_test": {
+          "diff": -0.07775070447736628,
+          "lo": -0.09665159010690769,
+          "hi": -0.059926606558614745,
+          "wins": 47,
+          "losses": 164,
+          "verdict": "benchmark better"
+        },
+        "group_a_matches": false
+      },
+      "A3R_minus_A4R": {
+        "overall": -0.08985930211743265,
+        "groups": {
+          "a": {
+            "label": "both have one",
+            "n": 299,
+            "share": 0.598,
+            "mean_diff": -0.04213194046054601,
+            "contribution": -0.025194900395406512,
+            "test": {
+              "diff": -0.04213194046054601,
+              "lo": -0.059928497970264165,
+              "hi": -0.026179936318959082,
+              "wins": 40,
+              "losses": 89,
+              "verdict": "benchmark better"
+            }
+          },
+          "b": {
+            "label": "only A4",
+            "n": 116,
+            "share": 0.232,
+            "mean_diff": -0.3192106701020917,
+            "contribution": -0.07405687546368528,
+            "test": {
+              "diff": -0.3192106701020917,
+              "lo": -0.37765480388460626,
+              "hi": -0.26419737739921234,
+              "wins": 0,
+              "losses": 77,
+              "verdict": "benchmark better"
+            }
+          },
+          "c": {
+            "label": "only the keyword list",
+            "n": 12,
+            "share": 0.024,
+            "mean_diff": 0.3913530725691305,
+            "contribution": 0.009392473741659132,
+            "test": {
+              "diff": 0.3913530725691305,
+              "lo": 0.22741271585256997,
+              "hi": 0.5812453306770894,
+              "wins": 10,
+              "losses": 0,
+              "verdict": "beats"
+            }
+          },
+          "d": {
+            "label": "neither",
+            "n": 73,
+            "share": 0.146,
+            "mean_diff": 0.0,
+            "contribution": 0.0,
+            "test": {
+              "diff": 0.0,
+              "lo": 0.0,
+              "hi": 0.0,
+              "wins": 0,
+              "losses": 0,
+              "verdict": "matches"
+            }
+          }
+        },
+        "overall_test": {
+          "diff": -0.08985930211743265,
+          "lo": -0.11091216922094846,
+          "hi": -0.07037537689492802,
+          "wins": 50,
+          "losses": 166,
+          "verdict": "benchmark better"
+        },
+        "group_a_matches": false
+      }
+    }
+  },
+  "H2": {
+    "scifact": {
+      "A3_top100_reproduces_saved_run": true,
+      "recall": {
+        "A0": {
+          "matched_only@100": 0.9264112072517512,
+          "as_ranked@100": 0.9264112072517512,
+          "matched_only@500": 0.9581788215904409,
+          "as_ranked@500": 0.9594149155335805,
+          "matched_only@1000": 0.9761021837659661,
+          "as_ranked@1000": 0.9773382777091059
+        },
+        "A3": {
+          "matched_only@100": 0.9410383189122373,
+          "as_ranked@100": 0.9410383189122373,
+          "matched_only@500": 0.9752781211372065,
+          "as_ranked@500": 0.9752781211372065,
+          "matched_only@1000": 0.9901112484548825,
+          "as_ranked@1000": 0.9901112484548825
+        }
+      },
+      "group_b_first_relevant_rank_in_A0": {
+        "n": 51,
+        "51-100": 17,
+        "101-500": 17,
+        "501-1000": 7,
+        "not in top 1000": 10,
+        "within_top_1000_share": 0.803921568627451
+      }
+    },
+    "nfcorpus": {
+      "A3_top100_reproduces_saved_run": true,
+      "recall": {
+        "A0": {
+          "matched_only@100": 0.22694515105314478,
+          "as_ranked@100": 0.22694515105314478,
+          "matched_only@500": 0.2991442721171448,
+          "as_ranked@500": 0.3385321632304536,
+          "matched_only@1000": 0.33524183876468105,
+          "as_ranked@1000": 0.4793985135249478
+        },
+        "A3": {
+          "matched_only@100": 0.31091677911320903,
+          "as_ranked@100": 0.31091677911320903,
+          "matched_only@500": 0.4893147079787859,
+          "as_ranked@500": 0.4908579178553291,
+          "matched_only@1000": 0.6155351897361153,
+          "as_ranked@1000": 0.6170783996126585
+        }
+      },
+      "group_b_first_relevant_rank_in_A0": {
+        "n": 35,
+        "51-100": 2,
+        "101-500": 6,
+        "501-1000": 1,
+        "not in top 1000": 26,
+        "within_top_1000_share": 0.2571428571428571
+      }
+    },
+    "fiqa": {
+      "A3_top100_reproduces_saved_run": true,
+      "recall": {
+        "A0": {
+          "matched_only@100": 0.5095741869241869,
+          "as_ranked@100": 0.5095741869241869,
+          "matched_only@500": 0.6730350760350761,
+          "as_ranked@500": 0.6730350760350761,
+          "matched_only@1000": 0.7329517649017648,
+          "as_ranked@1000": 0.7329517649017648
+        },
+        "A3": {
+          "matched_only@100": 0.5253330891330892,
+          "as_ranked@100": 0.5253330891330892,
+          "matched_only@500": 0.6942423409923411,
+          "as_ranked@500": 0.6942423409923411,
+          "matched_only@1000": 0.7641733155733155,
+          "as_ranked@1000": 0.7641733155733155
+        }
+      },
+      "group_b_first_relevant_rank_in_A0": {
+        "n": 97,
+        "51-100": 18,
+        "101-500": 49,
+        "501-1000": 11,
+        "not in top 1000": 19,
+        "within_top_1000_share": 0.8041237113402062
+      }
+    }
+  },
+  "H3": {
+    "file": "runs/analysis/h3-fiqa-review.md",
+    "questions": [
+      "10147",
+      "4455",
+      "543",
+      "548",
+      "5780",
+      "6772",
+      "9129",
+      "2566",
+      "6068",
+      "3449",
+      "7881",
+      "3017",
+      "5909",
+      "7099",
+      "7208",
+      "7460",
+      "4986",
+      "7681",
+      "9847",
+      "6502"
+    ]
+  },
+  "H4": {
+    "spot_check": [
+      {
+        "qid": "3988",
+        "label": "factual",
+        "question": "Difference between Edward Jones or Betterment"
+      },
+      {
+        "qid": "9558",
+        "label": "factual",
+        "question": "What tax can I expect on US stocks in a UK ISA?"
+      },
+      {
+        "qid": "2032",
+        "label": "factual",
+        "question": "Where can I find all public companies' information?"
+      },
+      {
+        "qid": "4709",
+        "label": "factual",
+        "question": "Corporate Finance"
+      },
+      {
+        "qid": "6744",
+        "label": "factual",
+        "question": "Buying non-qualified employee stock options that are going to expire?"
+      },
+      {
+        "qid": "10700",
+        "label": "factual",
+        "question": "why is the money withdrawn from traditional IRA taxed at the ordinary income tax rate?"
+      },
+      {
+        "qid": "1325",
+        "label": "factual",
+        "question": "How far do I go with a mortgage approval process when shopping around?"
+      },
+      {
+        "qid": "7916",
+        "label": "factual",
+        "question": "What do the suffixes on stock symbols indicate"
+      },
+      {
+        "qid": "5657",
+        "label": "factual",
+        "question": "How can I determine how much my car insurance will cost me?"
+      },
+      {
+        "qid": "1629",
+        "label": "factual",
+        "question": "Income At the Sell or Reception?"
+      },
+      {
+        "qid": "440",
+        "label": "factual",
+        "question": "What forms do I need to fill out for a super basic LLC closing?"
+      },
+      {
+        "qid": "612",
+        "label": "factual",
+        "question": "Can we amend last year's Schedule C to indicate reduced income due to a customer refund this year for a product we sold last year?"
+      },
+      {
+        "qid": "10997",
+        "label": "factual",
+        "question": "Pay index fund expense ratios with cash instead of fund balance"
+      },
+      {
+        "qid": "9010",
+        "label": "factual",
+        "question": "Is this Employee Stock Purchase Plan worth it when adding my student loan into the equation?"
+      },
+      {
+        "qid": "5501",
+        "label": "factual",
+        "question": "Is it possible to be subject to cash withdrawal even if you don't use ATM?"
+      },
+      {
+        "qid": "2771",
+        "label": "factual",
+        "question": "Will credit card payment from abroad be suspicious as taxable income?"
+      },
+      {
+        "qid": "1055",
+        "label": "factual",
+        "question": "How do online referal systems work?"
+      },
+      {
+        "qid": "1548",
+        "label": "factual",
+        "question": "How profitable is selling your customer base?"
+      },
+      {
+        "qid": "4966",
+        "label": "factual",
+        "question": "In today's low interest environment, is it generally more economical to buy or lease a new car in the US?"
+      },
+      {
+        "qid": "4872",
+        "label": "factual",
+        "question": "Taking a car loan vs cash and effect on credit score"
+      },
+      {
+        "qid": "1141",
+        "label": "factual",
+        "question": "Considerations for holding short-term reserves?"
+      },
+      {
+        "qid": "3133",
+        "label": "factual",
+        "question": "VAT & Tax implications of selling software"
+      },
+      {
+        "qid": "1568",
+        "label": "factual",
+        "question": "If a company in China says it accepts Visa, does it accept all Visas?"
+      },
+      {
+        "qid": "5836",
+        "label": "factual",
+        "question": "Why have candlestick charts overlaps?"
+      },
+      {
+        "qid": "4918",
+        "label": "factual",
+        "question": "Re-financing/consolidating multiple student loans for medical school?"
+      },
+      {
+        "qid": "1100",
+        "label": "factual",
+        "question": "Combined annual contribution limits for individuals [duplicate]"
+      },
+      {
+        "qid": "7979",
+        "label": "factual",
+        "question": "What is meant by a market that is technically strong"
+      },
+      {
+        "qid": "5964",
+        "label": "factual",
+        "question": "Are there cons to paying monthly bills with a rewards card and then paying it off monthly?"
+      },
+      {
+        "qid": "1789",
+        "label": "factual",
+        "question": "Why do some stocks have trading halts and what causes them?"
+      },
+      {
+        "qid": "29",
+        "label": "factual",
+        "question": "Do I need a business credit card?"
+      }
+    ],
+    "groups": {
+      "advice": {
+        "n": 20,
+        "mean_diff": -0.047010073124560806,
+        "test": {
+          "diff": -0.047010073124560806,
+          "lo": -0.10258389834780977,
+          "hi": 0.0022351139771158313,
+          "wins": 4,
+          "losses": 6,
+          "verdict": "inconclusive"
+        }
+      },
+      "factual": {
+        "n": 480,
+        "mean_diff": -0.0790315641170665,
+        "test": {
+          "diff": -0.0790315641170665,
+          "lo": -0.0988908337219636,
+          "hi": -0.0591077767958077,
+          "wins": 43,
+          "losses": 158,
+          "verdict": "benchmark better"
+        }
+      }
+    },
+    "advice_minus_factual_gap": 0.03202149099250569
+  }
+}
