@@ -1,0 +1,99 @@
+{
+  "n": 150,
+  "load_start": [
+    4.1064453125,
+    4.48583984375,
+    3.7236328125
+  ],
+  "load_end": [
+    2.20947265625,
+    2.3515625,
+    2.58056640625
+  ],
+  "check_A4R_fresh_vs_run_ndcg10_mean_abs_diff": 0.0,
+  "benchmark_A4R_depth50": {
+    "ndcg10": 0.47707866498345103,
+    "recall10": 0.5483465608465609,
+    "cost_per_search_usd": 0.0005269043333333333
+  },
+  "depths": {
+    "50": {
+      "ndcg10": 0.38241209489861194,
+      "recall10": 0.40800264550264553,
+      "pairs_per_search": 50.0,
+      "cost_per_search_usd": 0.0008590613333333334,
+      "relative_time_to_A4R_depth50": 1.398122445360809,
+      "vs_A4R_ndcg10": {
+        "diff": -0.09466657008483911,
+        "lo": -0.13066968107336321,
+        "hi": -0.06107650706204732,
+        "verdict": "benchmark better"
+      },
+      "vs_A4R_recall10": {
+        "diff": -0.14034391534391533,
+        "lo": -0.1885369047619048,
+        "hi": -0.09226415343915344
+      },
+      "cost_relative_to_A0R_depth50": 1.0
+    },
+    "100": {
+      "ndcg10": 0.3958430422415344,
+      "recall10": 0.43433597883597885,
+      "pairs_per_search": 100.0,
+      "cost_per_search_usd": 0.001704505666666667,
+      "relative_time_to_A4R_depth50": 2.7924783590348845,
+      "vs_A4R_ndcg10": {
+        "diff": -0.0812356227419167,
+        "lo": -0.1121658759916927,
+        "hi": -0.052350132557540875,
+        "verdict": "benchmark better"
+      },
+      "vs_A4R_recall10": {
+        "diff": -0.114010582010582,
+        "lo": -0.1585484126984127,
+        "hi": -0.07141772486772487
+      },
+      "cost_relative_to_A0R_depth50": 1.9841489781094406
+    },
+    "200": {
+      "ndcg10": 0.4317532615874414,
+      "recall10": 0.47956349206349214,
+      "pairs_per_search": 200.0,
+      "cost_per_search_usd": 0.003363864333333334,
+      "relative_time_to_A4R_depth50": 5.362782373635062,
+      "vs_A4R_ndcg10": {
+        "diff": -0.04532540339600965,
+        "lo": -0.07074354437573513,
+        "hi": -0.021627163436782004,
+        "verdict": "benchmark better"
+      },
+      "vs_A4R_recall10": {
+        "diff": -0.06878306878306878,
+        "lo": -0.11061944444444444,
+        "hi": -0.03088293650793651
+      },
+      "cost_relative_to_A0R_depth50": 3.9157440834647432
+    },
+    "500": {
+      "ndcg10": 0.4421760740485043,
+      "recall10": 0.49138888888888893,
+      "pairs_per_search": 500.0,
+      "cost_per_search_usd": 0.008181599333333334,
+      "relative_time_to_A4R_depth50": 12.641006267452653,
+      "vs_A4R_ndcg10": {
+        "diff": -0.03490259093494675,
+        "lo": -0.05361839641218618,
+        "hi": -0.015498853385698447,
+        "verdict": "benchmark better"
+      },
+      "vs_A4R_recall10": {
+        "diff": -0.056957671957671964,
+        "lo": -0.09422354497354497,
+        "hi": -0.023293253968254015
+      },
+      "cost_relative_to_A0R_depth50": 9.52388265641879
+    }
+  },
+  "check_A0R_depth50_vs_run_ndcg10_mean_abs_diff": 0.0,
+  "time_note": "relative_time_to_A4R_depth50 = cumulative scoring time of the first d A0 candidates over the scoring time of A4's top 50 in the same job"
+}

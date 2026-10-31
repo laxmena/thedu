@@ -587,3 +587,11 @@ Why it matters: It separates "more candidates fix it" from "the keyword list is 
 Evidence: none yet.
 Next: write the command, run it alone, show the results before committing them.
 Post: yes
+
+## 2026-10-30 · finding · H2b depth sweep: deeper candidates close about two thirds of the A0R to A4R gap on FiQA, then plateau; the expectation is not supported
+Who: agent
+What: 150 FiQA dev questions (seed 7), A0's top 500 scored once by the cross-encoder (every question had 500 candidates), depths derived from the same scores. Benchmark A4R at depth 50: nDCG@10 0.4771, Recall@10 0.5483. A0R minus A4R (paired nDCG@10, 95% range): depth 50 -0.0947 [-0.1307, -0.0611], depth 100 -0.0812 [-0.1122, -0.0524], depth 200 -0.0453 [-0.0707, -0.0216], depth 500 -0.0349 [-0.0536, -0.0155]; all four have the upper bound below 0, so A4R stays better at every depth. nDCG@10 of A0R by depth 0.3824, 0.3958, 0.4318, 0.4422; Recall@10 0.4080, 0.4343, 0.4796, 0.4914. Cost per search at the reference rate: A4R at depth 50 $0.00053; A0R $0.00086, $0.00170, $0.00336, $0.00818, i.e. 1.0, 2.0, 3.9 and 9.5 times A0R at depth 50 (15 times A4R's cost at depth 500). Relative time per search, A0R depth d over A4R at depth 50 in the same job: 1.4, 2.8, 5.4, 12.6 (A0's documents are longer than A4's, so even depth 50 costs more). The pre-registered expectation, A0R within 0.02 of A4R at depth 200 to 500 at 4 to 10 times the cost, is NOT supported: the gap is -0.045 at 200 and -0.035 at 500. It plateaus: depth 200 to 500 adds +0.0104 nDCG@10 for 2.4 times the cost, depth 50 to 200 adds +0.0494. Checks: A4R re-scored in this job and A0R at depth 50 reproduce the earlier runs exactly (mean absolute nDCG@10 difference 0.0000 for both). Load average 4.1 at the start and 2.2 at the end (other processes; the ratios come from setups timed back to back).
+Why it matters: On FiQA about 63% of the depth-50 gap closes with deeper candidates, at up to 9.5 times the rerank cost, and about 0.035 remains; the remaining gap is not a depth problem. Cheaper than depth 500: depth 200 closes 52% of the gap at 3.9 times the cost.
+Evidence: runs/analysis/h2b-depth-sweep.json, runs/analysis/h2b-scores.jsonl; pre-registration 2026-10-30 above.
+Next: your reading; nothing else runs.
+Post: yes
