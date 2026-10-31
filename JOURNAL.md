@@ -538,3 +538,18 @@ Why it matters: The latency comparison between the cross-encoder arms can go in 
 Evidence: runs/analysis/retime-interleaved-{scifact,nfcorpus,fiqa}.json.
 Next: none.
 Post: yes
+
+## 2026-10-30 · decision · Pre-registration of four free analyses on existing runs (H1 to H4), written before anything is computed
+Who: human (design and expectations), agent (definitions that were left open, marked below)
+What: Dev only, existing runs only, no new LLM calls (H2 uses cached rewrites and deeper BM25 lists). Runs: per dataset the reranker run (A0, A3, A4, A0R, A3R: nfcorpus 8dbc179fa6, scifact d8fe5f9aff, fiqa 00fb868eaa) and the A4+R run (nfcorpus 3598a84a25, scifact 6972fad3ba, fiqa 4432badf81). Judge, paired bootstrap and the wide-range rule unchanged; "match" = lower bound above -0.01.
+H1, finding or ordering? Per dataset, group the questions by whether a relevant document is in the top 50 of each first stage: (a) both A0 and A4 have one (primary group), (b) only A4, (c) only A0, (d) neither. Report counts per group. In group (a): paired A0R minus A4R with a 95% range, and the same for A3R minus A4R with groups built from A3's top 50 and A4's top 50. Split the overall A0R minus A4R gap into each group's contribution (share of questions x mean difference). Agent's definitions: the top 50 of a BM25 list means its first 50 hits with a score above zero (the rerank candidates); of A4, its first 50.
+Expectation (human): in group (a), A0R matches A4R (lower bound above -0.01) on all three datasets, and on FiQA most of the overall gap comes from group (b).
+H2, found but deeper? BM25 lists to depth 1,000 for A0 and, for A3, from the cached rewrites (the saved queries of the run, same fusion as the run; the top 100 must reproduce the saved A3 lists, else the check stops). Report Recall@100, 500, 1,000. For the questions in group (b), the rank of the first relevant document in A0's list: counts in 51 to 100, 101 to 500, 501 to 1,000, and not in the top 1,000. Agent's definition: documents with a score of zero are filler and are not counted as retrieved; Recall@100 is also given as ranked (filler included), as in the earlier reports.
+Expectation (human): on FiQA, fewer than half of the group (b) questions have a relevant document within A0's top 1,000.
+H3, benchmark holes, by hand. FiQA only. Take the 20 questions where A0R loses most to A4R (per-question nDCG@10 difference, lowest first, ties by question id). For each, print the question, A0R's top 3 and A4R's top 3 with relevance marks (relevant or not judged), to runs/analysis/h3-fiqa-review.md. No scoring, no LLM judging. Unjudged is not the same as not relevant.
+H4, one kind of question? FiQA dev, a fixed word rule, frozen here before labelling: a question is "advice/opinion" if its lower-cased text (curly apostrophes read as straight) contains any of: "should i", "is it worth", "is it better", "what's the best", "would you", "good idea", "recommend"; everything else is "factual". Print 30 random labels (seed 7) for a spot check. Report counts and A0R minus A4R per group with ranges.
+Expectation (human): the gap is larger in the advice group.
+Why it matters: These decide whether the A0R to A4R gap is a candidate-finding problem or an ordering problem, and whether the benchmark itself is a fair yardstick, before any new method is built.
+Evidence: none yet.
+Next: compute all four, show the results with the commit list; nothing else runs.
+Post: yes
