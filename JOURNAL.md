@@ -577,3 +577,13 @@ Why it matters: Whether advice questions behave differently stays open.
 Evidence: runs/analysis/h1-h4.json (H4).
 Next: none.
 Post: no
+
+## 2026-10-30 · decision · Pre-registration of H2b, the depth sweep (written before the run)
+Who: human (design and expectation), agent (definitions left open, marked below)
+What: Question: does a deeper candidate list close the A0R to A4R gap on FiQA, and at what cost? FiQA dev, a fixed sample of 150 questions (select_qids, seed 7). The cross-encoder (bge-reranker-v2-m3, zero-shot, max length 512) scores A0's top 500 once per question; the lists for depth 50, 100, 200 and 500 are derived from the same scores (the first d candidates, reordered by score; the ranks below stay in A0's order, as in the reranker). Agent's definitions: candidates are A0 hits with a score above zero (fewer than 500 when the question matches fewer documents; the number scored is reported); scores are computed in batches of 16 in rank order. Benchmark: A4R at depth 50 on the same questions: nDCG@10 and Recall@10 from run 4432badf81, and, to time it under the same load, A4's top 50 are scored in the same job, question by question, interleaved with A0's candidates (its scores are also checked against the run). A0R at depth 50 is checked against run 00fb868eaa on the same questions (small differences can come from batch padding).
+Report: nDCG@10 and Recall@10 per depth for A0R and for the benchmark; paired A0R at each depth minus A4R (95% range, wide-range rule, "match" lower bound above -0.01, "beat" above 0); rerank pairs per search and cost per search at the reference rate (configs/pricing_rerank.yaml, tokens as in the cost formula); relative time per search (the time of scoring the first d candidates in rank order, relative to the time of A4R at depth 50 in the same job). Ratios only, no absolute times; load average recorded at the start and the end; the job runs alone on the machine.
+Expectation (human): at depth 200 to 500, A0R comes within 0.02 of A4R (paired mean difference above -0.02), at 4 to 10 times the rerank cost. If it plateaus before then, that is a finding too.
+Why it matters: It separates "more candidates fix it" from "the keyword list is the wrong place to look" and prices the first at the reference rate.
+Evidence: none yet.
+Next: write the command, run it alone, show the results before committing them.
+Post: yes
