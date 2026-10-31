@@ -7,6 +7,8 @@ import logging
 import sys
 from pathlib import Path
 
+import json
+
 import typer
 
 from thedu.paths import QRELS_DIR, ROOT
@@ -180,11 +182,26 @@ def parity(restart: bool = typer.Option(False, help="Set an existing parity run 
 
 
 @app.command(name="test-eval")
-def test_eval() -> None:
-    """The final run on test (built in M7)."""
-    from thedu.test_eval import run_test_eval
+def test_eval(dataset: str = typer.Option(..., help="nfcorpus, scifact or fiqa"),
+              dry: bool = typer.Option(False, help="Count the questions and print the run hash; run nothing.")) -> None:
+    """The final run on one test split, from its frozen config configs/test_<dataset>.yaml. Never repeated."""
+    _logging()
+    from thedu.pipeline import RunRefused
+    from thedu.registry import VersionMismatch
+    from thedu.test_eval import ORDER, TestEvalRefused, run_test_eval
 
-    run_test_eval()
+    if dataset not in ORDER:
+        typer.echo(f"choose from {ORDER}", err=True)
+        raise typer.Exit(1)
+    try:
+        info = run_test_eval(dataset, dry)
+    except (TestEvalRefused, RunRefused, VersionMismatch) as e:
+        typer.echo(str(e), err=True)
+        raise typer.Exit(1)
+    typer.echo(json.dumps(info, indent=2))
+    if any(not p["passed"] for p in info.get("parity", [])):
+        typer.echo("PARITY FAIL: stop and report; do not rerun.", err=True)
+        raise typer.Exit(2)
 
 
 def _frozen_files() -> list[Path]:
@@ -756,3 +773,23 @@ def analyze_depth_sweep() -> None:
         t = v["vs_A4R_ndcg10"]
         typer.echo(f"  A0R depth {d:>3}: nDCG@10 {v['ndcg10']:.4f} R@10 {v['recall10']:.4f}  minus A4R {t['diff']:+.4f} [{t['lo']:+.4f}, {t['hi']:+.4f}] {t['verdict']}"
                    f"  pairs {v['pairs_per_search']:.0f}  cost x{v['cost_relative_to_A0R_depth50']:.1f}  ${v['cost_per_search_usd']:.5f}  time x{v['relative_time_to_A4R_depth50']:.1f} of A4R@50")
+
+
+@analyze_app.command("test-report")
+def analyze_test_report() -> None:
+    """The test report: per dataset nDCG@10 and Recall@100, the paired tests with verdicts, dev against test, flags."""
+    from thedu.analysis.testreport import report
+
+    r = report()
+    for ds, v in r["datasets"].items():
+        te, dv = v["test"], v["dev"]
+        typer.echo(f"\n== {ds}: test run {v['test_run']}, {te['n']} test questions (dev {dv['n']}); load {v['load_start'][0]:.2f} -> {v['load_end'][0]:.2f}; parity {v['parity'] or 'n/a'}")
+        typer.echo(f"  {'setup':<5} {'nDCG@10 test':>13} {'(95% range)':>18} {'dev':>7} {'R@100 test':>11} {'dev':>7}")
+        for s, x in te["setups"].items():
+            typer.echo(f"  {s:<5} {x['ndcg10']:>13.4f} [{x['ndcg10_lo']:.4f}, {x['ndcg10_hi']:.4f}] {dv['setups'][s]['ndcg10']:>7.4f} {x['recall100']:>11.4f} {dv['setups'][s]['recall100']:>7.4f}")
+        for k, t in te["tests"].items():
+            d = dv["tests"][k]
+            typer.echo(f"  {k:<10}{' [primary]' if t['primary'] else '          '} test {t['diff']:+.4f} [{t['lo']:+.4f}, {t['hi']:+.4f}] {t['verdict']:<17} dev {d['diff']:+.4f} [{d['lo']:+.4f}, {d['hi']:+.4f}] {d['verdict']}")
+    typer.echo("\nFlags (difference from dev above 0.02, or a changed verdict):")
+    for f in r["flags"] or ["none"]:
+        typer.echo(f"  {f}")
