@@ -1,0 +1,18 @@
+{
+  "dataset": "fiqa",
+  "run_hash": "6be5e8ae0c",
+  "n_questions": 648,
+  "rewrite_calls_at_most": 648,
+  "load_start": [
+    2.53125,
+    2.4697265625,
+    2.4345703125
+  ],
+  "load_end": [
+    3.9931640625,
+    3.90478515625,
+    3.96142578125
+  ],
+  "minutes": 151.981554265817,
+  "parity": []
+}
