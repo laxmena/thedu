@@ -34,8 +34,8 @@ for i, (h, sub, c, opt) in enumerate(steps):
     if sub: ax.text(x + w / 2, 14.6, sub, ha="center", va="center", fontsize=7.5, color=INK2)
     if i < len(steps) - 1: ax.annotate("", xy=(x + w + 2.9, 18), xytext=(x + w + 0.3, 18), arrowprops=dict(arrowstyle="-|>", color=INK2, lw=1))
     x += w + 3.2
-ax.text(1.5, 5, "Dashed boxes are optional. Embeddings replace both searches with one vector search over the top 100.\nUnder the strict rule no model touches the documents, so the only thing built ahead of time is the keyword index.", fontsize=7.8, color=INK2, va="center")
-fig.text(0.02, 0.93, "One search, start to finish", fontsize=12, fontweight="bold", color=INK, va="top")
+ax.text(1.5, 5, "Dashed boxes are optional steps. No AI model touches the documents ahead of time; only a keyword index is built.\nFor comparison, the embedding setup replaces both searches with a single vector search.", fontsize=7.8, color=INK2, va="center")
+fig.text(0.02, 0.93, "How one search works", fontsize=12, fontweight="bold", color=INK, va="top")
 save(fig, "fig1-pipeline")
 
 # Figure 3: candidate ceilings (dumbbells: as ranked -> perfectly reordered)
@@ -43,56 +43,57 @@ fig, ax = plt.subplots(figsize=(8, 4.2)); fig.subplots_adjust(left=0.14, right=0
 for r, (k, name) in enumerate(DS):
     s = j(f"diagnosis-{k}.json")["setups"]; y0 = len(DS) - 1 - r
     for dy, key, c, lab in [(0.15, "A0", KW, "Keyword"), (-0.15, "A4", EMB, "Embeddings")]:
-        a, p = s[key]["ndcg10"], s[key]["perfect_rerank_ndcg10"]; y = y0 + dy
+        a, p = s[key]["ndcg10"]*100, {q: v*100 for q, v in s[key]["perfect_rerank_ndcg10"].items() if q in ("mean", "lo", "hi")}; y = y0 + dy
         ax.plot([a, p["mean"]], [y, y], color=c, lw=2, alpha=0.45, solid_capstyle="round")
         ax.plot([p["lo"], p["hi"]], [y, y], color=c, lw=1, alpha=0.9)
         ax.plot(a, y, "o", ms=8, mfc=BG, mec=c, mew=1.8)
         ax.plot(p["mean"], y, "o", ms=8, color=c, mec=BG, mew=1.5)
-        ax.text(p["hi"] + 0.012, y, f"{lab}  {a:.2f} to {p['mean']:.2f}", va="center", fontsize=8.5, color=INK2)
+        ax.text(p["hi"] + 1.2, y, f"{lab}: {a:.0f} now → {p['mean']:.0f} sorted", va="center", fontsize=8.5, color=INK2)
 ax.set_yticks(range(len(DS))); ax.set_yticklabels([n for _, n in DS][::-1], color=INK)
-ax.set_xlim(0.2, 1.2); ax.set_xticks([0.2, 0.4, 0.6, 0.8, 1.0]); ax.grid(axis="x", color=GRID, lw=0.8); ax.set_axisbelow(True)
-ax.set_xlabel("nDCG@10   (hollow: as ranked; filled: top 100 perfectly reordered, with 95% interval)")
+ax.set_xlim(20, 130); ax.set_xticks([20, 40, 60, 80, 100]); ax.grid(axis="x", color=GRID, lw=0.8); ax.set_axisbelow(True)
+ax.set_xlabel("Search quality, 0 to 100 (higher is better)")
 ax.spines["left"].set_visible(False); ax.tick_params(axis="y", length=0)
-title(fig, "Reordered perfectly, keyword search's top 100 would beat embeddings",
-      "Ceilings use the top 100 candidates (the reranker reads the top 50). Embeddings' own top 100\nhas a higher ceiling still: the first sign the gap is in the candidates.")
+title(fig, "Sorted perfectly, keyword search's own results would beat embeddings",
+      "Hollow dot: the score as each search ranks its results. Filled dot: the score if its top 100 results\nwere put in the perfect order. Embeddings would gain even more, so their results are better to begin with.")
 save(fig, "fig3-ceilings")
 
-# Figure 4: the fair fight, paired difference vs embeddings + reranker
-fig, ax = plt.subplots(figsize=(8, 4.0)); fig.subplots_adjust(left=0.14, right=0.96, top=0.76, bottom=0.15)
-ax.axvspan(-0.01, 0, color=GRID, alpha=0.7, lw=0); ax.axvline(0, color=INK2, lw=1)
-ax.text(-0.005, -0.42, "match band: whole interval above -0.01", ha="center", va="bottom", fontsize=7.5, color=INK2)
+# Figure 4: the fair fight, paired difference vs embeddings + reranker (TEST set)
+TEST = j("test-report.json")["datasets"]
+fig, ax = plt.subplots(figsize=(8, 4.0)); fig.subplots_adjust(left=0.14, right=0.96, top=0.76, bottom=0.2)
+ax.axvline(0, color=EMB, lw=2.5)
+ax.text(-0.3, 2.62, "Embeddings + reranker", ha="right", va="center", fontsize=9, color=EMB, fontweight="bold")
 for r, (k, name) in enumerate(DS):
     y0 = len(DS) - 1 - r
     for dy, arm, filled, lab in [(0.13, "A0R", True, "Keyword + reranker"), (-0.13, "A3R", False, "Keyword + rewrite + reranker")]:
-        p = j(f"paired-a4r-{k}-{arm}.json"); y = y0 + dy
-        ax.plot([p["lo"], p["hi"]], [y, y], color=KW, lw=1.6)
-        ax.plot(p["diff"], y, "o", ms=8, mfc=KW if filled else BG, mec=KW, mew=1.8, label=lab if r == 0 else None)
-        ax.text(p["lo"] - 0.004, y, f"{p['diff']:+.3f}", ha="right", va="center", fontsize=8.5, color=INK2)
+        p = TEST[k]["test"]["tests"][f"{arm} - A4R"]; y = y0 + dy
+        ax.plot([p["lo"]*100, p["hi"]*100], [y, y], color=KW, lw=1.6)
+        ax.plot(p["diff"]*100, y, "o", ms=8, mfc=KW if filled else BG, mec=KW, mew=1.8, label=lab if r == 0 else None)
+        ax.text(p["lo"]*100 - 0.4, y, f"{p['diff']*100:+.1f}", ha="right", va="center", fontsize=8.5, color=INK2)
 ax.set_yticks(range(len(DS))); ax.set_yticklabels([n for _, n in DS][::-1], color=INK)
-ax.set_xlim(-0.14, 0.02); ax.grid(axis="x", color=GRID, lw=0.8); ax.set_axisbelow(True)
-ax.set_xlabel("nDCG@10 difference vs embeddings + the same reranker   (left of 0 = embeddings ahead)")
+ax.set_xlim(-14, 2); ax.grid(axis="x", color=GRID, lw=0.8); ax.set_axisbelow(True)
+ax.set_xlabel("Points behind the blue line (1 point = 0.01 nDCG@10)")
 ax.spines["left"].set_visible(False); ax.tick_params(axis="y", length=0)
-ax.legend(loc="upper left", frameon=False, fontsize=8.5); ax.set_ylim(-0.5, 2.5)
-title(fig, "With the same reranker on both sides, embeddings stay ahead",
-      "About one point behind on SciFact, one to two on NFCorpus, eight to nine on FiQA. Dots are paired\nmeans over every dev question; lines are 95% bootstrap intervals. No interval sits fully in the band.")
+ax.legend(loc="upper left", frameon=False, fontsize=8.5); ax.set_ylim(-0.5, 2.8)
+title(fig, "Keyword search stays behind embeddings, even with the same reranker",
+      "Blue line: embeddings + reranker. Orange dots: keyword search + the same reranker, placed by how far\nbehind they are. The bar is the likely range. Test set: too close to call on SciFact and NFCorpus, far behind on FiQA.")
 save(fig, "fig4-fair-fight")
 
 # Figure 5: made-up names
 m = j("m5-results.json")["ndcg10"]; lv = [0, 25, 50, 100]
 fig, axes = plt.subplots(1, 2, figsize=(8, 4.0), sharey=True); fig.subplots_adjust(left=0.08, right=0.97, top=0.70, bottom=0.15, wspace=0.08)
-series = [("A0", KW, ":", "Keyword"), ("A0R", KW, "-", "Keyword + reranker"), ("A4", EMB, "--", "Embeddings"), ("A4R", EMB, "-", "Embeddings + reranker")]
-for ax, cond, sub in [(axes[0], "A", "Users type the codename"), (axes[1], "B", "Users describe it instead")]:
+series = [("A0", KW, ":", "Keyword only"), ("A0R", KW, "-", "Keyword + reranker"), ("A4", EMB, "--", "Embeddings only"), ("A4R", EMB, "-", "Embeddings + reranker")]
+for ax, cond, sub in [(axes[0], "A", "Users type the made-up name"), (axes[1], "B", "Users describe it instead of naming it")]:
     for arm, c, ls, lab in series:
-        ys = [m[f"L{l}{cond}"][arm] for l in lv]
+        ys = [m[f"L{l}{cond}"][arm]*100 for l in lv]
         ax.plot(lv, ys, color=c, ls=ls, lw=2, marker="o", ms=5, mec=BG, label=lab)
     ax.set_title(sub, loc="left", fontsize=10, color=INK)
     ax.set_xticks(lv); ax.set_xticklabels([f"{l}%" for l in lv]); ax.set_xlim(-5, 105)
-    ax.grid(axis="y", color=GRID, lw=0.8); ax.set_axisbelow(True); ax.set_xlabel("Names swapped for codenames")
-axes[0].set_ylabel("nDCG@10"); axes[0].set_ylim(0.1, 0.6)
+    ax.grid(axis="y", color=GRID, lw=0.8); ax.set_axisbelow(True); ax.set_xlabel("Share of real names replaced")
+axes[0].set_ylabel("Search quality, 0 to 100"); axes[0].set_ylim(10, 60)
 axes[0].legend(loc="lower center", bbox_to_anchor=(1.04, 1.09), ncol=4, frameon=False, fontsize=8.5, handlelength=3)
 g0 = m["L0A"]["A4R"] - m["L0A"]["A0R"]; g1 = m["L100A"]["A4R"] - m["L100A"]["A0R"]
-title(fig, "Codenames shrink the gap between reranked pipelines but don't close it",
-      f"94 FiQA questions that mention one of 54 swapped names. When users type the codename, the reranked\ngap narrows from {g0:.3f} to {g1:.3f}. When they describe it, plain keyword search has little to match.")
+title(fig, "Made-up names hurt embeddings, but embeddings + reranker still win",
+      f"94 FiQA questions. I replaced real names (like \"Roth IRA\") with invented words. Left: keyword + reranker\nnearly catches up (gap shrinks from {g0*100:.1f} to {g1*100:.1f} points). Right: keyword search has nothing to match.")
 save(fig, "fig5-codenames")
 # Figure 6: rerank depth (150 FiQA questions)
 import math
@@ -108,18 +109,19 @@ rows = [json.loads(l) for l in open(A / "h2b-scores.jsonl")]
 sw = j("h2b-depth-sweep.json"); D = [50, 100, 200, 500]
 kw = [sum(nd([x for _, x in sorted(zip(r["a0_scores"][:d], r["a0_candidates"][:d]), key=lambda t: -t[0])], qr[r["qid"]]) for r in rows) / len(rows) for d in D]
 a4 = sum(nd(r["a4_top50"], qr[r["qid"]]) for r in rows) / len(rows); a4r = sw["benchmark_A4R_depth50"]["ndcg10"]
+kw = [v*100 for v in kw]; a4 *= 100; a4r *= 100
 fig, ax = plt.subplots(figsize=(8, 4.2)); fig.subplots_adjust(left=0.1, right=0.74, top=0.76, bottom=0.2)
 ax.axhline(a4r, color=EMB, lw=2); ax.axhline(a4, color=EMB, lw=2, ls="--")
-ax.text(640, a4r, f"Embeddings + reranker  {a4r:.3f}", va="center", fontsize=8.5, color=INK2, clip_on=False)
-ax.text(640, a4, f"Embeddings  {a4:.3f}", va="center", fontsize=8.5, color=INK2)
+ax.text(640, a4r, f"Embeddings + reranker  {a4r:.1f}", va="center", fontsize=8.5, color=INK2, clip_on=False)
+ax.text(640, a4, f"Embeddings only  {a4:.1f}", va="center", fontsize=8.5, color=INK2)
 ax.plot(D, kw, color=KW, lw=2, marker="o", ms=6, mec=BG)
-for d, v in zip(D, kw): ax.text(d, v + 0.006, f"{v:.3f}", ha="center", va="bottom", fontsize=8, color=INK2)
+for d, v in zip(D, kw): ax.text(d, v + 0.6, f"{v:.1f}", ha="center", va="bottom", fontsize=8, color=INK2)
 ax.text(640, kw[-1], "Keyword + reranker", va="center", fontsize=8.5, color=INK2)
 ax.set_xscale("log"); ax.set_xticks(D)
 ax.set_xticklabels([f"top {d}\n${sw['depths'][str(d)]['cost_per_search_usd']:.4f}" for d in D])
-ax.set_xlim(42, 600); ax.set_ylim(0.34, 0.5); ax.grid(axis="y", color=GRID, lw=0.8); ax.set_axisbelow(True)
-ax.set_xlabel("How many keyword candidates the reranker reads, and its cost per search"); ax.set_ylabel("nDCG@10")
-title(fig, "Reading deeper buys plain embeddings, not reranked ones",
-      f"150 FiQA dev questions. Embeddings + reranker reads only its top 50, at ${sw['benchmark_A4R_depth50']['cost_per_search_usd']:.4f} per search.\nGoing from 200 to 500 candidates adds one point for 2.4 times the cost.")
+ax.set_xlim(42, 600); ax.set_ylim(34, 50); ax.grid(axis="y", color=GRID, lw=0.8); ax.set_axisbelow(True)
+ax.set_xlabel("How many keyword results the reranker reads (cost per search underneath)"); ax.set_ylabel("Search quality, 0 to 100")
+title(fig, "Reading more results helps keyword search, up to a point",
+      "150 FiQA questions. Letting the reranker read more keyword results catches up with embeddings alone,\nbut never with embeddings + reranker, which only needs to read its top 50.")
 save(fig, "fig6-depth")
 print(sorted(p.name for p in OUT.iterdir()))

@@ -1,0 +1,6 @@
+W1028 18:52:06.109000 28898 torch/distributed/elastic/multiprocessing/redirects.py:35] NOTE: Redirects are currently not supported in MacOs.
+Loading weights:   0%|          | 0/393 [00:00<?, ?it/s]Loading weights: 100%|██████████| 393/393 [00:00<00:00, 8281.18it/s]
+[transformers] Token indices sequence length is longer than the specified maximum sequence length for this model (1169 > 512). Running this sequence through the model will result in indexing errors
+fiqa A0R: mean 5.02 s per search (50.0 pairs), 10.0 pairs/s
+fiqa A3R: mean 5.36 s per search (50.0 pairs), 9.3 pairs/s
+fiqa A4R: mean 3.64 s per search (50.0 pairs), 13.7 pairs/s

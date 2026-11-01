@@ -1,0 +1,6 @@
+W1030 08:30:05.397000 58222 torch/distributed/elastic/multiprocessing/redirects.py:35] NOTE: Redirects are currently not supported in MacOs.
+Loading weights:   0%|          | 0/393 [00:00<?, ?it/s]Loading weights: 100%|██████████| 393/393 [00:00<00:00, 5313.04it/s]
+[transformers] Token indices sequence length is longer than the specified maximum sequence length for this model (513 > 512). Running this sequence through the model will result in indexing errors
+scifact pass 1: A3R/A0R 0.998  A4R/A0R 0.945  load 16.57 -> 2.16
+scifact pass 2: A3R/A0R 0.998  A4R/A0R 0.947  load 2.16 -> 2.27
+scifact: difference between passes {'ratio_A3R_to_A0R': 0.00041835534758994134, 'ratio_A4R_to_A0R': 0.002149192861150358}  quotable (within 10%): True

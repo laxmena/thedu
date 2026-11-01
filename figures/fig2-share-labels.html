@@ -1,0 +1,50 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+  :root { --bg:#fcfcfa; --ink:#111; --ink2:#555; --kw:#eb6834; --kwsoft:#f9ece7; --emb:#2a78d6; --embsoft:#e7f1fb; --line:#e3e3df; }
+  * { box-sizing:border-box; margin:0; }
+  body { background:var(--bg); font-family:"DejaVu Sans", sans-serif; color:var(--ink); width:800px; padding:22px 28px 24px; }
+  h1 { font-size:17px; font-weight:bold; margin-bottom:6px; }
+  .sub { font-size:11.5px; color:var(--ink2); line-height:1.45; margin-bottom:16px; }
+  .row { display:grid; grid-template-columns: 0.85fr 1.15fr 1.35fr; gap:12px; }
+  .card { border:1.5px solid var(--line); border-radius:10px; padding:12px 13px; background:#fff; display:flex; flex-direction:column; }
+  .card.kw { border-color:var(--kw); }
+  .card.emb { border-color:var(--emb); }
+  .lab { font-size:10px; font-weight:bold; letter-spacing:.06em; text-transform:uppercase; color:var(--ink2); margin-bottom:8px; }
+  .q { font-size:14px; line-height:1.45; }
+  .q b { background:#eee; padding:0 3px; border-radius:3px; }
+  .chips { display:flex; flex-wrap:wrap; gap:5px; }
+  .chip { font-size:10.5px; background:var(--kwsoft); color:#8a3412; padding:3px 7px; border-radius:20px; }
+  .ans { font-size:11.5px; line-height:1.55; color:#222; }
+  .ans mark { background:var(--embsoft); color:#0f4a8f; font-weight:bold; padding:0 2px; border-radius:3px; }
+  .foot { margin-top:auto; padding-top:10px; font-size:11px; font-weight:bold; }
+  .foot.kw { color:var(--kw); } .foot.emb { color:var(--emb); } .foot.q2 { color:var(--ink2); font-weight:normal; }
+</style></head>
+<body>
+  <h1>No synonym leads from this question to its answer</h1>
+  <div class="sub">One FiQA question. The rewrite read five wrong results and borrowed their words, so keyword search searched further in the
+  wrong direction. The right answer never uses the word "label".</div>
+  <div class="row">
+    <div class="card">
+      <div class="lab">The question</div>
+      <div class="q">Terminology: What are the <b>labels</b> associated with a share called?</div>
+      <div class="foot q2">The answer has to name the labels, and nothing in the question hints at what they are.</div>
+    </div>
+    <div class="card kw">
+      <div class="lab">Words the rewrite added</div>
+      <div class="chips">
+        <span class="chip">stock split</span><span class="chip">bonus shares</span><span class="chip">stock dividend</span>
+        <span class="chip">strike prices</span><span class="chip">option series</span><span class="chip">expiration date</span>
+        <span class="chip">call</span><span class="chip">put</span><span class="chip">commissions</span><span class="chip">ETF</span>
+        <span class="chip">in-the-money</span><span class="chip">settlement</span><span class="chip">general partnership</span>
+        <span class="chip">underlying symbol</span><span class="chip">share labels</span><span class="chip">+ 8 more</span>
+      </div>
+      <div class="foot kw">Keyword search: the answer isn't in the top 100, with or without the rewrite</div>
+    </div>
+    <div class="card emb">
+      <div class="lab">The right answer (excerpt)</div>
+      <div class="ans">"…companies can issue shares more than once, … so you could have 'Google <mark>ordinary</mark>', 'Google <mark>preference</mark>', 'Google ordinary issue B'. … I'd normally see it referred to as '<mark>display name</mark>'. The second one is '<mark>symbol</mark>', '<mark>ticker</mark>', 'ID', and others."</div>
+      <div class="foot emb">Embeddings: ranked it 1st</div>
+    </div>
+  </div>
+</body></html>

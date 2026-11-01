@@ -1,0 +1,6 @@
+W1028 17:56:37.276000 27891 torch/distributed/elastic/multiprocessing/redirects.py:35] NOTE: Redirects are currently not supported in MacOs.
+Loading weights:   0%|          | 0/393 [00:00<?, ?it/s]Loading weights: 100%|██████████| 393/393 [00:00<00:00, 7850.72it/s]
+[transformers] Token indices sequence length is longer than the specified maximum sequence length for this model (513 > 512). Running this sequence through the model will result in indexing errors
+scifact A0R: mean 6.03 s per search (50.0 pairs), 8.3 pairs/s
+scifact A3R: mean 5.98 s per search (50.0 pairs), 8.4 pairs/s
+scifact A4R: mean 5.59 s per search (50.0 pairs), 8.9 pairs/s

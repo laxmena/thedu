@@ -1,0 +1,6 @@
+W1028 18:26:10.040000 28630 torch/distributed/elastic/multiprocessing/redirects.py:35] NOTE: Redirects are currently not supported in MacOs.
+Loading weights:   0%|          | 0/393 [00:00<?, ?it/s]Loading weights: 100%|██████████| 393/393 [00:00<00:00, 8715.31it/s]
+[transformers] Token indices sequence length is longer than the specified maximum sequence length for this model (696 > 512). Running this sequence through the model will result in indexing errors
+nfcorpus A0R: mean 4.16 s per search (36.1 pairs), 8.7 pairs/s
+nfcorpus A3R: mean 5.86 s per search (50.0 pairs), 8.5 pairs/s
+nfcorpus A4R: mean 5.41 s per search (50.0 pairs), 9.2 pairs/s

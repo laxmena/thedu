@@ -1,0 +1,46 @@
+54 entities; 94 of 500 dev questions contain at least one; split {'orgs_products': 45, 'places_currencies': 46, 'both': 3}
+level 25%: 14 entities, 3752 documents changed, 14 glossary docs, 22 affected questions changed; residual 35 of 7798 (0.4%)
+level 50%: 27 entities, 10941 documents changed, 27 glossary docs, 60 affected questions changed; residual 57 of 24056 (0.2%)
+level 100%: 54 entities, 13510 documents changed, 54 glossary docs, 94 affected questions changed; residual 101 of 33158 (0.3%)
+relevant-passage split of the affected questions: {'affected_questions': 94, 'relevant_passage_has_entity': 72, 'relevant_passage_has_none': 22, 'all_dev_questions_passage_has_entity': 256}
+leftovers at 100% (top 20): {'fdic': 16, 'PAKISTAN': 8, 'Indianapolis': 8, 'nyse': 8, 'FTSE': 7, 'aapl': 6, 'britains': 4, 'AmericanExpress': 3, 'tfsa': 3, 'americancentury': 3, 'rrsp': 3, 'AAPL': 2, 'americansecurityproject': 2, 'americanaffairsjournal': 2, 'indianapolis': 2, 'indianartvilla': 2, 'canadataxplan': 2, 'AmericanAir': 2, 'russell': 1, 'Pakistanee': 1}
+not-the-entity words set apart at 25/50/100%: 22, 62, 76
+
+--- pair 1 (question 4966; entities: United States)
+original: In today's low interest environment, is it generally more economical to buy or lease a new car in the US?
+A (codename): In today's low interest environment, is it generally more economical to buy or lease a new car in the KODATRAR?
+B (description): In today's low interest environment, is it generally more economical to buy or lease a new car in the a federal republic consisting of fifty states and a federal district?
+relevant doc, original: ...uy a brand new car every 2 or 3 years, and does not drive a lot of miles. Note: in the case of a company car, Canadian taxes let you deduct the entire lease payment (which clearly has some principal in it) if you lease, while if...
+relevant doc, swapped:  ...uy a brand new car every 2 or 3 years, and does not drive a lot of miles. Note: in the case of a company car, Sudabunian taxes let you deduct the entire lease payment (which clearly has some principal in it) if you lease, while if...
+glossary: Kodatrar: a federal republic consisting of fifty states and a federal district
+
+--- pair 2 (question 2782; entities: Roth Individual Retirement Account)
+original: Using a Roth IRA instead of a college savings account
+A (codename): Using a Kevodran instead of a college savings account
+B (description): Using a a tax-advantaged retirement savings account instead of a college savings account
+relevant doc, original: ..."One problem with this plan is that the individual must have earned income to contribute to a Roth IRA. If you have an infant, unless she is the new Gerber baby or something like that, there is probably no legiti...
+relevant doc, swapped:  ..."One problem with this plan is that the individual must have earned income to contribute to a Kevodran. If you have an infant, unless she is the new Gerber baby or something like that, there is probably no legiti...
+glossary: Kevodran: a tax-advantaged retirement savings account
+
+--- pair 3 (question 5522; entities: United Kingdom)
+original: In the UK, could low-income pensioners (or those near a low-income retirement) find a student loan useful for boosting their finances?
+A (codename): In the TRODUGEL, could low-income pensioners (or those near a low-income retirement) find a student loan useful for boosting their finances?
+B (description): In the a sovereign island country off the northwestern coast of its continent, could low-income pensioners (or those near a low-income retirement) find a student loan useful for boosting their finances?
+relevant doc, original: ...aybe that's the intention of the rule! (Although I might not think that was so true if I was actually on the UK's state pension of £6K a year and desperate. However, I was originally thinking more in terms of comparing t...
+relevant doc, swapped:  ...aybe that's the intention of the rule! (Although I might not think that was so true if I was actually on the TRODUGEL's state pension of £6K a year and desperate. However, I was originally thinking more in terms of comparing t...
+glossary: Trodugel: a sovereign island country off the northwestern coast of its continent
+
+--- pair 4 (question 806; entities: Joel Greenblatt)
+original: Trying to understand Return on Capital (Joel Greenblatt's Magic Formula version)
+A (codename): Trying to understand Return on Capital (Favomin's Magic Formula version)
+B (description): Trying to understand Return on Capital (American investor, author, and professor known for his Magic Formula investing strategy's Magic Formula version)
+relevant doc: no entity mention in it
+glossary: Favomin: American investor, author, and professor known for his Magic Formula investing strategy
+
+--- pair 5 (question 1568; entities: China)
+original: If a company in China says it accepts Visa, does it accept all Visas?
+A (codename): If a company in Nafipan says it accepts Visa, does it accept all Visas?
+B (description): If a company in a country in East Asia says it accepts Visa, does it accept all Visas?
+relevant doc, original: ...gos) have a rule that a merchant must accept any credit card with their logo. Visa rules for merchants in the US say it explicitly: Accept all types of valid Visa cards. Although Visa card acceptance rules may vary based...
+relevant doc, swapped:  ...gos) have a rule that a merchant must accept any credit card with their logo. Visa rules for merchants in the KODATRAR say it explicitly: Accept all types of valid Visa cards. Although Visa card acceptance rules may vary based...
+glossary: Nafipan: a country in East Asia

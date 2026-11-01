@@ -1,0 +1,70 @@
+H1: A0R minus A4R by first-stage group (a both / b only A4 / c only keyword / d neither)
+  scifact A0R_minus_A4R: overall -0.0097  group (a) matches A4R: False
+     (a) n=706  share 0.87  contribution -0.0129  -0.0148 [-0.0212, -0.0086] benchmark better
+     (b) n=51   share 0.06  contribution -0.0105  -0.1663 [-0.2331, -0.1007] benchmark better
+     (c) n=24   share 0.03  contribution +0.0137  +0.4611 [+0.3259, +0.5892] beats
+     (d) n=28   share 0.03  contribution +0.0000  +0.0000 [+0.0000, +0.0000] matches
+  scifact A3R_minus_A4R: overall -0.0097  group (a) matches A4R: False
+     (a) n=714  share 0.88  contribution -0.0107  -0.0121 [-0.0174, -0.0070] benchmark better
+     (b) n=43   share 0.05  contribution -0.0124  -0.2335 [-0.3290, -0.1464] benchmark better
+     (c) n=28   share 0.03  contribution +0.0134  +0.3866 [+0.2602, +0.5209] beats
+     (d) n=24   share 0.03  contribution +0.0000  +0.0000 [+0.0000, +0.0000] matches
+  nfcorpus A0R_minus_A4R: overall -0.0211  group (a) matches A4R: False
+     (a) n=233  share 0.72  contribution -0.0094  -0.0130 [-0.0234, -0.0021] benchmark better
+     (b) n=35   share 0.11  contribution -0.0135  -0.1249 [-0.1733, -0.0799] benchmark better
+     (c) n=5    share 0.02  contribution +0.0017  +0.1118 [+0.0235, +0.2093] beats
+     (d) n=51   share 0.16  contribution +0.0000  +0.0000 [+0.0000, +0.0000] matches
+  nfcorpus A3R_minus_A4R: overall -0.0105  group (a) matches A4R: False
+     (a) n=241  share 0.74  contribution -0.0042  -0.0057 [-0.0181, +0.0058] inconclusive
+     (b) n=27   share 0.08  contribution -0.0086  -0.1031 [-0.1546, -0.0557] benchmark better
+     (c) n=11   share 0.03  contribution +0.0023  +0.0684 [+0.0220, +0.1262] beats
+     (d) n=45   share 0.14  contribution +0.0000  +0.0000 [+0.0000, +0.0000] matches
+  fiqa A0R_minus_A4R: overall -0.0778  group (a) matches A4R: False
+     (a) n=318  share 0.64  contribution -0.0325  -0.0510 [-0.0657, -0.0359] benchmark better
+     (b) n=97   share 0.19  contribution -0.0543  -0.2800 [-0.3401, -0.2199] benchmark better
+     (c) n=11   share 0.02  contribution +0.0090  +0.4102 [+0.2188, +0.6133] beats
+     (d) n=74   share 0.15  contribution +0.0000  +0.0000 [+0.0000, +0.0000] matches
+  fiqa A3R_minus_A4R: overall -0.0899  group (a) matches A4R: False
+     (a) n=299  share 0.60  contribution -0.0252  -0.0421 [-0.0599, -0.0262] benchmark better
+     (b) n=116  share 0.23  contribution -0.0741  -0.3192 [-0.3777, -0.2642] benchmark better
+     (c) n=12   share 0.02  contribution +0.0094  +0.3914 [+0.2274, +0.5812] beats
+     (d) n=73   share 0.15  contribution +0.0000  +0.0000 [+0.0000, +0.0000] matches
+H2: recall (matched only / as ranked)
+  scifact: A0 @100/500/1000 0.926/0.958/0.976  A3 @100/500/1000 0.941/0.975/0.990   group (b) first relevant in A0: {'n': 51, '51-100': 17, '101-500': 17, '501-1000': 7, 'not in top 1000': 10, 'within_top_1000_share': 0.803921568627451}
+  nfcorpus: A0 @100/500/1000 0.227/0.299/0.335  A3 @100/500/1000 0.311/0.489/0.616   group (b) first relevant in A0: {'n': 35, '51-100': 2, '101-500': 6, '501-1000': 1, 'not in top 1000': 26, 'within_top_1000_share': 0.2571428571428571}
+  fiqa: A0 @100/500/1000 0.510/0.673/0.733  A3 @100/500/1000 0.525/0.694/0.764   group (b) first relevant in A0: {'n': 97, '51-100': 18, '101-500': 49, '501-1000': 11, 'not in top 1000': 19, 'within_top_1000_share': 0.8041237113402062}
+H3: runs/analysis/h3-fiqa-review.md
+H4:
+  advice: n=20  A0R minus A4R -0.0470 [-0.1026, +0.0022] inconclusive
+  factual: n=480  A0R minus A4R -0.0790 [-0.0989, -0.0591] benchmark better
+  30 random labels:
+   [factual] Difference between Edward Jones or Betterment
+   [factual] What tax can I expect on US stocks in a UK ISA?
+   [factual] Where can I find all public companies' information?
+   [factual] Corporate Finance
+   [factual] Buying non-qualified employee stock options that are going to expire?
+   [factual] why is the money withdrawn from traditional IRA taxed at the ordinary income tax rate?
+   [factual] How far do I go with a mortgage approval process when shopping around?
+   [factual] What do the suffixes on stock symbols indicate
+   [factual] How can I determine how much my car insurance will cost me?
+   [factual] Income At the Sell or Reception?
+   [factual] What forms do I need to fill out for a super basic LLC closing?
+   [factual] Can we amend last year's Schedule C to indicate reduced income due to a customer refund this year for a product we sold last year?
+   [factual] Pay index fund expense ratios with cash instead of fund balance
+   [factual] Is this Employee Stock Purchase Plan worth it when adding my student loan into the equation?
+   [factual] Is it possible to be subject to cash withdrawal even if you don't use ATM?
+   [factual] Will credit card payment from abroad be suspicious as taxable income?
+   [factual] How do online referal systems work?
+   [factual] How profitable is selling your customer base?
+   [factual] In today's low interest environment, is it generally more economical to buy or lease a new car in the US?
+   [factual] Taking a car loan vs cash and effect on credit score
+   [factual] Considerations for holding short-term reserves?
+   [factual] VAT & Tax implications of selling software
+   [factual] If a company in China says it accepts Visa, does it accept all Visas?
+   [factual] Why have candlestick charts overlaps?
+   [factual] Re-financing/consolidating multiple student loans for medical school?
+   [factual] Combined annual contribution limits for individuals [duplicate]
+   [factual] What is meant by a market that is technically strong
+   [factual] Are there cons to paying monthly bills with a rewards card and then paying it off monthly?
+   [factual] Why do some stocks have trading halts and what causes them?
+   [factual] Do I need a business credit card?
